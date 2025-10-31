@@ -41,7 +41,7 @@ Your domains: **koldgeneration.com** and **koldgeneration.ca**
 
 ### 4. Configure DNS
 
-You need to configure DNS records for BOTH domains at your domain provider:
+**Important:** Your domain is on Squarespace. You need to configure DNS records to point your domains to GitHub Pages. Squarespace and GitHub Pages can work together - Squarespace manages your domain, and GitHub hosts your website.
 
 #### For koldgeneration.com
 
@@ -67,7 +67,32 @@ You need to configure DNS records for BOTH domains at your domain provider:
 
 **Note:** You can point `.ca` to the same GitHub Pages site by using the same IPs.
 
+#### How to Add DNS Records in Squarespace:
+
+1. Log in to your Squarespace account
+2. Go to **Settings** → **Domains** (or **Website** → **Domains**)
+3. Find your domain (koldgeneration.com or koldgeneration.ca)
+4. Click **DNS Settings** or **Manage DNS Records**
+5. Look for **Advanced DNS** or **Custom DNS Records**
+6. Add the A records:
+   - Click **Add Record** → Type: `A`
+   - For each IP address, add a separate A record:
+     - Host: `@` (or leave blank/empty for the root domain)
+     - Points to: `185.199.108.153`
+   - Repeat for all four IPs (separate record for each)
+7. Add the CNAME record:
+   - Click **Add Record** → Type: `CNAME`
+   - Host: `www`
+   - Points to: `koldlab.github.io`
+8. **Repeat steps 3-7 for koldgeneration.ca** (if you have it connected)
+
 **Wait 5-30 minutes** for DNS propagation.
+
+**Note:** Some Squarespace plans only show DNS settings if the domain is connected to your site. If you don't see DNS settings, you may need to:
+- Disconnect the domain from any Squarespace website
+- Or contact Squarespace support to enable custom DNS records
+
+**Alternative:** If Squarespace DNS management is too complex, you can transfer your domain DNS to a provider like Cloudflare (free) or Google Domains, which have simpler DNS management interfaces. This won't change domain ownership, just DNS management.
 
 ### 5. Enable HTTPS (Optional but Recommended)
 
