@@ -1,29 +1,29 @@
 // src/config/routesConfig.ts
 export type RouteConfig = {
-  label: string;
-  path: string;
+  title: string;
+  to: string;
   description: string;
   children?: RouteConfig[];
 };
 export const routesConfig = [
   {
-    label: 'Home',
-    path: '/',
+    title: 'Home',
+    to: '/',
     description: 'Main landing page',
   },
   {
-    label: 'Tools',
-    path: '/tools',
+    title: 'Tools',
+    to: '/tools',
     description: 'All personal utilities and scripts',
     children: [
       {
-        label: 'Tool 1',
-        path: '/tools/tool-1',
-        description: 'Description for Tool 1',
+        title: 'Minecraft List Generator',
+        to: '/tools/minecraft-list-generator',
+        description: 'Generate a list of Minecraft items',
       },
       {
-        label: 'Tool 2',
-        path: '/tools/tool-2',
+        title: 'Tool 2',
+        to: '/tools/tool-2',
         description: 'Description for Tool 2',
       },
     ],

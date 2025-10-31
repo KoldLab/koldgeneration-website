@@ -1,7 +1,9 @@
-export default function Home() {
+import { Outlet } from 'react-router';
+
+export default function Tools() {
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-4">Tools!</h1>
+    <div>
+      <Outlet />
     </div>
   );
 }
