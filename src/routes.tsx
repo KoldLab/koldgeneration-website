@@ -4,6 +4,7 @@ import Home from './components/pages/Home';
 import Layout from './components/Layout';
 import MinecraftListGenerator from './components/pages/tools/minecraft list generator/MinecraftListGenerator';
 import ErrorBoundary from './components/ErrorBoundary';
+import NotFound from './components/pages/NotFound';
 
 export const router = createBrowserRouter([
   {
@@ -24,6 +25,10 @@ export const router = createBrowserRouter([
             element: <MinecraftListGenerator />,
           },
         ],
+      },
+      {
+        path: '*',
+        element: <NotFound />,
       },
     ],
   },
