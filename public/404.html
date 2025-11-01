@@ -11,8 +11,17 @@
       const search = window.location.search;
       const hash = window.location.hash;
 
-      // Redirect to index.html with the full path
-      window.location.replace('/index.html' + path + search + hash);
+      // Don't redirect if we're already on index.html or if path is root
+      if (path.includes('index.html')) {
+        // Already on index.html, just redirect to root
+        window.location.replace('/' + search + hash);
+      } else if (path === '/' || path === '') {
+        // Root path, just redirect to index.html
+        window.location.replace('/index.html' + search + hash);
+      } else {
+        // Other paths, redirect to index.html with the path
+        window.location.replace('/index.html' + path + search + hash);
+      }
     </script>
   </head>
   <body>
