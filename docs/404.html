@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KoldGeneration - Tools & Resources</title>
+    <script>
+      // GitHub Pages 404.html workaround for SPAs
+      // Redirect to index.html with the current path
+      const path = window.location.pathname;
+      const search = window.location.search;
+      const hash = window.location.hash;
+
+      // Redirect to index.html with the full path
+      window.location.replace('/index.html' + path + search + hash);
+    </script>
+  </head>
+  <body>
+    <div id="root">
+      <div
+        style="
+          text-align: center;
+          padding: 2rem;
+          font-family: system-ui, sans-serif;
+        "
+      >
+        <p>Redirecting...</p>
+      </div>
+    </div>
+  </body>
+</html>
