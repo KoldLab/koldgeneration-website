@@ -12,31 +12,13 @@
       const search = window.location.search;
       const hash = window.location.hash;
 
-      // Don't redirect if we're already loading index.html or at root
-      // (shouldn't happen, but prevent infinite loops)
-      if (path === '/index.html' || (path === '/' && !document.referrer.includes('404'))) {
+      // Don't redirect if we're already at root
+      if (path === '/' || path === '/index.html') {
         return;
       }
 
-      // Clean the path - remove any index.html references
-      let cleanPath = path.replace(/\/index\.html\/?/g, '') || '/';
-      
-      // Build the redirect URL
-      // For root path, just go to index.html
-      // For other paths, append them to index.html so React Router can handle them
-      let redirectUrl;
-      if (cleanPath === '/') {
-        redirectUrl = '/index.html' + search + hash;
-      } else {
-        // Ensure cleanPath starts with /
-        if (!cleanPath.startsWith('/')) {
-          cleanPath = '/' + cleanPath;
-        }
-        redirectUrl = '/index.html' + cleanPath + search + hash;
-      }
-
-      // Single redirect - should work now
-      window.location.replace(redirectUrl);
+      // Redirect to home - GitHub Pages will serve index.html for root path
+      window.location.replace('/');
     </script>
   </head>
   <body>
