@@ -10,9 +10,13 @@ import {
 } from '@/components/ui/navigation-menu';
 import { Link } from 'react-router-dom';
 import { routesConfig, type RouteConfig } from '@/routesConfig';
+import { useAuth } from '@/contexts/AuthContext';
+import LoginButton from '@/components/auth/LoginButton';
+import UserMenu from '@/components/auth/UserMenu';
 
 export function NavBar() {
   const isMobile = useIsMobile();
+  const { user, loading } = useAuth();
 
   return (
     <NavigationMenu viewport={isMobile}>
@@ -20,6 +24,9 @@ export function NavBar() {
         {routesConfig.map((route) => (
           <ListItem key={route.title} {...route} />
         ))}
+        <NavigationMenuItem className="ml-auto">
+          {!loading && (user ? <UserMenu /> : <LoginButton />)}
+        </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
   );
