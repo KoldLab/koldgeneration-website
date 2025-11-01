@@ -6,27 +6,37 @@
     <title>KoldGeneration - Tools & Resources</title>
     <script>
       // GitHub Pages 404.html workaround for SPAs
-      // Redirect to index.html and preserve the path via hash so React Router can handle it
+      // This file is served when GitHub Pages can't find the requested file
+      // We redirect to index.html and preserve the path in the URL
       const path = window.location.pathname;
       const search = window.location.search;
       const hash = window.location.hash;
 
-      // If we're already on index.html, don't redirect
-      if (path === '/index.html' || path === '/') {
+      // Don't redirect if we're already loading index.html or at root
+      // (shouldn't happen, but prevent infinite loops)
+      if (path === '/index.html' || (path === '/' && !document.referrer.includes('404'))) {
         return;
       }
 
-      // Strip /index.html if it exists in the path to avoid duplication
+      // Clean the path - remove any index.html references
       let cleanPath = path.replace(/\/index\.html\/?/g, '') || '/';
       
-      // If cleanPath is just '/', redirect to index.html
+      // Build the redirect URL
+      // For root path, just go to index.html
+      // For other paths, append them to index.html so React Router can handle them
+      let redirectUrl;
       if (cleanPath === '/') {
-        window.location.replace('/index.html' + search + hash);
+        redirectUrl = '/index.html' + search + hash;
       } else {
-        // For other paths, redirect to index.html and append path as hash
-        // React Router will then navigate to the correct route
-        window.location.replace('/index.html' + search + '#' + cleanPath + hash);
+        // Ensure cleanPath starts with /
+        if (!cleanPath.startsWith('/')) {
+          cleanPath = '/' + cleanPath;
+        }
+        redirectUrl = '/index.html' + cleanPath + search + hash;
       }
+
+      // Single redirect - should work now
+      window.location.replace(redirectUrl);
     </script>
   </head>
   <body>
