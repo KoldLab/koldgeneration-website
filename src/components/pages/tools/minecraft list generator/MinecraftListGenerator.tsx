@@ -363,7 +363,8 @@ const MinecraftListGenerator = () => {
           value={jsonInput}
           onChange={(e) => setJsonInput(e.target.value)}
           placeholder="Paste your JSON here..."
-          className={cn('font-mono overflow-hidden')}
+          className={cn('font-mono overflow-hidden max-w-full')}
+          style={{ width: '100%', boxSizing: 'border-box' }}
         />
         <div className="flex flex-col sm:flex-row justify-center gap-2">
           <Button
