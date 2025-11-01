@@ -1,6 +1,21 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { Card } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { ChevronDown, Copy, Check } from 'lucide-react';
 
@@ -26,10 +41,8 @@ const MinecraftListGenerator = () => {
   const [fontColor, setFontColor] = useState('#000000');
   const [fontSize, setFontSize] = useState(28);
   const [iconSize, setIconSize] = useState(64);
-  const [fontDropdownOpen, setFontDropdownOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(true);
   const [copied, setCopied] = useState(false);
-  const fontDropdownRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const fonts = [
@@ -57,26 +70,6 @@ const MinecraftListGenerator = () => {
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   }, [jsonInput]);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        fontDropdownRef.current &&
-        !fontDropdownRef.current.contains(event.target as Node)
-      ) {
-        setFontDropdownOpen(false);
-      }
-    };
-
-    if (fontDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [fontDropdownOpen]);
 
   const formatItemName = (id: string): string => {
     // Remove "minecraft:" prefix and format to readable name
@@ -355,30 +348,29 @@ const MinecraftListGenerator = () => {
   }, [items, generateImage]);
 
   return (
-    <div className="flex flex-col w-[80vw] gap-6">
+    <div className="flex flex-col w-full gap-4 sm:gap-6 px-2 sm:px-0">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Minecraft List Generator</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">
+          Minecraft List Generator
+        </h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Paste your Minecraft chest NBT data to generate a formatted item list
         </p>
       </div>
       <div className="flex flex-col gap-2">
-        <textarea
+        <Textarea
           ref={textareaRef}
           value={jsonInput}
           onChange={(e) => setJsonInput(e.target.value)}
           placeholder="Paste your JSON here..."
-          className={cn(
-            'flex min-h-[120px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm font-mono',
-            'shadow-xs transition-[color,box-shadow] outline-none resize-none overflow-hidden',
-            'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
-            'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
-            'placeholder:text-muted-foreground'
-          )}
-          style={{ minHeight: '120px' }}
+          className={cn('font-mono overflow-hidden')}
         />
-        <div className="flex justify-center gap-2">
-          <Button onClick={handleProcess} variant="default">
+        <div className="flex flex-col sm:flex-row justify-center gap-2">
+          <Button
+            onClick={handleProcess}
+            variant="default"
+            className="w-full sm:w-auto"
+          >
             Generate
           </Button>
           <Button
@@ -388,6 +380,7 @@ const MinecraftListGenerator = () => {
               );
             }}
             variant="outline"
+            className="w-full sm:w-auto"
           >
             Test
           </Button>
@@ -397,90 +390,82 @@ const MinecraftListGenerator = () => {
       {error && <div className="text-destructive text-sm">{error}</div>}
 
       {items.length > 0 && (
-        <div className="border rounded-md p-4 bg-card">
-          <div className="flex justify-between items-center mb-4">
-            <button
-              type="button"
-              onClick={() => setPreviewOpen(!previewOpen)}
-              className="flex items-center gap-2 text-lg font-semibold hover:text-accent-foreground transition-colors"
-            >
-              <ChevronDown
-                className={cn(
-                  'h-4 w-4 transition-transform',
-                  previewOpen && 'rotate-180'
-                )}
-              />
-              Preview
-            </button>
-            <div className="flex gap-2">
-              <Button
-                onClick={handleCopyFormattedText}
-                variant="outline"
-                className="gap-2"
-              >
-                {copied ? (
-                  <>
-                    <Check className="h-4 w-4" />
-                    Copied!
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-4 w-4" />
-                    Copy Text
-                  </>
-                )}
-              </Button>
-              <Button onClick={handleDownloadImage} variant="outline">
-                Download PNG
-              </Button>
-            </div>
-          </div>
-
-          {previewOpen && (
-            <>
-              {/* Settings */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4 p-4 bg-muted/50 rounded-md">
-                <div ref={fontDropdownRef} className="relative">
-                  <label className="text-sm font-medium mb-2 block">Font</label>
-                  <button
-                    type="button"
-                    onClick={() => setFontDropdownOpen(!fontDropdownOpen)}
+        <Card className="p-3 sm:p-4 w-full">
+          <Collapsible open={previewOpen} onOpenChange={setPreviewOpen}>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4">
+              <CollapsibleTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 text-base sm:text-lg font-semibold p-0 h-auto hover:text-accent-foreground transition-colors"
+                >
+                  <ChevronDown
                     className={cn(
-                      'w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-left flex justify-between items-center',
-                      'hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+                      'h-4 w-4 transition-transform',
+                      previewOpen && 'rotate-180'
                     )}
-                    style={{ fontFamily: font }}
-                  >
-                    <span>{font}</span>
-                    <span className="text-muted-foreground">▼</span>
-                  </button>
-                  {fontDropdownOpen && (
-                    <div className="absolute z-50 w-full mt-1 rounded-md border border-input bg-background shadow-lg max-h-60 overflow-auto">
+                  />
+                  Preview
+                </Button>
+              </CollapsibleTrigger>
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <Button
+                  onClick={handleCopyFormattedText}
+                  variant="outline"
+                  className="gap-2 w-full sm:w-auto"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="h-4 w-4" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4" />
+                      Copy Text
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={handleDownloadImage}
+                  variant="outline"
+                  className="w-full sm:w-auto"
+                >
+                  Download PNG
+                </Button>
+              </div>
+            </div>
+
+            <CollapsibleContent>
+              {/* Settings */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 p-3 sm:p-4 bg-muted/50 rounded-md">
+                <div className="relative">
+                  <Label htmlFor="font-select" className="mb-2">
+                    Font
+                  </Label>
+                  <Select value={font} onValueChange={setFont}>
+                    <SelectTrigger
+                      id="font-select"
+                      style={{ fontFamily: font }}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
                       {fonts.map((fontOption) => (
-                        <button
+                        <SelectItem
                           key={fontOption}
-                          type="button"
-                          onClick={() => {
-                            setFont(fontOption);
-                            setFontDropdownOpen(false);
-                          }}
-                          className={cn(
-                            'w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors',
-                            font === fontOption && 'bg-accent'
-                          )}
+                          value={fontOption}
                           style={{ fontFamily: fontOption }}
                         >
                           {fontOption}
-                        </button>
+                        </SelectItem>
                       ))}
-                    </div>
-                  )}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Columns
-                  </label>
+                  <Label htmlFor="columns">Columns</Label>
                   <Input
+                    id="columns"
                     type="number"
                     min="1"
                     max="10"
@@ -488,13 +473,13 @@ const MinecraftListGenerator = () => {
                     onChange={(e) =>
                       setColumns(Math.max(1, parseInt(e.target.value) || 1))
                     }
+                    className="mt-2"
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Rows (0 = auto)
-                  </label>
+                  <Label htmlFor="rows">Rows (0 = auto)</Label>
                   <Input
+                    id="rows"
                     type="number"
                     min="0"
                     max="50"
@@ -502,14 +487,14 @@ const MinecraftListGenerator = () => {
                     onChange={(e) =>
                       setRows(Math.max(0, parseInt(e.target.value) || 0))
                     }
+                    className="mt-2"
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Background Color
-                  </label>
-                  <div className="flex gap-2">
+                  <Label htmlFor="bg-color">Background Color</Label>
+                  <div className="flex gap-2 mt-2">
                     <Input
+                      id="bg-color"
                       type="color"
                       value={backgroundColor || '#ffffff'}
                       onChange={(e) => setBackgroundColor(e.target.value)}
@@ -525,11 +510,10 @@ const MinecraftListGenerator = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Font Color
-                  </label>
-                  <div className="flex gap-2">
+                  <Label htmlFor="font-color">Font Color</Label>
+                  <div className="flex gap-2 mt-2">
                     <Input
+                      id="font-color"
                       type="color"
                       value={fontColor}
                       onChange={(e) => setFontColor(e.target.value)}
@@ -544,10 +528,9 @@ const MinecraftListGenerator = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Font Size
-                  </label>
+                  <Label htmlFor="font-size">Font Size</Label>
                   <Input
+                    id="font-size"
                     type="number"
                     min="12"
                     max="72"
@@ -560,13 +543,13 @@ const MinecraftListGenerator = () => {
                         )
                       )
                     }
+                    className="mt-2"
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Icon Size
-                  </label>
+                  <Label htmlFor="icon-size">Icon Size</Label>
                   <Input
+                    id="icon-size"
                     type="number"
                     min="16"
                     max="128"
@@ -579,21 +562,22 @@ const MinecraftListGenerator = () => {
                         )
                       )
                     }
+                    className="mt-2"
                   />
                 </div>
               </div>
               {previewUrl && (
-                <div className="flex justify-center">
+                <div className="flex justify-center overflow-x-auto">
                   <img
                     src={previewUrl}
                     alt="Minecraft items preview"
-                    className="border rounded-md"
+                    className="border rounded-md max-w-full h-auto"
                   />
                 </div>
               )}
-            </>
-          )}
-        </div>
+            </CollapsibleContent>
+          </Collapsible>
+        </Card>
       )}
     </div>
   );

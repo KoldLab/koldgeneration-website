@@ -8,11 +8,17 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
 dist-ssr
 *.local
 
-# docs/ is committed to git for GitHub Pages deployment
+# dist/ is committed to git for GitHub Pages deployment
+
+# Firebase
+.firebase/
+.firebaserc
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
 
 # Editor directories and files
 .vscode/*

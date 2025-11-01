@@ -51,7 +51,7 @@ function ListItem({
     <NavigationMenuItem>
       <NavigationMenuTrigger>{title}</NavigationMenuTrigger>
       <NavigationMenuContent>
-        <ul className="grid w-[300px] gap-4">
+        <ul className="grid w-[280px] sm:w-[300px] gap-4">
           {children.map((child) => (
             <ListItem key={child.title} {...child} isSub />
           ))}
