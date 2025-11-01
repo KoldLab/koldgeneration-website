@@ -12,6 +12,8 @@ dist
 dist-ssr
 *.local
 
+# docs/ is committed to git for GitHub Pages deployment
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

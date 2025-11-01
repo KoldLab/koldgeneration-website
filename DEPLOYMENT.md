@@ -1,55 +1,72 @@
 # Guide de Déploiement
 
-Ce guide vous aidera à déployer votre site web sur GitHub Pages en utilisant GitHub Actions.
+Ce guide vous aidera à déployer votre site web sur GitHub Pages avec votre domaine personnalisé.
 
 ## Prérequis
 
 1. Un compte GitHub
 2. Un dépôt pour votre site web (ce projet)
+3. Un domaine personnalisé configuré (www.koldgeneration.com)
 
-## Étapes pour Déployer
+## Configuration GitHub Pages
 
-### 1. Code Déjà sur GitHub ✅
-
-Votre code a été poussé sur la branche `main`. Vous êtes prêt !
-
-### 2. Activer GitHub Pages ⚠️ IMPORTANT
+### 1. Activer GitHub Pages
 
 1. Allez sur votre dépôt GitHub : `https://github.com/KoldLab/koldgeneration-website`
 2. Cliquez sur **Settings** → **Pages** (dans la barre latérale gauche)
-3. **CRUCIAL** : Sous "Source", changez de "Deploy from a branch" vers **GitHub Actions**
-4. Sauvegardez les paramètres
+3. Sous "Source", sélectionnez **"Deploy from a branch"**
+4. Choisissez la branche **`main`** et le dossier **`/docs`**
+5. Sauvegardez les paramètres
 
-**Si le site ne fonctionne pas, c'est probablement que GitHub Pages est encore configuré sur "Deploy from a branch" au lieu de "GitHub Actions" !**
+### 2. Configuration du Domaine Personnalisé
 
-C'est tout ! GitHub Actions construira et déploiera automatiquement votre site.
+1. Le fichier `public/CNAME` contient déjà votre domaine : `www.koldgeneration.com`
+2. Dans GitHub Settings → Pages, ajoutez votre domaine personnalisé si ce n'est pas déjà fait
+3. Configurez les enregistrements DNS chez votre fournisseur de domaine :
+   - Type: `CNAME`
+   - Name: `www`
+   - Value: `KoldLab.github.io`
+
+## Déploiement
+
+### Déploiement Automatique (Recommandé)
+
+Pour déployer votre site en une seule commande :
+
+```bash
+npm run deploy
+```
+
+Cette commande va automatiquement :
+
+1. Construire le site dans le dossier `docs/` (`npm run build`)
+2. Ajouter les fichiers au commit (`git add docs`)
+3. Commiter les changements
+4. Pousser vers la branche `main`
+
+### Déploiement Manuel
+
+Si vous préférez déployer manuellement :
+
+1. Construisez le site localement :
+
+   ```bash
+   npm run build
+   ```
+
+2. Ajoutez et commitez le dossier `docs/` :
+
+   ```bash
+   git add docs
+   git commit -m "Deploy to production"
+   git push origin main
+   ```
 
 ## URL de Votre Site Web
 
-Après le déploiement, votre site sera disponible à :
+Votre site est disponible à :
 
-- **`https://koldlab.github.io/koldgeneration-website/`**
-
-## Déploiement Automatique
-
-Chaque fois que vous poussez vers la branche `main`, GitHub Actions va :
-
-1. Construire votre site web
-2. Le déployer sur GitHub Pages
-3. Vos changements seront en ligne dans ~2 minutes
-
-## Dépannage
-
-### La Construction Échoue
-
-- Vérifiez l'onglet **Actions** dans GitHub pour les logs d'erreur
-- Assurez-vous que toutes les dépendances sont dans `package.json`
-
-### Erreurs 404 sur les Routes
-
-- C'est normal pour les SPAs (Single Page Applications)
-- Le workflow de déploiement devrait gérer cela automatiquement
-- Si vous voyez des 404s, vérifiez que la construction s'est terminée avec succès
+- **`https://www.koldgeneration.com`**
 
 ## Test Local
 
@@ -60,21 +77,30 @@ npm run build
 npm run preview
 ```
 
-Visitez `http://localhost:4173` pour voir comment ça apparaîtra sur GitHub Pages.
+Visitez `http://localhost:4173` pour voir comment ça apparaîtra en production.
+
+## Dépannage
+
+### La Construction Échoue
+
+- Assurez-vous que toutes les dépendances sont dans `package.json`
+- Vérifiez que TypeScript compile sans erreurs : `npm run build`
+
+### Erreurs 404 sur les Routes
+
+- Le fichier `public/404.html` gère automatiquement le routage pour les SPAs
+- Si vous voyez des 404s, vérifiez que le fichier `404.html` est bien présent dans le dossier `dist/`
+
+### Problèmes de SSL/HTTPS
+
+- GitHub Pages configure automatiquement SSL pour les domaines personnalisés
+- L'activation peut prendre quelques heures après la configuration DNS
+- Vérifiez le statut dans GitHub Settings → Pages
 
 ## Notes
 
-- Le workflow de déploiement est dans `.github/workflows/deploy.yml`
-- La sortie de construction va dans le dossier `dist/` (gitignored)
-- GitHub Pages sert automatiquement depuis la branche `gh-pages`
-- Vous n'avez pas besoin d'un domaine personnalisé - le site fonctionne sur l'URL par défaut `github.io`
-
-## Configuration Future d'un Domaine Personnalisé
-
-Si vous voulez ajouter un domaine personnalisé plus tard :
-
-1. Créez un fichier `public/CNAME` avec votre domaine
-2. Dans GitHub Settings → Pages, ajoutez votre domaine personnalisé
-3. Configurez les enregistrements DNS chez votre fournisseur de domaine
-
-Mais pour l'instant, vous n'avez besoin de rien de tout ça ! Activez simplement GitHub Actions dans Settings et c'est fait. 🎉
+- La sortie de construction va dans le dossier `docs/` (committé dans git)
+- Le fichier `public/CNAME` est automatiquement copié dans `docs/` lors de la construction
+- Le site est servi directement depuis le dossier `/docs` de la branche `main`
+- Le domaine personnalisé `www.koldgeneration.com` est configuré dans `public/CNAME`
+- GitHub Pages est configuré pour servir depuis le dossier `/docs`

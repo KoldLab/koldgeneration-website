@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "npm run build && git add docs && (git diff --staged --quiet || git commit -m \"Deploy to production\") && git pull --rebase origin main && git push origin main"
   },
   "dependencies": {
     "@radix-ui/react-navigation-menu": "^1.2.14",

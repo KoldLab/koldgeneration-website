@@ -6,21 +6,13 @@
     <title>KoldGeneration - Tools & Resources</title>
     <script>
       // GitHub Pages 404.html workaround for SPAs
-      // Redirect to index.html with the current path, preserving the base path
-      const basePath = '/koldgeneration-website';
+      // Redirect to index.html with the current path
       const path = window.location.pathname;
       const search = window.location.search;
       const hash = window.location.hash;
 
-      // Remove base path from the path if it's already there
-      const relativePath = path.startsWith(basePath)
-        ? path.slice(basePath.length)
-        : path;
-
       // Redirect to index.html with the full path
-      window.location.replace(
-        basePath + '/index.html' + relativePath + search + hash
-      );
+      window.location.replace('/index.html' + path + search + hash);
     </script>
   </head>
   <body>
