@@ -13,12 +13,14 @@ Ce guide vous aidera à déployer votre site web sur GitHub Pages en utilisant G
 
 Votre code a été poussé sur la branche `main`. Vous êtes prêt !
 
-### 2. Activer GitHub Pages
+### 2. Activer GitHub Pages ⚠️ IMPORTANT
 
 1. Allez sur votre dépôt GitHub : `https://github.com/KoldLab/koldgeneration-website`
-2. Cliquez sur **Settings** → **Pages**
-3. Sous "Source", sélectionnez **GitHub Actions** (PAS "Deploy from a branch")
+2. Cliquez sur **Settings** → **Pages** (dans la barre latérale gauche)
+3. **CRUCIAL** : Sous "Source", changez de "Deploy from a branch" vers **GitHub Actions**
 4. Sauvegardez les paramètres
+
+**Si le site ne fonctionne pas, c'est probablement que GitHub Pages est encore configuré sur "Deploy from a branch" au lieu de "GitHub Actions" !**
 
 C'est tout ! GitHub Actions construira et déploiera automatiquement votre site.
 
