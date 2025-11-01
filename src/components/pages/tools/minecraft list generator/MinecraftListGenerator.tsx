@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { ChevronDown, Copy, Check } from 'lucide-react';
 
 interface MinecraftItem {
   Slot: number;
@@ -26,7 +27,10 @@ const MinecraftListGenerator = () => {
   const [fontSize, setFontSize] = useState(28);
   const [iconSize, setIconSize] = useState(64);
   const [fontDropdownOpen, setFontDropdownOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(true);
+  const [copied, setCopied] = useState(false);
   const fontDropdownRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const fonts = [
     'Arial',
@@ -45,6 +49,14 @@ const MinecraftListGenerator = () => {
     'Playfair Display',
     'Oswald',
   ];
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [jsonInput]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -73,6 +85,29 @@ const MinecraftListGenerator = () => {
       .split('_')
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
+  };
+
+  const formatItemsAsText = (): string => {
+    if (items.length === 0) return '';
+
+    let text = '- Items requis -\n\n';
+    items.forEach((item) => {
+      const name = formatItemName(item.id);
+      text += `${item.count} - ${name}\n`;
+    });
+
+    return text.trim();
+  };
+
+  const handleCopyFormattedText = async () => {
+    const formattedText = formatItemsAsText();
+    try {
+      await navigator.clipboard.writeText(formattedText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy text:', err);
+    }
   };
 
   const loadImage = (src: string): Promise<HTMLImageElement> => {
@@ -286,12 +321,8 @@ const MinecraftListGenerator = () => {
           return acc;
         }, [] as MinecraftItem[]);
 
-        // Sort by name
-        grouped.sort((a, b) => {
-          const nameA = formatItemName(a.id);
-          const nameB = formatItemName(b.id);
-          return nameA.localeCompare(nameB);
-        });
+        // Sort by quantity (highest first)
+        grouped.sort((a, b) => b.count - a.count);
 
         setItems(grouped);
       } else {
@@ -333,16 +364,18 @@ const MinecraftListGenerator = () => {
       </div>
       <div className="flex flex-col gap-2">
         <textarea
+          ref={textareaRef}
           value={jsonInput}
           onChange={(e) => setJsonInput(e.target.value)}
           placeholder="Paste your JSON here..."
           className={cn(
-            'flex min-h-[300px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm font-mono',
-            'shadow-xs transition-[color,box-shadow] outline-none',
+            'flex min-h-[120px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm font-mono',
+            'shadow-xs transition-[color,box-shadow] outline-none resize-none overflow-hidden',
             'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
             'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
             'placeholder:text-muted-foreground'
           )}
+          style={{ minHeight: '120px' }}
         />
         <div className="flex justify-center gap-2">
           <Button onClick={handleProcess} variant="default">
@@ -366,156 +399,199 @@ const MinecraftListGenerator = () => {
       {items.length > 0 && (
         <div className="border rounded-md p-4 bg-card">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Preview</h2>
-            <Button onClick={handleDownloadImage} variant="outline">
-              Download as PNG
-            </Button>
+            <button
+              type="button"
+              onClick={() => setPreviewOpen(!previewOpen)}
+              className="flex items-center gap-2 text-lg font-semibold hover:text-accent-foreground transition-colors"
+            >
+              <ChevronDown
+                className={cn(
+                  'h-4 w-4 transition-transform',
+                  previewOpen && 'rotate-180'
+                )}
+              />
+              Preview
+            </button>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleCopyFormattedText}
+                variant="outline"
+                className="gap-2"
+              >
+                {copied ? (
+                  <>
+                    <Check className="h-4 w-4" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4" />
+                    Copy Text
+                  </>
+                )}
+              </Button>
+              <Button onClick={handleDownloadImage} variant="outline">
+                Download PNG
+              </Button>
+            </div>
           </div>
 
-          {/* Settings */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4 p-4 bg-muted/50 rounded-md">
-            <div ref={fontDropdownRef} className="relative">
-              <label className="text-sm font-medium mb-2 block">Font</label>
-              <button
-                type="button"
-                onClick={() => setFontDropdownOpen(!fontDropdownOpen)}
-                className={cn(
-                  'w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-left flex justify-between items-center',
-                  'hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
-                )}
-                style={{ fontFamily: font }}
-              >
-                <span>{font}</span>
-                <span className="text-muted-foreground">▼</span>
-              </button>
-              {fontDropdownOpen && (
-                <div className="absolute z-50 w-full mt-1 rounded-md border border-input bg-background shadow-lg max-h-60 overflow-auto">
-                  {fonts.map((fontOption) => (
-                    <button
-                      key={fontOption}
-                      type="button"
-                      onClick={() => {
-                        setFont(fontOption);
-                        setFontDropdownOpen(false);
-                      }}
-                      className={cn(
-                        'w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors',
-                        font === fontOption && 'bg-accent'
-                      )}
-                      style={{ fontFamily: fontOption }}
-                    >
-                      {fontOption}
-                    </button>
-                  ))}
+          {previewOpen && (
+            <>
+              {/* Settings */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4 p-4 bg-muted/50 rounded-md">
+                <div ref={fontDropdownRef} className="relative">
+                  <label className="text-sm font-medium mb-2 block">Font</label>
+                  <button
+                    type="button"
+                    onClick={() => setFontDropdownOpen(!fontDropdownOpen)}
+                    className={cn(
+                      'w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-left flex justify-between items-center',
+                      'hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+                    )}
+                    style={{ fontFamily: font }}
+                  >
+                    <span>{font}</span>
+                    <span className="text-muted-foreground">▼</span>
+                  </button>
+                  {fontDropdownOpen && (
+                    <div className="absolute z-50 w-full mt-1 rounded-md border border-input bg-background shadow-lg max-h-60 overflow-auto">
+                      {fonts.map((fontOption) => (
+                        <button
+                          key={fontOption}
+                          type="button"
+                          onClick={() => {
+                            setFont(fontOption);
+                            setFontDropdownOpen(false);
+                          }}
+                          className={cn(
+                            'w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors',
+                            font === fontOption && 'bg-accent'
+                          )}
+                          style={{ fontFamily: fontOption }}
+                        >
+                          {fontOption}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    Columns
+                  </label>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="10"
+                    value={columns}
+                    onChange={(e) =>
+                      setColumns(Math.max(1, parseInt(e.target.value) || 1))
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    Rows (0 = auto)
+                  </label>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="50"
+                    value={rows}
+                    onChange={(e) =>
+                      setRows(Math.max(0, parseInt(e.target.value) || 0))
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    Background Color
+                  </label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="color"
+                      value={backgroundColor || '#ffffff'}
+                      onChange={(e) => setBackgroundColor(e.target.value)}
+                      className="w-20"
+                    />
+                    <Input
+                      type="text"
+                      placeholder="Transparent"
+                      value={backgroundColor}
+                      onChange={(e) => setBackgroundColor(e.target.value)}
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    Font Color
+                  </label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="color"
+                      value={fontColor}
+                      onChange={(e) => setFontColor(e.target.value)}
+                      className="w-20"
+                    />
+                    <Input
+                      type="text"
+                      value={fontColor}
+                      onChange={(e) => setFontColor(e.target.value)}
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    Font Size
+                  </label>
+                  <Input
+                    type="number"
+                    min="12"
+                    max="72"
+                    value={fontSize}
+                    onChange={(e) =>
+                      setFontSize(
+                        Math.max(
+                          12,
+                          Math.min(72, parseInt(e.target.value) || 28)
+                        )
+                      )
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    Icon Size
+                  </label>
+                  <Input
+                    type="number"
+                    min="16"
+                    max="128"
+                    value={iconSize}
+                    onChange={(e) =>
+                      setIconSize(
+                        Math.max(
+                          16,
+                          Math.min(128, parseInt(e.target.value) || 64)
+                        )
+                      )
+                    }
+                  />
+                </div>
+              </div>
+              {previewUrl && (
+                <div className="flex justify-center">
+                  <img
+                    src={previewUrl}
+                    alt="Minecraft items preview"
+                    className="border rounded-md"
+                  />
                 </div>
               )}
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Columns</label>
-              <Input
-                type="number"
-                min="1"
-                max="10"
-                value={columns}
-                onChange={(e) =>
-                  setColumns(Math.max(1, parseInt(e.target.value) || 1))
-                }
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">
-                Rows (0 = auto)
-              </label>
-              <Input
-                type="number"
-                min="0"
-                max="50"
-                value={rows}
-                onChange={(e) =>
-                  setRows(Math.max(0, parseInt(e.target.value) || 0))
-                }
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">
-                Background Color
-              </label>
-              <div className="flex gap-2">
-                <Input
-                  type="color"
-                  value={backgroundColor || '#ffffff'}
-                  onChange={(e) => setBackgroundColor(e.target.value)}
-                  className="w-20"
-                />
-                <Input
-                  type="text"
-                  placeholder="Transparent"
-                  value={backgroundColor}
-                  onChange={(e) => setBackgroundColor(e.target.value)}
-                  className="flex-1"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">
-                Font Color
-              </label>
-              <div className="flex gap-2">
-                <Input
-                  type="color"
-                  value={fontColor}
-                  onChange={(e) => setFontColor(e.target.value)}
-                  className="w-20"
-                />
-                <Input
-                  type="text"
-                  value={fontColor}
-                  onChange={(e) => setFontColor(e.target.value)}
-                  className="flex-1"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">
-                Font Size
-              </label>
-              <Input
-                type="number"
-                min="12"
-                max="72"
-                value={fontSize}
-                onChange={(e) =>
-                  setFontSize(
-                    Math.max(12, Math.min(72, parseInt(e.target.value) || 28))
-                  )
-                }
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">
-                Icon Size
-              </label>
-              <Input
-                type="number"
-                min="16"
-                max="128"
-                value={iconSize}
-                onChange={(e) =>
-                  setIconSize(
-                    Math.max(16, Math.min(128, parseInt(e.target.value) || 64))
-                  )
-                }
-              />
-            </div>
-          </div>
-          {previewUrl && (
-            <div className="flex justify-center">
-              <img
-                src={previewUrl}
-                alt="Minecraft items preview"
-                className="border rounded-md"
-              />
-            </div>
+            </>
           )}
         </div>
       )}
