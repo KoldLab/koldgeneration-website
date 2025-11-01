@@ -1,75 +1,78 @@
-# Deployment Guide
+# Guide de Déploiement
 
-This guide will help you deploy your website to GitHub Pages using GitHub Actions.
+Ce guide vous aidera à déployer votre site web sur GitHub Pages en utilisant GitHub Actions.
 
-## Prerequisites
+## Prérequis
 
-1. A GitHub account
-2. A repository for your website (this project)
+1. Un compte GitHub
+2. Un dépôt pour votre site web (ce projet)
 
-## Steps to Deploy
+## Étapes pour Déployer
 
-### 1. Code is Already on GitHub ✅
+### 1. Code Déjà sur GitHub ✅
 
-Your code has been pushed to the `main` branch. You're all set!
+Votre code a été poussé sur la branche `main`. Vous êtes prêt !
 
-### 2. Enable GitHub Pages
+### 2. Activer GitHub Pages
 
-1. Go to your repository on GitHub: `https://github.com/KoldLab/koldgeneration-website`
-2. Click **Settings** → **Pages**
-3. Under "Source", select **GitHub Actions** (NOT "Deploy from a branch")
-4. Save the settings
+1. Allez sur votre dépôt GitHub : `https://github.com/KoldLab/koldgeneration-website`
+2. Cliquez sur **Settings** → **Pages**
+3. Sous "Source", sélectionnez **GitHub Actions** (PAS "Deploy from a branch")
+4. Sauvegardez les paramètres
 
-That's it! GitHub Actions will automatically build and deploy your site.
+C'est tout ! GitHub Actions construira et déploiera automatiquement votre site.
 
-## Your Website URL
+## URL de Votre Site Web
 
-After deployment, your site will be available at:
+Après le déploiement, votre site sera disponible à :
+
 - **`https://koldlab.github.io/koldgeneration-website/`**
 
-## Automatic Deployment
+## Déploiement Automatique
 
-Every time you push to the `main` branch, GitHub Actions will:
-1. Build your website
-2. Deploy it to GitHub Pages
-3. Your changes will be live in ~2 minutes
+Chaque fois que vous poussez vers la branche `main`, GitHub Actions va :
 
-## Troubleshooting
+1. Construire votre site web
+2. Le déployer sur GitHub Pages
+3. Vos changements seront en ligne dans ~2 minutes
 
-### Build Fails
+## Dépannage
 
-- Check the **Actions** tab in GitHub for error logs
-- Make sure all dependencies are in `package.json`
+### La Construction Échoue
 
-### 404 Errors on Routes
+- Vérifiez l'onglet **Actions** dans GitHub pour les logs d'erreur
+- Assurez-vous que toutes les dépendances sont dans `package.json`
 
-- This is normal for SPAs (Single Page Applications)
-- The deployment workflow should handle this automatically
-- If you see 404s, check that the build completed successfully
+### Erreurs 404 sur les Routes
 
-## Local Testing
+- C'est normal pour les SPAs (Single Page Applications)
+- Le workflow de déploiement devrait gérer cela automatiquement
+- Si vous voyez des 404s, vérifiez que la construction s'est terminée avec succès
 
-Test the production build locally before deploying:
+## Test Local
+
+Testez la construction de production localement avant de déployer :
 
 ```bash
 npm run build
 npm run preview
 ```
 
-Visit `http://localhost:4173` to see how it will look on GitHub Pages.
+Visitez `http://localhost:4173` pour voir comment ça apparaîtra sur GitHub Pages.
 
 ## Notes
 
-- The deployment workflow is in `.github/workflows/deploy.yml`
-- Build output goes to `dist/` folder (gitignored)
-- GitHub Pages serves from the `gh-pages` branch automatically
-- You don't need a custom domain - the site works on the default `github.io` URL
+- Le workflow de déploiement est dans `.github/workflows/deploy.yml`
+- La sortie de construction va dans le dossier `dist/` (gitignored)
+- GitHub Pages sert automatiquement depuis la branche `gh-pages`
+- Vous n'avez pas besoin d'un domaine personnalisé - le site fonctionne sur l'URL par défaut `github.io`
 
-## Future Custom Domain Setup
+## Configuration Future d'un Domaine Personnalisé
 
-If you want to add a custom domain later:
-1. Create a `public/CNAME` file with your domain
-2. In GitHub Settings → Pages, add your custom domain
-3. Configure DNS records at your domain provider
+Si vous voulez ajouter un domaine personnalisé plus tard :
 
-But for now, you don't need any of that! Just enable GitHub Actions in Settings and you're done. 🎉
+1. Créez un fichier `public/CNAME` avec votre domaine
+2. Dans GitHub Settings → Pages, ajoutez votre domaine personnalisé
+3. Configurez les enregistrements DNS chez votre fournisseur de domaine
+
+Mais pour l'instant, vous n'avez besoin de rien de tout ça ! Activez simplement GitHub Actions dans Settings et c'est fait. 🎉
