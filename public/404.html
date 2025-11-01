@@ -6,28 +6,27 @@
     <title>KoldGeneration - Tools & Resources</title>
     <script>
       // GitHub Pages 404.html workaround for SPAs
-      // Only redirect if we're actually on a 404 (not already on index.html)
+      // Redirect to index.html and preserve the path via hash so React Router can handle it
       const path = window.location.pathname;
       const search = window.location.search;
       const hash = window.location.hash;
 
-      // If path already contains index.html, strip it and redirect to clean URL
-      if (path.includes('/index.html')) {
-        const cleanPath = path.replace('/index.html', '') || '/';
-        window.location.replace(cleanPath + search + hash);
+      // If we're already on index.html, don't redirect
+      if (path === '/index.html' || path === '/') {
         return;
       }
 
-      // If we're at root, serve index.html directly (no redirect needed)
-      if (path === '/' || path === '') {
-        // Let React Router handle it - don't redirect
+      // Strip /index.html if it exists in the path to avoid duplication
+      let cleanPath = path.replace(/\/index\.html\/?/g, '') || '/';
+      
+      // If cleanPath is just '/', redirect to index.html
+      if (cleanPath === '/') {
         window.location.replace('/index.html' + search + hash);
-        return;
+      } else {
+        // For other paths, redirect to index.html and append path as hash
+        // React Router will then navigate to the correct route
+        window.location.replace('/index.html' + search + '#' + cleanPath + hash);
       }
-
-      // For other routes, redirect to index.html with the path
-      // This allows React Router to handle client-side routing
-      window.location.replace('/index.html' + path + search + hash);
     </script>
   </head>
   <body>
