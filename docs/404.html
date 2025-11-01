@@ -6,16 +6,20 @@
     <title>KoldGeneration - Tools & Resources</title>
     <script>
       // GitHub Pages 404.html workaround for SPAs
-      // This file is served when GitHub Pages can't find the requested file
-      // We redirect to index.html and preserve the path in the URL
+      // When a route doesn't exist, GitHub Pages serves this file
+      // We need to redirect to index.html and preserve the original route
       const path = window.location.pathname;
       const search = window.location.search;
       const hash = window.location.hash;
 
-      // Only redirect if we're not already at root
-      if (path !== '/' && path !== '/index.html') {
-        // Redirect to home - GitHub Pages will serve index.html for root path
-        window.location.replace('/');
+      // Don't do anything if we're already on index.html or root
+      if (path === '/index.html' || path === '/') {
+        // Already where we need to be
+      } else {
+        // Store the original path and redirect to index.html
+        // React Router will then navigate to this path
+        sessionStorage.setItem('redirectPath', path + search + hash);
+        window.location.replace('/index.html');
       }
     </script>
   </head>
