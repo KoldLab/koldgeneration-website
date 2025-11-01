@@ -16,7 +16,7 @@ import UserMenu from '@/components/auth/UserMenu';
 
 export function NavBar() {
   const isMobile = useIsMobile();
-  const { user, loading } = useAuth();
+  const { user, loading, error } = useAuth();
 
   return (
     <NavigationMenu viewport={isMobile}>
@@ -25,7 +25,15 @@ export function NavBar() {
           <ListItem key={route.title} {...route} />
         ))}
         <NavigationMenuItem className="ml-auto">
-          {!loading && (user ? <UserMenu /> : <LoginButton />)}
+          {loading ? (
+            <span className="text-xs text-muted-foreground">Loading...</span>
+          ) : error ? (
+            <span className="text-xs text-destructive">Auth Error</span>
+          ) : user ? (
+            <UserMenu />
+          ) : (
+            <LoginButton />
+          )}
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
