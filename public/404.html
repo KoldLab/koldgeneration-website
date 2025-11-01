@@ -12,13 +12,11 @@
       const search = window.location.search;
       const hash = window.location.hash;
 
-      // Don't redirect if we're already at root
-      if (path === '/' || path === '/index.html') {
-        return;
+      // Only redirect if we're not already at root
+      if (path !== '/' && path !== '/index.html') {
+        // Redirect to home - GitHub Pages will serve index.html for root path
+        window.location.replace('/');
       }
-
-      // Redirect to home - GitHub Pages will serve index.html for root path
-      window.location.replace('/');
     </script>
   </head>
   <body>
