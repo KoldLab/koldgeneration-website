@@ -21,11 +21,6 @@ export const routesConfig = [
         to: '/tools/minecraft-list-generator',
         description: 'Generate a list of Minecraft items',
       },
-      {
-        title: 'Tool 2',
-        to: '/tools/tool-2',
-        description: 'Description for Tool 2',
-      },
     ],
   },
 ];
