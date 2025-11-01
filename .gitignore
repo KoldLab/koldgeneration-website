@@ -9,9 +9,8 @@ lerna-debug.log*
 
 node_modules
 dist-ssr
+dist
 *.local
-
-# dist/ is committed to git for GitHub Pages deployment
 
 # Firebase
 .firebase/
