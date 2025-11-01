@@ -7,6 +7,19 @@
     <title>KoldGeneration - Tools & Resources</title>
   </head>
   <body>
+    <script>
+      // Apply theme immediately to prevent flash
+      (function() {
+        const saved = localStorage.getItem('theme');
+        if (saved === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else if (saved === 'light') {
+          document.documentElement.classList.remove('dark');
+        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

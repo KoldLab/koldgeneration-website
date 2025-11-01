@@ -13,6 +13,7 @@ import { routesConfig, type RouteConfig } from '@/routesConfig';
 import { useAuth } from '@/contexts/AuthContext';
 import LoginButton from '@/components/auth/LoginButton';
 import UserMenu from '@/components/auth/UserMenu';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export function NavBar() {
   const isMobile = useIsMobile();
@@ -24,6 +25,9 @@ export function NavBar() {
         {routesConfig.map((route) => (
           <ListItem key={route.title} {...route} />
         ))}
+        <NavigationMenuItem>
+          <ThemeToggle />
+        </NavigationMenuItem>
         <NavigationMenuItem className="ml-auto">
           {loading ? (
             <span className="text-xs text-muted-foreground">Loading...</span>

@@ -4,6 +4,7 @@ import { RouterProvider } from 'react-router';
 import React from 'react';
 import { router } from './routes.tsx';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 // Handle SPA redirect from 404.html before React Router initializes
 // The 404.html redirects to /?/path, we need to extract that and update the URL
@@ -19,8 +20,10 @@ if (typeof window !== 'undefined') {
 
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </ThemeProvider>
   </React.StrictMode>
 );
