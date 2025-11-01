@@ -13,9 +13,6 @@ function getGitCommitHash(): string {
   }
 }
 
-// Get build date
-const buildDate = new Date().toISOString().split('T')[0];
-
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
@@ -30,6 +27,5 @@ export default defineConfig({
   },
   define: {
     __GIT_COMMIT_HASH__: JSON.stringify(getGitCommitHash()),
-    __BUILD_DATE__: JSON.stringify(buildDate),
   },
 });
