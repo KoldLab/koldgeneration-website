@@ -52,9 +52,9 @@ export function NavBar() {
       </div>
 
       {/* Center: Desktop navigation */}
-      <div className="hidden sm:flex flex-1 items-center justify-center">
+      <div className="hidden sm:flex flex-1 justify-start items-center ">
         <NavigationMenu viewport={isMobile}>
-          <NavigationMenuList className="items-center justify-center gap-2">
+          <NavigationMenuList className="items-center  gap-2">
             {routesConfig.map((route) => (
               <ListItem key={route.title} {...route} />
             ))}
