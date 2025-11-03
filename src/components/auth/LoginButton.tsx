@@ -23,10 +23,9 @@ export default function LoginButton() {
       ) : (
         <>
           <LogIn className="h-4 w-4 mr-2" />
-          Sign in with Google
+          Sign in
         </>
       )}
     </Button>
   );
 }
-

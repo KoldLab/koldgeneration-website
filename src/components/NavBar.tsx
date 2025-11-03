@@ -9,6 +9,15 @@ import {
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
 import { Link } from 'react-router-dom';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { Menu } from 'lucide-react';
 import { routesConfig, type RouteConfig } from '@/routesConfig';
 import { useAuth } from '@/contexts/AuthContext';
 import LoginButton from '@/components/auth/LoginButton';
@@ -20,27 +29,53 @@ export function NavBar() {
   const { user, loading, error } = useAuth();
 
   return (
-    <NavigationMenu viewport={isMobile}>
-      <NavigationMenuList className="flex-wrap">
-        {routesConfig.map((route) => (
-          <ListItem key={route.title} {...route} />
-        ))}
-        <NavigationMenuItem>
-          <ThemeToggle />
-        </NavigationMenuItem>
-        <NavigationMenuItem className="ml-auto">
-          {loading ? (
-            <span className="text-xs text-muted-foreground">Loading...</span>
-          ) : error ? (
-            <span className="text-xs text-destructive">Auth Error</span>
-          ) : user ? (
-            <UserMenu />
-          ) : (
-            <LoginButton />
-          )}
-        </NavigationMenuItem>
-      </NavigationMenuList>
-    </NavigationMenu>
+    <div className="w-full flex items-center">
+      {/* Left: Mobile menu trigger */}
+      <div className="flex-1 flex items-center sm:hidden">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" aria-label="Open menu">
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-72">
+            <SheetHeader>
+              <SheetTitle>Menu</SheetTitle>
+            </SheetHeader>
+            <nav className="mt-4 flex flex-col gap-2">
+              {routesConfig.map((route) => (
+                <MobileItem key={route.title} {...route} />
+              ))}
+            </nav>
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      {/* Center: Desktop navigation */}
+      <div className="hidden sm:flex flex-1 items-center justify-center">
+        <NavigationMenu viewport={isMobile}>
+          <NavigationMenuList className="items-center justify-center gap-2">
+            {routesConfig.map((route) => (
+              <ListItem key={route.title} {...route} />
+            ))}
+          </NavigationMenuList>
+        </NavigationMenu>
+      </div>
+
+      {/* Right: Theme + Auth */}
+      <div className="flex-1 flex items-center justify-end gap-3">
+        <ThemeToggle />
+        {loading ? (
+          <span className="text-xs text-muted-foreground">Loading...</span>
+        ) : error ? (
+          <span className="text-xs text-destructive">Auth Error</span>
+        ) : user ? (
+          <UserMenu />
+        ) : (
+          <LoginButton />
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -77,5 +112,36 @@ function ListItem({
         </ul>
       </NavigationMenuContent>
     </NavigationMenuItem>
+  );
+}
+
+function MobileItem({ title, children, to }: RouteConfig) {
+  if (!children) {
+    return (
+      <Link
+        to={to}
+        className="px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground"
+      >
+        {title}
+      </Link>
+    );
+  }
+  return (
+    <div className="mb-2">
+      <div className="px-3 py-2 text-sm font-medium text-muted-foreground">
+        {title}
+      </div>
+      <div className="ml-2 flex flex-col">
+        {children.map((child) => (
+          <Link
+            key={child.title}
+            to={child.to}
+            className="px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground"
+          >
+            {child.title}
+          </Link>
+        ))}
+      </div>
+    </div>
   );
 }
