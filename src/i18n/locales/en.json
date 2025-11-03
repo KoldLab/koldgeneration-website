@@ -1,0 +1,72 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "signIn": "Sign in",
+    "signingIn": "Signing in...",
+    "signOut": "Sign out",
+    "menu": "Menu",
+    "openMenu": "Open menu",
+    "goHome": "Go Home",
+    "user": "User"
+  },
+  "nav": {
+    "home": "Home",
+    "tools": "Tools"
+  },
+  "routes": {
+    "home": {
+      "title": "Home",
+      "description": "Main landing page"
+    },
+    "tools": {
+      "title": "Tools",
+      "description": "All personal utilities and scripts",
+      "minecraftListGenerator": {
+        "title": "Minecraft List Generator",
+        "description": "Generate formatted item lists and images from Minecraft chest NBT data"
+      }
+    }
+  },
+  "home": {
+    "welcome": "Welcome!",
+    "description": "This is my personal website for custom tools and information."
+  },
+  "error": {
+    "notFound": {
+      "title": "404",
+      "heading": "Page Not Found",
+      "message": "The page you're looking for doesn't exist.",
+      "goHome": "Go Home"
+    },
+    "generic": {
+      "heading": "Not Found",
+      "message": "The page you're looking for doesn't exist."
+    }
+  },
+  "minecraft": {
+    "title": "Minecraft List Generator",
+    "description": "Transform your Minecraft chest NBT data into beautifully formatted item lists. Generate text lists or custom PNG images with customizable fonts, colors, and layouts.",
+    "pasteJson": "Paste your JSON here...",
+    "itemsRequired": "- Items required -",
+    "generate": "Generate",
+    "test": "Test",
+    "preview": "Preview",
+    "settings": "Settings",
+    "font": "Font",
+    "fontSize": "Font Size",
+    "fontColor": "Font Color",
+    "backgroundColor": "Background Color",
+    "columns": "Columns",
+    "rows": "Rows (0 = auto)",
+    "iconSize": "Icon Size",
+    "copyText": "Copy Text",
+    "copied": "Copied!",
+    "downloadPng": "Download PNG",
+    "error": {
+      "invalidJson": "Invalid JSON format",
+      "invalidStructure": "Invalid JSON structure: Missing Items array"
+    }
+  }
+}
+

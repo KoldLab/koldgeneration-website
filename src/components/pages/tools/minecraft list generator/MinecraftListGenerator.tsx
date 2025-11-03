@@ -18,6 +18,7 @@ import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { ChevronDown, Copy, Check } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface MinecraftItem {
   Slot: number;
@@ -30,6 +31,7 @@ interface MinecraftData {
 }
 
 const MinecraftListGenerator = () => {
+  const { t } = useTranslation();
   const [jsonInput, setJsonInput] = useState('');
   const [items, setItems] = useState<MinecraftItem[]>([]);
   const [error, setError] = useState<string>('');
@@ -83,7 +85,7 @@ const MinecraftListGenerator = () => {
   const formatItemsAsText = (): string => {
     if (items.length === 0) return '';
 
-    let text = '- Items requis -\n\n';
+    let text = `${t('minecraft.itemsRequired')}\n\n`;
     items.forEach((item) => {
       const name = formatItemName(item.id);
       text += `${item.count} - ${name}\n`;
@@ -154,7 +156,11 @@ const MinecraftListGenerator = () => {
     ctx.textAlign = 'center';
     ctx.fillStyle = fontColor;
     ctx.font = `bold 60px ${font}`;
-    ctx.fillText('Items requis :', canvas.width / 2, padding + 60);
+    ctx.fillText(
+      `${t('minecraft.itemsRequired').replace(/^- | -$/g, '')}:`,
+      canvas.width / 2,
+      padding + 60
+    );
 
     // Load all item images
     try {
@@ -268,6 +274,7 @@ const MinecraftListGenerator = () => {
     fontColor,
     fontSize,
     iconSize,
+    t,
   ]);
 
   const handleDownloadImage = async () => {
@@ -319,10 +326,10 @@ const MinecraftListGenerator = () => {
 
         setItems(grouped);
       } else {
-        setError('Invalid JSON structure: Missing Items array');
+        setError(t('minecraft.error.invalidStructure'));
       }
     } catch (err) {
-      setError('Invalid JSON format');
+      setError(t('minecraft.error.invalidJson'));
     }
   };
 
@@ -351,10 +358,10 @@ const MinecraftListGenerator = () => {
     <div className="flex flex-col w-full gap-2">
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold mb-2">
-          Minecraft List Generator
+          {t('minecraft.title')}
         </h1>
         <p className="text-sm sm:text-base text-muted-foreground">
-          Paste your Minecraft chest NBT data to generate a formatted item list
+          {t('minecraft.description')}
         </p>
       </div>
       <div className="flex flex-col gap-2">
@@ -362,7 +369,7 @@ const MinecraftListGenerator = () => {
           ref={textareaRef}
           value={jsonInput}
           onChange={(e) => setJsonInput(e.target.value)}
-          placeholder="Paste your JSON here..."
+          placeholder={t('minecraft.pasteJson')}
           className={cn('font-mono overflow-hidden')}
         />
         <div className="flex flex-col sm:flex-row justify-center gap-2">
@@ -371,7 +378,7 @@ const MinecraftListGenerator = () => {
             variant="default"
             className="w-full sm:w-auto"
           >
-            Generate
+            {t('minecraft.generate')}
           </Button>
           <Button
             onClick={() => {
@@ -382,7 +389,7 @@ const MinecraftListGenerator = () => {
             variant="outline"
             className="w-full sm:w-auto"
           >
-            Test
+            {t('minecraft.test')}
           </Button>
         </div>
       </div>
@@ -404,7 +411,7 @@ const MinecraftListGenerator = () => {
                       previewOpen && 'rotate-180'
                     )}
                   />
-                  Preview
+                  {t('minecraft.preview')}
                 </Button>
               </CollapsibleTrigger>
               <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -416,12 +423,12 @@ const MinecraftListGenerator = () => {
                   {copied ? (
                     <>
                       <Check className="h-4 w-4" />
-                      Copied!
+                      {t('minecraft.copied')}
                     </>
                   ) : (
                     <>
                       <Copy className="h-4 w-4" />
-                      Copy Text
+                      {t('minecraft.copyText')}
                     </>
                   )}
                 </Button>
@@ -430,7 +437,7 @@ const MinecraftListGenerator = () => {
                   variant="outline"
                   className="w-full sm:w-auto"
                 >
-                  Download PNG
+                  {t('minecraft.downloadPng')}
                 </Button>
               </div>
             </div>
@@ -440,7 +447,7 @@ const MinecraftListGenerator = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 p-3 sm:p-4 bg-muted/50 rounded-md">
                 <div className="relative">
                   <Label htmlFor="font-select" className="mb-2">
-                    Font
+                    {t('minecraft.font')}
                   </Label>
                   <Select value={font} onValueChange={setFont}>
                     <SelectTrigger
@@ -463,7 +470,7 @@ const MinecraftListGenerator = () => {
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="columns">Columns</Label>
+                  <Label htmlFor="columns">{t('minecraft.columns')}</Label>
                   <Input
                     id="columns"
                     type="number"
@@ -477,7 +484,7 @@ const MinecraftListGenerator = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="rows">Rows (0 = auto)</Label>
+                  <Label htmlFor="rows">{t('minecraft.rows')}</Label>
                   <Input
                     id="rows"
                     type="number"
@@ -491,7 +498,9 @@ const MinecraftListGenerator = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="bg-color">Background Color</Label>
+                  <Label htmlFor="bg-color">
+                    {t('minecraft.backgroundColor')}
+                  </Label>
                   <div className="flex gap-2 mt-2">
                     <Input
                       id="bg-color"
@@ -510,7 +519,7 @@ const MinecraftListGenerator = () => {
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="font-color">Font Color</Label>
+                  <Label htmlFor="font-color">{t('minecraft.fontColor')}</Label>
                   <div className="flex gap-2 mt-2">
                     <Input
                       id="font-color"
@@ -528,7 +537,7 @@ const MinecraftListGenerator = () => {
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="font-size">Font Size</Label>
+                  <Label htmlFor="font-size">{t('minecraft.fontSize')}</Label>
                   <Input
                     id="font-size"
                     type="number"
@@ -547,7 +556,7 @@ const MinecraftListGenerator = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="icon-size">Icon Size</Label>
+                  <Label htmlFor="icon-size">{t('minecraft.iconSize')}</Label>
                   <Input
                     id="icon-size"
                     type="number"

@@ -18,15 +18,19 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
-import { routesConfig, type RouteConfig } from '@/routesConfig';
+import { getRoutesConfig, type RouteConfig } from '@/routesConfig';
 import { useAuth } from '@/contexts/AuthContext';
 import LoginButton from '@/components/auth/LoginButton';
 import UserMenu from '@/components/auth/UserMenu';
+import { useTranslation } from 'react-i18next';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 export function NavBar() {
   const isMobile = useIsMobile();
   const { user, loading, error } = useAuth();
+  const { t } = useTranslation();
+  const routesConfig = getRoutesConfig(t);
 
   return (
     <div className="w-full flex items-center">
@@ -34,13 +38,17 @@ export function NavBar() {
       <div className="flex-1 flex items-center sm:hidden">
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label="Open menu">
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={t('common.openMenu')}
+            >
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-72">
             <SheetHeader>
-              <SheetTitle>Menu</SheetTitle>
+              <SheetTitle>{t('common.menu')}</SheetTitle>
             </SheetHeader>
             <nav className="mt-4 flex flex-col gap-2">
               {routesConfig.map((route) => (
@@ -62,13 +70,20 @@ export function NavBar() {
         </NavigationMenu>
       </div>
 
-      {/* Right: Theme + Auth */}
+      {/* Right: Language + Theme + Auth */}
       <div className="flex-1 flex items-center justify-end gap-3">
-        <ThemeToggle />
+        {!user && (
+          <>
+            <LanguageSwitcher variant="accordion" />
+            <ThemeToggle />
+          </>
+        )}
         {loading ? (
-          <span className="text-xs text-muted-foreground">Loading...</span>
+          <span className="text-xs text-muted-foreground">
+            {t('common.loading')}
+          </span>
         ) : error ? (
-          <span className="text-xs text-destructive">Auth Error</span>
+          <span className="text-xs text-destructive">{t('common.error')}</span>
         ) : user ? (
           <UserMenu />
         ) : (

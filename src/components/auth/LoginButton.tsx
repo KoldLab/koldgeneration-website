@@ -1,9 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { LogIn, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function LoginButton() {
   const { signInWithGoogle, loading } = useAuth();
+  const { t } = useTranslation();
 
   const handleLogin = async () => {
     try {
@@ -18,12 +20,12 @@ export default function LoginButton() {
       {loading ? (
         <>
           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          Signing in...
+          {t('common.signingIn')}
         </>
       ) : (
         <>
           <LogIn className="h-4 w-4 mr-2" />
-          Sign in
+          {t('common.signIn')}
         </>
       )}
     </Button>
