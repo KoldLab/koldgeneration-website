@@ -1,0 +1,72 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "signIn": "Se connecter",
+    "signingIn": "Connexion en cours...",
+    "signOut": "Se déconnecter",
+    "menu": "Menu",
+    "openMenu": "Ouvrir le menu",
+    "goHome": "Retour à l'accueil",
+    "user": "Utilisateur"
+  },
+  "nav": {
+    "home": "Accueil",
+    "tools": "Outils"
+  },
+  "routes": {
+    "home": {
+      "title": "Accueil",
+      "description": "Page d'accueil principale"
+    },
+    "tools": {
+      "title": "Outils",
+      "description": "Toutes les utilitaires et scripts personnels",
+      "minecraftListGenerator": {
+        "title": "Générateur de Liste Minecraft",
+        "description": "Générer des listes d'objets formatées et des images à partir des données NBT de coffre Minecraft"
+      }
+    }
+  },
+  "home": {
+    "welcome": "Bienvenue !",
+    "description": "Ceci est mon site web personnel pour des outils et informations personnalisés."
+  },
+  "error": {
+    "notFound": {
+      "title": "404",
+      "heading": "Page Non Trouvée",
+      "message": "La page que vous recherchez n'existe pas.",
+      "goHome": "Retour à l'accueil"
+    },
+    "generic": {
+      "heading": "Non Trouvé",
+      "message": "La page que vous recherchez n'existe pas."
+    }
+  },
+  "minecraft": {
+    "title": "Générateur de Liste Minecraft",
+    "description": "Transformez vos données NBT de coffre Minecraft en listes d'objets joliment formatées. Générez des listes de texte ou des images PNG personnalisées avec des polices, couleurs et mises en page personnalisables.",
+    "pasteJson": "Collez votre JSON ici...",
+    "itemsRequired": "- Items requis -",
+    "generate": "Générer",
+    "test": "Test",
+    "preview": "Aperçu",
+    "settings": "Paramètres",
+    "font": "Police",
+    "fontSize": "Taille de Police",
+    "fontColor": "Couleur du Texte",
+    "backgroundColor": "Couleur de Fond",
+    "columns": "Colonnes",
+    "rows": "Lignes (0 = auto)",
+    "iconSize": "Taille des Icônes",
+    "copyText": "Copier le Texte",
+    "copied": "Copié !",
+    "downloadPng": "Télécharger PNG",
+    "error": {
+      "invalidJson": "Format JSON invalide",
+      "invalidStructure": "Structure JSON invalide : Tableau Items manquant"
+    }
+  }
+}
+

@@ -1,12 +1,14 @@
 import { useRouteError, isRouteErrorResponse, Link } from 'react-router-dom';
 import { Button } from './ui/button';
+import { useTranslation } from 'react-i18next';
 
 export default function ErrorBoundary() {
   const error = useRouteError();
+  const { t } = useTranslation();
 
   let status = 404;
-  let statusText = 'Not Found';
-  let message = "The page you're looking for doesn't exist.";
+  let statusText = t('error.generic.heading');
+  let message = t('error.generic.message');
 
   if (isRouteErrorResponse(error)) {
     status = error.status;
@@ -23,7 +25,7 @@ export default function ErrorBoundary() {
         <h2 className="text-xl sm:text-2xl font-semibold mb-4">{statusText}</h2>
         <p className="text-sm sm:text-base text-muted-foreground mb-6">{message}</p>
         <Button asChild className="min-h-[44px]">
-          <Link to="/">Go Home</Link>
+          <Link to="/">{t('common.goHome')}</Link>
         </Button>
       </div>
     </div>
