@@ -348,7 +348,7 @@ const MinecraftListGenerator = () => {
   }, [items, generateImage]);
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full gap-2">
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold mb-2">
           Minecraft List Generator
