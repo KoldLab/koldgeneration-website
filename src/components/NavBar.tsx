@@ -117,10 +117,12 @@ function ListItem({
   }
 
   return (
-    <NavigationMenuItem>
-      <NavigationMenuTrigger>{title}</NavigationMenuTrigger>
-      <NavigationMenuContent>
-        <ul className="grid w-[280px] sm:w-[300px] gap-4">
+    <NavigationMenuItem className="group/item">
+      <NavigationMenuTrigger className="group/trigger">
+        {title}
+      </NavigationMenuTrigger>
+      <NavigationMenuContent className="left-0 w-max min-w-[calc(100%-0px)] [@media(min-width:768px)]:min-w-[var(--trigger-width,auto)]">
+        <ul className="grid gap-4">
           {children.map((child) => (
             <ListItem key={child.title} {...child} isSub />
           ))}

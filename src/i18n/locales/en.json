@@ -8,7 +8,9 @@
     "menu": "Menu",
     "openMenu": "Open menu",
     "goHome": "Go Home",
-    "user": "User"
+    "user": "User",
+    "cancel": "Cancel",
+    "retry": "Retry"
   },
   "nav": {
     "home": "Home",
@@ -25,6 +27,18 @@
       "minecraftListGenerator": {
         "title": "Minecraft List Generator",
         "description": "Generate formatted item lists and images from Minecraft chest NBT data"
+      }
+    },
+    "tournaments": {
+      "title": "Tournaments",
+      "description": "Create and manage tournaments",
+      "create": {
+        "title": "Create Tournament",
+        "description": "Create a new tournament"
+      },
+      "my": {
+        "title": "My Tournaments",
+        "description": "View all tournaments you have participated in"
       }
     }
   },
@@ -67,6 +81,86 @@
       "invalidJson": "Invalid JSON format",
       "invalidStructure": "Invalid JSON structure: Missing Items array"
     }
+  },
+  "tournament": {
+    "types": {
+      "singleElimination": "Single Elimination",
+      "singleEliminationDescription": "Players are eliminated after one loss. Simple and fast format.",
+      "doubleElimination": "Double Elimination",
+      "doubleEliminationDescription": "Players need two losses to be eliminated. More competitive format.",
+      "roundRobin": "Round Robin",
+      "roundRobinDescription": "Every player plays against every other player. Most matches, fair ranking.",
+      "swiss": "Swiss",
+      "swissDescription": "Players with similar records face each other. Balanced tournament format."
+    },
+    "status": {
+      "pending": "Pending",
+      "open": "Open",
+      "inProgress": "In Progress",
+      "paused": "Paused",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "create": {
+      "title": "Create Tournament",
+      "description": "Set up a new tournament and invite players to join",
+      "name": "Tournament Name",
+      "namePlaceholder": "Enter tournament name",
+      "description": "Description (optional)",
+      "descriptionPlaceholder": "Enter tournament description",
+      "type": "Tournament Type",
+      "maxPlayers": "Maximum Players",
+      "maxPlayersHint": "Minimum 2, maximum 128 players",
+      "winScore": "Win Score",
+      "winScoreHint": "Points awarded for a win (optional)",
+      "loseScore": "Lose Score",
+      "loseScoreHint": "Points awarded for a loss (optional)",
+      "createButton": "Create Tournament",
+      "creating": "Creating...",
+      "error": "Failed to create tournament",
+      "loginRequired": "You must be logged in to create a tournament",
+      "blockedByExtension": "Your browser extension (ad blocker/privacy tool) is blocking Firestore requests. Please disable it for this site or allow requests to firestore.googleapis.com"
+    },
+    "view": {
+      "notFound": "Tournament not found",
+      "error": "Error loading tournament",
+      "code": "Code",
+      "type": "Type",
+      "players": "Players",
+      "register": "Register",
+      "registering": "Registering...",
+      "registerError": "Failed to register",
+      "unregister": "Unregister",
+      "unregistering": "Unregistering...",
+      "unregisterError": "Failed to unregister",
+      "loginToRegister": "Sign in to Register",
+      "noPlayers": "No players registered yet",
+      "info": "Tournament Information",
+      "createdBy": "Created By",
+      "createdAt": "Created At",
+      "startedAt": "Started At",
+      "completedAt": "Completed At",
+      "openTournament": "Open Tournament",
+      "startTournament": "Start Tournament",
+      "pauseTournament": "Pause Tournament",
+      "resumeTournament": "Resume Tournament",
+      "completeTournament": "Complete Tournament",
+      "cancelTournament": "Cancel Tournament",
+      "statusError": "Failed to update tournament status",
+      "copyLink": "Copy Link",
+      "copied": "Copied!",
+      "enterPseudonym": "Enter Your Pseudonym",
+      "pseudonymPlaceholder": "Choose a name to play as",
+      "pseudonymHint": "You can join without signing in! Just choose a name and start playing.",
+      "winScore": "Win Score",
+      "loseScore": "Lose Score",
+      "points": "points"
+    },
+    "myTournaments": {
+      "title": "My Tournaments",
+      "description": "View all tournaments you have participated in",
+      "noTournaments": "You haven't participated in any tournaments yet.",
+      "view": "View"
+    }
   }
 }
-

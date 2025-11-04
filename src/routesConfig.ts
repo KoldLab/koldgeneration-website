@@ -26,6 +26,23 @@ export const getRoutesConfig = (t: TFunction): RouteConfig[] => [
       },
     ],
   },
+  {
+    title: t('routes.tournaments.title'),
+    to: '/tournaments',
+    description: t('routes.tournaments.description'),
+    children: [
+      {
+        title: t('routes.tournaments.create.title'),
+        to: '/tournaments/create',
+        description: t('routes.tournaments.create.description'),
+      },
+      {
+        title: t('routes.tournaments.my.title'),
+        to: '/tournaments/my',
+        description: t('routes.tournaments.my.description'),
+      },
+    ],
+  },
 ];
 
 // Legacy export for backwards compatibility (will use default English)
@@ -45,6 +62,23 @@ export const routesConfig: RouteConfig[] = [
         to: '/tools/minecraft-list-generator',
         description:
           'Generate formatted item lists and images from Minecraft chest NBT data',
+      },
+    ],
+  },
+  {
+    title: 'Tournaments',
+    to: '/tournaments',
+    description: 'Create and manage tournaments',
+    children: [
+      {
+        title: 'Create Tournament',
+        to: '/tournaments/create',
+        description: 'Create a new tournament',
+      },
+      {
+        title: 'My Tournaments',
+        to: '/tournaments/my',
+        description: 'View all tournaments you have participated in',
       },
     ],
   },
