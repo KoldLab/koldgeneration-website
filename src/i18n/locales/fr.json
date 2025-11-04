@@ -8,7 +8,9 @@
     "menu": "Menu",
     "openMenu": "Ouvrir le menu",
     "goHome": "Retour à l'accueil",
-    "user": "Utilisateur"
+    "user": "Utilisateur",
+    "cancel": "Annuler",
+    "retry": "Réessayer"
   },
   "nav": {
     "home": "Accueil",
@@ -25,6 +27,18 @@
       "minecraftListGenerator": {
         "title": "Générateur de Liste Minecraft",
         "description": "Générer des listes d'objets formatées et des images à partir des données NBT de coffre Minecraft"
+      }
+    },
+    "tournaments": {
+      "title": "Tournois",
+      "description": "Créer et gérer des tournois",
+      "create": {
+        "title": "Créer un Tournoi",
+        "description": "Créer un nouveau tournoi"
+      },
+      "my": {
+        "title": "Mes Tournois",
+        "description": "Voir tous les tournois auxquels vous avez participé"
       }
     }
   },
@@ -67,6 +81,86 @@
       "invalidJson": "Format JSON invalide",
       "invalidStructure": "Structure JSON invalide : Tableau Items manquant"
     }
+  },
+  "tournament": {
+    "types": {
+      "singleElimination": "Élimination Simple",
+      "singleEliminationDescription": "Les joueurs sont éliminés après une défaite. Format simple et rapide.",
+      "doubleElimination": "Double Élimination",
+      "doubleEliminationDescription": "Les joueurs doivent perdre deux fois pour être éliminés. Format plus compétitif.",
+      "roundRobin": "Round Robin",
+      "roundRobinDescription": "Chaque joueur affronte tous les autres joueurs. Plus de matchs, classement équitable.",
+      "swiss": "Suisse",
+      "swissDescription": "Les joueurs avec des records similaires s'affrontent. Format de tournoi équilibré."
+    },
+    "status": {
+      "pending": "En Attente",
+      "open": "Ouvert",
+      "inProgress": "En Cours",
+      "paused": "En Pause",
+      "completed": "Terminé",
+      "cancelled": "Annulé"
+    },
+    "create": {
+      "title": "Créer un Tournoi",
+      "description": "Configurez un nouveau tournoi et invitez des joueurs à rejoindre",
+      "name": "Nom du Tournoi",
+      "namePlaceholder": "Entrez le nom du tournoi",
+      "description": "Description (optionnel)",
+      "descriptionPlaceholder": "Entrez la description du tournoi",
+      "type": "Type de Tournoi",
+      "maxPlayers": "Nombre Maximum de Joueurs",
+      "maxPlayersHint": "Minimum 2, maximum 128 joueurs",
+      "winScore": "Score de Victoire",
+      "winScoreHint": "Points attribués pour une victoire (optionnel)",
+      "loseScore": "Score de Défaite",
+      "loseScoreHint": "Points attribués pour une défaite (optionnel)",
+      "createButton": "Créer le Tournoi",
+      "creating": "Création...",
+      "error": "Échec de la création du tournoi",
+      "loginRequired": "Vous devez être connecté pour créer un tournoi",
+      "blockedByExtension": "Une extension de navigateur (bloqueur de publicités/outil de confidentialité) bloque les requêtes Firestore. Veuillez la désactiver pour ce site ou autoriser les requêtes vers firestore.googleapis.com"
+    },
+    "view": {
+      "notFound": "Tournoi introuvable",
+      "error": "Erreur lors du chargement du tournoi",
+      "code": "Code",
+      "type": "Type",
+      "players": "Joueurs",
+      "register": "S'inscrire",
+      "registering": "Inscription...",
+      "registerError": "Échec de l'inscription",
+      "unregister": "Se désinscrire",
+      "unregistering": "Désinscription...",
+      "unregisterError": "Échec de la désinscription",
+      "loginToRegister": "Se connecter pour s'inscrire",
+      "noPlayers": "Aucun joueur inscrit pour le moment",
+      "info": "Informations du Tournoi",
+      "createdBy": "Créé Par",
+      "createdAt": "Créé Le",
+      "startedAt": "Commencé Le",
+      "completedAt": "Terminé Le",
+      "openTournament": "Ouvrir le Tournoi",
+      "startTournament": "Démarrer le Tournoi",
+      "pauseTournament": "Mettre en Pause",
+      "resumeTournament": "Reprendre le Tournoi",
+      "completeTournament": "Terminer le Tournoi",
+      "cancelTournament": "Annuler le Tournoi",
+      "statusError": "Échec de la mise à jour du statut du tournoi",
+      "copyLink": "Copier le Lien",
+      "copied": "Copié !",
+      "enterPseudonym": "Entrez Votre Pseudonyme",
+      "pseudonymPlaceholder": "Choisissez un nom pour jouer",
+      "pseudonymHint": "Vous pouvez rejoindre sans vous connecter ! Choisissez simplement un nom et commencez à jouer.",
+      "winScore": "Score de Victoire",
+      "loseScore": "Score de Défaite",
+      "points": "points"
+    },
+    "myTournaments": {
+      "title": "Mes Tournois",
+      "description": "Voir tous les tournois auxquels vous avez participé",
+      "noTournaments": "Vous n'avez participé à aucun tournoi pour le moment.",
+      "view": "Voir"
+    }
   }
 }
-

@@ -3,6 +3,9 @@ import Tools from './components/pages/Tools';
 import Home from './components/pages/Home';
 import Layout from './components/Layout';
 import MinecraftListGenerator from './components/pages/tools/minecraft list generator/MinecraftListGenerator';
+import CreateTournament from './components/pages/tournaments/CreateTournament';
+import TournamentView from './components/pages/tournaments/TournamentView';
+import MyTournaments from './components/pages/tournaments/MyTournaments';
 import ErrorBoundary from './components/ErrorBoundary';
 import NotFound from './components/pages/NotFound';
 
@@ -25,6 +28,18 @@ export const router = createBrowserRouter([
             element: <MinecraftListGenerator />,
           },
         ],
+      },
+      {
+        path: '/tournaments/create',
+        element: <CreateTournament />,
+      },
+      {
+        path: '/tournaments/my',
+        element: <MyTournaments />,
+      },
+      {
+        path: '/tournament/:code',
+        element: <TournamentView />,
       },
       {
         path: '*',
