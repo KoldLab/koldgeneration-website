@@ -27,6 +27,10 @@
       "minecraftListGenerator": {
         "title": "Minecraft List Generator",
         "description": "Generate formatted item lists and images from Minecraft chest NBT data"
+      },
+      "timer": {
+        "title": "Timer",
+        "description": "Stopwatch and countdown timer with precision timing"
       }
     },
     "tournaments": {
@@ -81,6 +85,21 @@
       "invalidJson": "Invalid JSON format",
       "invalidStructure": "Invalid JSON structure: Missing Items array"
     }
+  },
+  "timer": {
+    "title": "Timer",
+    "description": "A precise stopwatch and countdown timer for timing your activities",
+    "mode": "Mode",
+    "modes": {
+      "stopwatch": "Stopwatch",
+      "countdown": "Countdown"
+    },
+    "minutes": "Minutes",
+    "seconds": "Seconds",
+    "start": "Start",
+    "pause": "Pause",
+    "reset": "Reset",
+    "finished": "Time's up!"
   },
   "tournament": {
     "types": {

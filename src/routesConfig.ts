@@ -24,6 +24,11 @@ export const getRoutesConfig = (t: TFunction): RouteConfig[] => [
         to: '/tools/minecraft-list-generator',
         description: t('routes.tools.minecraftListGenerator.description'),
       },
+      {
+        title: t('routes.tools.timer.title'),
+        to: '/tools/timer',
+        description: t('routes.tools.timer.description'),
+      },
     ],
   },
   {
@@ -62,6 +67,11 @@ export const routesConfig: RouteConfig[] = [
         to: '/tools/minecraft-list-generator',
         description:
           'Generate formatted item lists and images from Minecraft chest NBT data',
+      },
+      {
+        title: 'Timer',
+        to: '/tools/timer',
+        description: 'Stopwatch and countdown timer with precision timing',
       },
     ],
   },

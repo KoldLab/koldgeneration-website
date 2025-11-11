@@ -27,6 +27,10 @@
       "minecraftListGenerator": {
         "title": "Générateur de Liste Minecraft",
         "description": "Générer des listes d'objets formatées et des images à partir des données NBT de coffre Minecraft"
+      },
+      "timer": {
+        "title": "Minuteur",
+        "description": "Chronomètre et compte à rebours avec minutage précis"
       }
     },
     "tournaments": {
@@ -81,6 +85,21 @@
       "invalidJson": "Format JSON invalide",
       "invalidStructure": "Structure JSON invalide : Tableau Items manquant"
     }
+  },
+  "timer": {
+    "title": "Minuteur",
+    "description": "Un chronomètre et compte à rebours précis pour chronométrer vos activités",
+    "mode": "Mode",
+    "modes": {
+      "stopwatch": "Chronomètre",
+      "countdown": "Compte à Rebours"
+    },
+    "minutes": "Minutes",
+    "seconds": "Secondes",
+    "start": "Démarrer",
+    "pause": "Pause",
+    "reset": "Réinitialiser",
+    "finished": "Le temps est écoulé !"
   },
   "tournament": {
     "types": {
