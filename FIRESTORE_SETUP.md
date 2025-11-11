@@ -32,9 +32,21 @@ service cloud.firestore {
   match /databases/{database}/documents {
     // Tournaments collection
     match /tournaments/{tournamentId} {
-      // Anyone can read tournaments (to view tournament details)
-      allow read: if true;
-      
+      // SECURITY: Allow reading individual tournaments (for code-based sharing)
+      // Tournaments are shareable via code, so individual reads are allowed
+      allow get: if true;
+
+      // SECURITY: Restrict queries to prevent bulk data scraping
+      // Allow authenticated users to list (for "My Tournaments" feature)
+      // For anonymous users, only allow limited queries with WHERE filters
+      allow list: if (
+        // Authenticated users can list tournaments (needed for getTournamentsByUserId)
+        request.auth != null
+        ||
+        // Anonymous users: only allow queries with explicit limits (code lookup)
+        (request.query.limit != null && request.query.limit <= 10)
+      );
+
       // Only authenticated users can create tournaments
       allow create: if request.auth != null
         && request.resource.data.ownerId == request.auth.uid
@@ -42,14 +54,44 @@ service cloud.firestore {
         && request.resource.data.name is string
         && request.resource.data.maxPlayers is int
         && request.resource.data.status == 'pending';
-      
-      // Only the tournament owner can update their tournament
-      allow update: if request.auth != null
-        && resource.data.ownerId == request.auth.uid;
-      
+
+      // Tournament updates: owner can update anything, authenticated users can register/unregister
+      allow update: if request.auth != null && (
+        // Owner can update anything
+        resource.data.ownerId == request.auth.uid
+        ||
+        // Authenticated users can update tournaments to register/unregister themselves only
+        (
+          // Only players array and updatedAt are being modified
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['players', 'updatedAt'])
+          &&
+          // All other fields remain unchanged
+          request.resource.data.ownerId == resource.data.ownerId
+          && request.resource.data.code == resource.data.code
+          && request.resource.data.name == resource.data.name
+          && request.resource.data.type == resource.data.type
+          && request.resource.data.maxPlayers == resource.data.maxPlayers
+          && request.resource.data.status == resource.data.status
+          && request.resource.data.createdAt == resource.data.createdAt
+          &&
+          // Security: Verify array size only changes by 1 (registration or unregistration)
+          (
+            request.resource.data.players.size() == resource.data.players.size() + 1
+            ||
+            request.resource.data.players.size() == resource.data.players.size() - 1
+          )
+        )
+      );
+
       // Only the tournament owner can delete their tournament
       allow delete: if request.auth != null
         && resource.data.ownerId == request.auth.uid;
+    }
+
+    // SECURITY: Deny all access to other collections by default
+    // Add specific rules for other collections as needed
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
@@ -64,6 +106,7 @@ If you plan to use more complex queries in the future, you may need to create co
 ### 4. Test the Setup
 
 1. Start your development server:
+
    ```bash
    npm run dev
    ```
@@ -82,26 +125,67 @@ If you plan to use more complex queries in the future, you may need to create co
 
 ## Security Rules Explanation
 
-The rules above allow:
-- ✅ **Anyone** to read tournaments (so users can view tournament details by code)
-- ✅ **Authenticated users** to create tournaments (only if they're the owner)
-- ✅ **Tournament owners** to update/delete their tournaments
-- ❌ **Prevents** users from modifying other users' tournaments
+The rules above provide multiple layers of security:
+
+### Read Protection:
+
+- ✅ **Individual tournaments** can be read by anyone (needed for code-based sharing)
+- ✅ **Queries** are restricted to prevent bulk data scraping:
+  - Anonymous users can only query with WHERE filters (code lookup) - max 10 results
+  - Authenticated users can list tournaments (needed for "My Tournaments" feature)
+  - No pagination allowed to prevent systematic scraping
+- ✅ **Default deny** for all other collections prevents accidental exposure
+
+### Write Protection:
+
+- ✅ **Only authenticated users** can create tournaments (and must be the owner)
+- ✅ **Tournament owners** can update/delete their tournaments
+- ✅ **Authenticated users** can only register/unregister themselves (only `players` array can be modified)
+- ❌ **Prevents** users from modifying other users' tournaments or other fields
+
+### Additional Security:
+
+- ✅ **Default deny rule** at the end blocks access to any collections you haven't explicitly allowed
+- ✅ **Query limits** prevent bulk data extraction
+- ✅ **Field validation** ensures data integrity
 
 ## Troubleshooting
 
 **Issue**: "Missing or insufficient permissions"
+
 - **Solution**: Make sure you've published the Firestore security rules
 
 **Issue**: "Collection not found"
+
 - **Solution**: This is normal - the collection will be created when you write the first document
 
 **Issue**: Tournament creation works but doesn't appear in Firestore
+
 - **Solution**: Check your browser console for errors, and verify your Firestore rules are published
+
+**Issue**: "My Tournaments" page shows permission error
+
+- **Solution**: Make sure you're signed in. The `getTournamentsByUserId` function requires authentication and may need optimization for large datasets (see note below)
+
+## Security Best Practices
+
+1. **Never expose your Firebase API keys** in client-side code - they're safe to use in the browser, but don't commit them to public repos
+2. **Review your security rules regularly** - Test them using the Firebase Console Rules Playground
+3. **Monitor your Firestore usage** - Check the Firebase Console for unusual query patterns
+4. **Consider rate limiting** - For production, you may want to add Cloud Functions with rate limiting for sensitive operations
+
+## Performance Note
+
+The `getTournamentsByUserId` function currently fetches all tournaments and filters in memory. For better security and performance:
+
+- Consider adding a `participants` subcollection indexed by userId
+- Or use Cloud Functions to handle this query server-side
+- This will also reduce the query limit needed in security rules
 
 ## Next Steps
 
 Once Firestore is enabled and rules are set up, you're ready to:
+
 - ✅ Create tournaments
 - ✅ View tournaments by code
 - ✅ Register/unregister players

@@ -3,11 +3,13 @@ import Tools from './components/pages/Tools';
 import Home from './components/pages/Home';
 import Layout from './components/Layout';
 import MinecraftListGenerator from './components/pages/tools/minecraft list generator/MinecraftListGenerator';
+import Timer from './components/pages/tools/timer/Timer';
 import CreateTournament from './components/pages/tournaments/CreateTournament';
 import TournamentView from './components/pages/tournaments/TournamentView';
 import MyTournaments from './components/pages/tournaments/MyTournaments';
 import ErrorBoundary from './components/ErrorBoundary';
 import NotFound from './components/pages/NotFound';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 export const router = createBrowserRouter([
   {
@@ -27,15 +29,27 @@ export const router = createBrowserRouter([
             path: '/tools/minecraft-list-generator',
             element: <MinecraftListGenerator />,
           },
+          {
+            path: '/tools/timer',
+            element: <Timer />,
+          },
         ],
       },
       {
         path: '/tournaments/create',
-        element: <CreateTournament />,
+        element: (
+          <ProtectedRoute>
+            <CreateTournament />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/tournaments/my',
-        element: <MyTournaments />,
+        element: (
+          <ProtectedRoute>
+            <MyTournaments />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/tournament/:code',
