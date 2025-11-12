@@ -187,6 +187,7 @@ const MinecraftListGenerator = () => {
 
       // Draw items in grid - left aligned within cells
       ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
 
       for (let i = 0; i < itemsToDisplay; i++) {
         const item = items[i];
@@ -230,6 +231,7 @@ const MinecraftListGenerator = () => {
     } catch (error) {
       // Fallback: draw without icons - left aligned
       ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
 
       for (let i = 0; i < itemsToDisplay; i++) {
         const item = items[i];
