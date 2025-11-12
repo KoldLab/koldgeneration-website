@@ -708,86 +708,91 @@ const Timer = () => {
           )}
         </Card>
 
-        <Card className="p-4 space-y-4 lg:w-64 lg:shrink-0 lg:min-h-128">
-          <div className="space-y-1">
-            <h2 className="text-lg font-semibold">
-              {t('timer.workouts.title')}
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              {t('timer.workouts.localInfo')}
-            </p>
-          </div>
-          {savedWorkouts.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              {t('timer.workouts.empty')}
-            </p>
-          ) : (
-            <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
-              {savedWorkouts.map((workout) => {
-                const isSelected = selectedWorkoutId === workout.id;
-                return (
-                  <ButtonGroup
-                    key={workout.id}
-                    className={`w-full overflow-hidden rounded-md border transition ${
-                      isSelected
-                        ? 'border-border bg-muted/70 text-foreground shadow-sm'
-                        : 'border-border/70 bg-background'
-                    }`}
-                  >
-                    <Button
-                      variant={isSelected ? 'secondary' : 'ghost'}
-                      size="lg"
-                      className={`flex-1 justify-start text-left ${
-                        isSelected
-                          ? 'text-foreground hover:text-foreground'
-                          : 'text-foreground hover:text-foreground'
-                      }`}
-                      onClick={() => handleSelectWorkout(workout)}
-                    >
-                      <div className="flex flex-1 flex-col gap-1 overflow-hidden">
-                        <span className="truncate font-medium">
-                          {workout.name}
-                        </span>
-                        <span
-                          className={`truncate text-xs ${
-                            isSelected
-                              ? 'text-foreground/70'
-                              : 'text-muted-foreground'
-                          }`}
-                        >
-                          {t('timer.workouts.summary', {
-                            sets: workout.totalSets,
-                            work: formatWorkoutDuration(
-                              workout.workMinutes,
-                              workout.workSeconds
-                            ),
-                            rest: formatWorkoutDuration(
-                              workout.restMinutes,
-                              workout.restSeconds
-                            ),
-                          })}
-                        </span>
-                      </div>
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      className="rounded-none border-l border-border/70 hover:bg-destructive/15"
-                      onClick={() => handleDeleteWorkout(workout.id)}
-                    >
-                      <span className="sr-only">
-                        {t('timer.workouts.delete')}
-                      </span>
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </ButtonGroup>
-                );
-              })}
+        {mode === 'sports' && (
+          <Card className="p-4 space-y-4 lg:w-64 lg:shrink-0 lg:min-h-128">
+            <div className="space-y-1">
+              <h2 className="text-lg font-semibold">
+                {t('timer.workouts.title')}
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                {t('timer.workouts.localInfo')}
+              </p>
             </div>
-          )}
-        </Card>
+            {savedWorkouts.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                {t('timer.workouts.empty')}
+              </p>
+            ) : (
+              <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+                {savedWorkouts.map((workout) => {
+                  const isSelected = selectedWorkoutId === workout.id;
+                  return (
+                    <ButtonGroup
+                      key={workout.id}
+                      className={`w-full overflow-hidden rounded-md border transition ${
+                        isSelected
+                          ? 'border-border bg-muted/70 text-foreground shadow-sm'
+                          : 'border-border/70 bg-background'
+                      }`}
+                    >
+                      <Button
+                        variant={isSelected ? 'secondary' : 'ghost'}
+                        size="lg"
+                        className={`flex-1 justify-start text-left ${
+                          isSelected
+                            ? 'text-foreground hover:text-foreground'
+                            : 'text-foreground hover:text-foreground'
+                        }`}
+                        onClick={() => handleSelectWorkout(workout)}
+                      >
+                        <div className="flex flex-1 flex-col gap-1 overflow-hidden">
+                          <span className="truncate font-medium">
+                            {workout.name}
+                          </span>
+                          <span
+                            className={`truncate text-xs ${
+                              isSelected
+                                ? 'text-foreground/70'
+                                : 'text-muted-foreground'
+                            }`}
+                          >
+                            {t('timer.workouts.summary', {
+                              sets: workout.totalSets,
+                              work: formatWorkoutDuration(
+                                workout.workMinutes,
+                                workout.workSeconds
+                              ),
+                              rest: formatWorkoutDuration(
+                                workout.restMinutes,
+                                workout.restSeconds
+                              ),
+                            })}
+                          </span>
+                        </div>
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="rounded-none border-l border-border/70 hover:bg-destructive/15"
+                        onClick={() => handleDeleteWorkout(workout.id)}
+                      >
+                        <span className="sr-only">
+                          {t('timer.workouts.delete')}
+                        </span>
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </ButtonGroup>
+                  );
+                })}
+              </div>
+            )}
+          </Card>
+        )}
       </div>
-      <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
+      <Dialog
+        open={mode === 'sports' && isSaveDialogOpen}
+        onOpenChange={setIsSaveDialogOpen}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t('timer.workouts.dialog.title')}</DialogTitle>
