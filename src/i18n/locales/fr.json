@@ -92,14 +92,59 @@
     "mode": "Mode",
     "modes": {
       "stopwatch": "Chronomètre",
-      "countdown": "Compte à Rebours"
+      "countdown": "Compte à Rebours",
+      "sports": "Entraînement"
     },
     "minutes": "Minutes",
     "seconds": "Secondes",
+    "duration": "Durée",
     "start": "Démarrer",
     "pause": "Pause",
     "reset": "Réinitialiser",
-    "finished": "Le temps est écoulé !"
+    "finished": "Le temps est écoulé !",
+    "sports": {
+      "sets": "Séries",
+      "work": "Durée d'effort",
+      "rest": "Durée de repos",
+      "currentSet": "Série {{current}} sur {{total}}",
+      "currentPhase": "Phase : {{phase}}",
+      "phase": {
+        "idle": "Prêt",
+        "work": "Effort",
+        "rest": "Repos",
+        "finished": "Terminé"
+      },
+      "completed": "Entraînement terminé !",
+      "status": {
+        "set": "Série actuelle",
+        "phase": "Phase actuelle"
+      }
+    },
+    "workouts": {
+      "title": "Entraînements enregistrés",
+      "localInfo": "Enregistré localement sur cet appareil.",
+      "empty": "Aucun entraînement enregistré pour l'instant. Configurez le mode sport et appuyez sur enregistrer.",
+      "summary": "{{sets}} séries • {{work}} | {{rest}}",
+      "saveTooltip": "Enregistrer cet entraînement",
+      "saveDialogTitle": "Enregistrer l'entraînement",
+      "saveDialogDescription": "Donnez un nom à cette configuration pour la réutiliser plus tard.",
+      "nameLabel": "Nom de l'entraînement",
+      "namePlaceholder": "ex. HIIT Pyramide",
+      "cancelButton": "Annuler",
+      "saveButton": "Enregistrer",
+      "nameRequired": "Veuillez saisir un nom.",
+      "saveError": "Impossible d'enregistrer l'entraînement. Veuillez réessayer.",
+      "delete": "Supprimer l'entraînement",
+      "defaultName": "Entraînement {{index}}",
+      "dialog": {
+        "title": "Enregistrer l'entraînement",
+        "description": "Nommez cette configuration pour pouvoir la réutiliser plus tard.",
+        "label": "Nom de l'entraînement",
+        "placeholder": "ex. HIIT Pyramide",
+        "cancel": "Annuler",
+        "confirm": "Enregistrer"
+      }
+    }
   },
   "tournament": {
     "types": {
