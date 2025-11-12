@@ -30,7 +30,13 @@ export default function LoginButton() {
   }, [user]);
 
   return (
-    <Button onClick={handleLogin} disabled={loading || isSigningIn} variant="default">
+    <Button
+      onClick={handleLogin}
+      disabled={loading || isSigningIn}
+      variant="default"
+      size="sm"
+      className="gap-2"
+    >
       {loading || isSigningIn ? (
         <>
           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
