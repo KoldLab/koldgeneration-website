@@ -83,7 +83,7 @@ function timestampToDate(timestamp: any): Date {
   return new Date(timestamp);
 }
 
-function convertMatchParticipant(participant: any): TournamentMatchParticipant | null {
+function convertMatchParticipant(participant: Record<string, unknown>): TournamentMatchParticipant | null {
   if (!participant) return null;
   const key =
     participant.key ||
@@ -161,34 +161,47 @@ function convertMatchHistory(history: any): TournamentMatchHistoryEntry[] {
     }));
 }
 
-function convertMatch(rawMatch: any): TournamentMatch {
-  const participants = Array.isArray(rawMatch?.participants)
-    ? rawMatch.participants
-        .map(convertMatchParticipant)
-        .filter((participant): participant is TournamentMatchParticipant => Boolean(participant))
+function convertMatch(rawMatch: unknown): TournamentMatch {
+  const matchRecord = (rawMatch ?? {}) as Record<string, unknown>;
+
+  const participantsArray = Array.isArray(matchRecord.participants)
+    ? (matchRecord.participants as Record<string, unknown>[])
     : [];
 
-  const matchId = rawMatch?.id || rawMatch?.matchId || rawMatch?.key || cryptoRandomId();
-  const roundId = rawMatch?.roundId || rawMatch?.round || '';
+  const participants = participantsArray
+    .map((participant) => convertMatchParticipant(participant))
+    .filter((participant): participant is TournamentMatchParticipant => Boolean(participant));
+
+  const matchId =
+    (matchRecord.id as string) ||
+    (matchRecord.matchId as string) ||
+    (matchRecord.key as string) ||
+    cryptoRandomId();
+  const roundId =
+    (matchRecord.roundId as string) ||
+    (matchRecord.round as string) ||
+    '';
 
   return {
     id: matchId,
     roundId,
-    order: typeof rawMatch?.order === 'number' ? rawMatch.order : 0,
+    order: typeof matchRecord.order === 'number' ? (matchRecord.order as number) : 0,
     participants,
-    status: ['pending', 'in-progress', 'completed'].includes(rawMatch?.status)
-      ? rawMatch.status
+    status: ['pending', 'in-progress', 'completed'].includes(
+      matchRecord.status as string
+    )
+      ? (matchRecord.status as TournamentMatch['status'])
       : 'pending',
-    scores: convertMatchScores(rawMatch?.scores),
+    scores: convertMatchScores(matchRecord.scores),
     winnerKey:
-      rawMatch?.winnerKey ||
-      rawMatch?.winnerParticipantKey ||
-      rawMatch?.result?.winnerKey ||
-      rawMatch?.result?.winnerParticipantKey ||
+      (matchRecord.winnerKey as string) ||
+      (matchRecord.winnerParticipantKey as string) ||
+      (matchRecord.result as any)?.winnerKey ||
+      (matchRecord.result as any)?.winnerParticipantKey ||
       undefined,
-    createdAt: timestampToDate(rawMatch?.createdAt || new Date()),
-    updatedAt: timestampToDate(rawMatch?.updatedAt || rawMatch?.createdAt || new Date()),
-    history: convertMatchHistory(rawMatch?.history),
+    createdAt: timestampToDate(matchRecord.createdAt || new Date()),
+    updatedAt: timestampToDate(matchRecord.updatedAt || matchRecord.createdAt || new Date()),
+    history: convertMatchHistory(matchRecord.history),
   };
 }
 
