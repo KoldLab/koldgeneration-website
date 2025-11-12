@@ -10,13 +10,46 @@ import {
   unregisterPlayer,
   unregisterGuestPlayer,
   updateTournamentStatus,
+  reportSingleEliminationMatch,
 } from '@/services/tournamentService';
-import type { Tournament, TournamentStatus } from '@/types/tournament';
+import type {
+  Tournament,
+  TournamentStatus,
+  TournamentMatch,
+  TournamentMatchScore,
+} from '@/types/tournament';
 import { useTranslation } from 'react-i18next';
 import { User, Loader2, Play, Square, CheckCircle, XCircle, Copy, Check, Pause } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { SingleEliminationBracket } from './components/SingleEliminationBracket';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 
 export default function TournamentView() {
   const { code } = useParams<{ code: string }>();
@@ -30,6 +63,28 @@ export default function TournamentView() {
   const [copied, setCopied] = useState(false);
   const [guestPseudonym, setGuestPseudonym] = useState<string>('');
   const [showGuestForm, setShowGuestForm] = useState<boolean>(false);
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [reportMatch, setReportMatch] = useState<TournamentMatch | null>(null);
+  const [reportScores, setReportScores] = useState<Record<string, string>>({});
+  const [reportWinnerKey, setReportWinnerKey] = useState<string>('');
+  const [reportSubmitting, setReportSubmitting] = useState(false);
+  const [reportErrorMessage, setReportErrorMessage] = useState<string>('');
+  const ownerAddParticipantSchema = z.object({
+    name: z
+      .string()
+      .trim()
+      .min(1, { message: t('tournament.view.ownerAddParticipant.errors.nameRequired') })
+      .max(50, { message: t('tournament.view.ownerAddParticipant.errors.nameTooLong') }),
+  });
+
+  type OwnerAddParticipantFormValues = z.infer<typeof ownerAddParticipantSchema>;
+
+  const ownerAddParticipantForm = useForm<OwnerAddParticipantFormValues>({
+    resolver: zodResolver(ownerAddParticipantSchema),
+    defaultValues: {
+      name: '',
+    },
+  });
 
   const LOCAL_STORAGE_GUEST_KEY_PREFIX = 'tournament_guest_';
   const LOCAL_STORAGE_REGISTRATIONS_KEY = 'tournament_guest_registrations';
@@ -216,6 +271,115 @@ export default function TournamentView() {
     }
   };
 
+  const openReportDialog = (match: TournamentMatch) => {
+    const scores: Record<string, string> = {};
+    if (requireScores) {
+      match.participants.forEach((participant) => {
+        const previousScore = match.scores.find(
+          (entry) => entry.participantKey === participant.key
+        );
+        scores[participant.key] =
+          previousScore && typeof previousScore.score === 'number'
+            ? String(previousScore.score)
+            : '';
+      });
+    }
+
+    setReportMatch(match);
+    setReportScores(scores);
+    setReportWinnerKey(match.winnerKey || match.participants[0]?.key || '');
+    setReportErrorMessage('');
+    setReportDialogOpen(true);
+  };
+
+  const closeReportDialog = () => {
+    setReportDialogOpen(false);
+    setReportMatch(null);
+    setReportScores({});
+    setReportWinnerKey('');
+    setReportSubmitting(false);
+    setReportErrorMessage('');
+  };
+
+  const handleReportSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!tournament || !reportMatch) return;
+
+    const participants = reportMatch.participants;
+    if (participants.length === 0) {
+      setReportErrorMessage(t('tournament.bracket.reportDialog.errors.winnerRequired'));
+      return;
+    }
+
+    if (!reportWinnerKey) {
+      setReportErrorMessage(t('tournament.bracket.reportDialog.errors.winnerRequired'));
+      return;
+    }
+
+    const parsedScores: TournamentMatchScore[] = [];
+    if (requireScores) {
+      for (const participant of participants) {
+        const rawScore = reportScores[participant.key];
+        if (rawScore === undefined || rawScore === '') {
+          setReportErrorMessage(t('tournament.bracket.reportDialog.errors.scoreRequired'));
+          return;
+        }
+
+        const numericScore = Number(rawScore);
+        if (Number.isNaN(numericScore) || numericScore < 0) {
+          setReportErrorMessage(t('tournament.bracket.reportDialog.errors.scoreRequired'));
+          return;
+        }
+
+        parsedScores.push({
+          participantKey: participant.key,
+          score: numericScore,
+        });
+      }
+    }
+
+    setReportSubmitting(true);
+    setReportErrorMessage('');
+
+    try {
+      await reportSingleEliminationMatch(tournament.id, {
+        matchId: reportMatch.id,
+        winnerKey: reportWinnerKey,
+        winnerParticipant: participants.find((participant) => participant.key === reportWinnerKey),
+        scores: parsedScores,
+        reportedByUid: user?.uid,
+        reporterDisplayName: user?.displayName || user?.email || undefined,
+        timestamp: new Date(),
+      });
+      closeReportDialog();
+      await loadTournament();
+    } catch (err: any) {
+      setReportErrorMessage(err.message || t('tournament.view.statusError'));
+    } finally {
+      setReportSubmitting(false);
+    }
+  };
+
+  const handleOwnerAddParticipant = ownerAddParticipantForm.handleSubmit(
+    async (values: OwnerAddParticipantFormValues) => {
+      if (!tournament) return;
+
+      ownerAddParticipantForm.clearErrors();
+      setError('');
+
+      const guestId = `owner_guest_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+
+      try {
+        await registerGuestPlayer(tournament.id, values.name.trim(), guestId);
+        ownerAddParticipantForm.reset();
+        await loadTournament();
+      } catch (err: any) {
+        const message = err.message || t('tournament.view.registerError');
+        ownerAddParticipantForm.setError('name', { message });
+      }
+    }
+  );
+
   if (loading) {
     return (
       <div className="w-full flex flex-col items-center justify-center min-h-[60vh] gap-4">
@@ -239,6 +403,8 @@ export default function TournamentView() {
   if (!tournament) {
     return null;
   }
+
+  const requireScores = tournament.settings?.requireScores ?? true;
 
   const getTournamentTypeLabel = (type: string): string => {
     const typeMap: Record<string, string> = {
@@ -375,7 +541,7 @@ export default function TournamentView() {
                 )}
               </Button>
             )}
-            {(tournament.status === 'pending' || tournament.status === 'open') && (
+        {(tournament.status === 'pending' || tournament.status === 'open') && (
               <Button
                 onClick={() => handleStatusChange('cancelled')}
                 disabled={actionLoading}
@@ -432,6 +598,7 @@ export default function TournamentView() {
               </div>
               <div className="flex gap-2">
                 <Button
+                  size="sm"
                   onClick={handleRegister}
                   disabled={actionLoading || !guestPseudonym.trim()}
                 >
@@ -445,6 +612,7 @@ export default function TournamentView() {
                   )}
                 </Button>
                 <Button
+                  size="sm"
                   variant="outline"
                   onClick={() => {
                     setShowGuestForm(false);
@@ -460,7 +628,7 @@ export default function TournamentView() {
 
         <div className="flex flex-wrap gap-2">
           {canRegister && (!showGuestForm || user) && (
-            <Button onClick={handleRegister} disabled={actionLoading}>
+            <Button size="sm" onClick={handleRegister} disabled={actionLoading}>
               {actionLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -472,7 +640,7 @@ export default function TournamentView() {
             </Button>
           )}
           {isRegistered && tournament.status !== 'completed' && tournament.status !== 'cancelled' && (
-            <Button variant="outline" onClick={handleUnregister} disabled={actionLoading}>
+            <Button size="sm" variant="outline" onClick={handleUnregister} disabled={actionLoading}>
               {actionLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -510,6 +678,77 @@ export default function TournamentView() {
               </Button>
             )}
         </div>
+      )}
+
+      {/* Bracket */}
+      {tournament.type === 'single-elimination' && (
+        <>
+          {tournament.progress ? (
+            <SingleEliminationBracket
+              progress={tournament.progress}
+              isOwner={isOwner}
+              onReportMatch={isOwner ? openReportDialog : undefined}
+            />
+          ) : (
+            <Card className="p-4 text-sm text-muted-foreground">
+              {t('tournament.bracket.awaitingStart')}
+            </Card>
+          )}
+        </>
+      )}
+
+      {/* Owner add participant */}
+      {isOwner && tournament.status !== 'completed' && (
+        <Card className="p-4 sm:p-6 space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold">
+              {t('tournament.view.ownerAddParticipant.title')}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {t('tournament.view.ownerAddParticipant.description')}
+            </p>
+          </div>
+          <Form {...ownerAddParticipantForm}>
+            <form onSubmit={handleOwnerAddParticipant} className="space-y-3">
+              <FormField
+                control={ownerAddParticipantForm.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('tournament.view.ownerAddParticipant.nameLabel')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        value={field.value || ''}
+                        placeholder={t('tournament.view.ownerAddParticipant.namePlaceholder')}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  type="submit"
+                  disabled={ownerAddParticipantForm.formState.isSubmitting}
+                >
+                  {ownerAddParticipantForm.formState.isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {t('common.loading')}
+                    </>
+                  ) : (
+                    t('tournament.view.ownerAddParticipant.addButton')
+                  )}
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  {t('tournament.view.ownerAddParticipant.helper')}
+                </p>
+              </div>
+            </form>
+          </Form>
+        </Card>
       )}
 
       {/* Players List */}
@@ -595,24 +834,113 @@ export default function TournamentView() {
                 </p>
               </div>
             )}
-            {(tournament.winScore !== undefined || tournament.loseScore !== undefined) && (
-              <>
-                {tournament.winScore !== undefined && (
-                  <div>
-                    <p className="text-muted-foreground mb-1">{t('tournament.view.winScore')}</p>
-                    <p className="font-medium">{tournament.winScore} {t('tournament.view.points')}</p>
-                  </div>
-                )}
-                {tournament.loseScore !== undefined && (
-                  <div>
-                    <p className="text-muted-foreground mb-1">{t('tournament.view.loseScore')}</p>
-                    <p className="font-medium">{tournament.loseScore} {t('tournament.view.points')}</p>
-                  </div>
-                )}
-              </>
-            )}
           </div>
         </Card>
+
+      <Dialog
+        open={reportDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            closeReportDialog();
+          }
+        }}
+      >
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{t('tournament.bracket.reportDialog.title')}</DialogTitle>
+            <DialogDescription>
+              {t('tournament.bracket.reportDialog.description')}
+            </DialogDescription>
+          </DialogHeader>
+          {reportMatch ? (
+            <form onSubmit={handleReportSubmit} className="space-y-6">
+              <div className="space-y-4">
+                {requireScores ? (
+                  <div>
+                    <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+                      {t('tournament.bracket.reportDialog.scoresLabel')}
+                    </Label>
+                    <div className="mt-2 space-y-3">
+                      {reportMatch.participants.map((participant) => (
+                        <div key={participant.key} className="space-y-1">
+                          <Label htmlFor={`score-${participant.key}`}>
+                            {participant.displayName}
+                          </Label>
+                          <Input
+                            id={`score-${participant.key}`}
+                            type="number"
+                            min={0}
+                            value={reportScores[participant.key] ?? ''}
+                            onChange={(event) =>
+                              setReportScores((prev) => ({
+                                ...prev,
+                                [participant.key]: event.target.value,
+                              }))
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="rounded-md border border-dashed border-muted-foreground/40 bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+                    {t('tournament.bracket.reportDialog.scoresOptional')}
+                  </p>
+                )}
+
+                <div className="space-y-2">
+                  <Label>{t('tournament.bracket.reportDialog.winnerLabel')}</Label>
+                  <Select value={reportWinnerKey} onValueChange={setReportWinnerKey}>
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={t('tournament.bracket.reportDialog.winnerLabel')}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {reportMatch.participants.map((participant) => (
+                        <SelectItem key={participant.key} value={participant.key}>
+                          {participant.displayName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {reportErrorMessage && (
+                <div className="rounded border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  {reportErrorMessage}
+                </div>
+              )}
+
+              <DialogFooter className="gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={closeReportDialog}
+                  disabled={reportSubmitting}
+                >
+                  {t('tournament.bracket.reportDialog.cancel')}
+                </Button>
+                <Button type="submit" disabled={reportSubmitting}>
+                  {reportSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {t('common.loading')}
+                    </>
+                  ) : (
+                    t('tournament.bracket.reportDialog.submit')
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {t('tournament.bracket.reportDialog.description')}
+            </p>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

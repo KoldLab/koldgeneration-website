@@ -175,10 +175,10 @@
       "type": "Tournament Type",
       "maxPlayers": "Maximum Players",
       "maxPlayersHint": "Minimum 2, maximum 128 players",
-      "winScore": "Win Score",
-      "winScoreHint": "Points awarded for a win (optional)",
-      "loseScore": "Lose Score",
-      "loseScoreHint": "Points awarded for a loss (optional)",
+      "requireScores": {
+        "title": "Require score entry",
+        "description": "When disabled, organizers only select a winner for each match."
+      },
       "createButton": "Create Tournament",
       "creating": "Creating...",
       "error": "Failed to create tournament",
@@ -216,16 +216,73 @@
       "enterPseudonym": "Enter Your Pseudonym",
       "pseudonymPlaceholder": "Choose a name to play as",
       "pseudonymHint": "You can join without signing in! Just choose a name and start playing.",
-      "winScore": "Win Score",
-      "loseScore": "Lose Score",
-      "points": "points",
-      "you": "You"
+      "you": "You",
+      "ownerAddParticipant": {
+        "title": "Add Participant",
+        "description": "Manually add a player to the tournament. They will appear as a guest participant.",
+        "nameLabel": "Participant name",
+        "namePlaceholder": "Enter participant name",
+        "addButton": "Add participant",
+        "helper": "Use this when someone can’t sign in but should still be included.",
+        "errors": {
+          "nameRequired": "Enter a participant name before adding."
+        }
+      }
     },
     "myTournaments": {
       "title": "My Tournaments",
       "description": "View all tournaments you have participated in",
       "noTournaments": "You haven't participated in any tournaments yet.",
-      "view": "View"
+      "view": "View",
+      "ownerBadge": "Owner"
+    },
+    "bracket": {
+      "singleElimination": {
+        "title": "Single Elimination Bracket"
+      },
+      "roundStatus": {
+        "pending": "Pending",
+        "active": "In Progress",
+        "completed": "Completed"
+      },
+      "matchLabel": "Match {{number}}",
+      "matchStatus": {
+        "pending": "Pending",
+        "in-progress": "In Progress",
+        "completed": "Completed"
+      },
+      "noMatches": "No matches yet",
+      "reportResult": "Report Result",
+      "updateResult": "Update Result",
+      "lastReported": "Last update: {{date}}",
+      "reportedBy": "Reported by {{name}}",
+      "tbd": "TBD",
+      "awaitingStart": "The bracket will generate once the tournament starts.",
+      "reportDialog": {
+        "title": "Report Match Result",
+        "description": "Enter the final scores and select the winner to advance in the bracket.",
+        "scoresLabel": "Scores",
+        "winnerLabel": "Winner",
+        "scoresOptional": "Scores are disabled for this tournament. Select a winner to continue.",
+        "submit": "Submit Result",
+        "cancel": "Cancel",
+        "errors": {
+          "winnerRequired": "Select a winner for the match.",
+          "scoreRequired": "Enter a score for each participant."
+        }
+      }
+    },
+    "ownerAddParticipant": {
+      "title": "Add Participant",
+      "description": "Manually add a player to the tournament. They will appear as a guest participant.",
+      "nameLabel": "Participant name",
+      "namePlaceholder": "Enter participant name",
+      "addButton": "Add participant",
+      "helper": "Use this when someone can’t sign in but should still be included.",
+      "errors": {
+        "nameRequired": "Enter a participant name before adding.",
+        "nameTooLong": "Please keep the name under 50 characters."
+      }
     }
   }
 }

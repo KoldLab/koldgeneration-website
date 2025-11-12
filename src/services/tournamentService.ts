@@ -12,7 +12,23 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Tournament, TournamentPlayer, CreateTournamentData, TournamentStatus } from '@/types/tournament';
+import type {
+  Tournament,
+  TournamentPlayer,
+  CreateTournamentData,
+  TournamentStatus,
+  TournamentMatch,
+  TournamentMatchHistoryEntry,
+  TournamentMatchParticipant,
+  TournamentMatchScore,
+  TournamentProgress,
+  TournamentRound,
+} from '@/types/tournament';
+import {
+  generateSingleEliminationProgress,
+  applySingleEliminationResult,
+  type SingleEliminationResultPayload,
+} from './brackets/singleElimination';
 import type { User } from 'firebase/auth';
 
 const TOURNAMENTS_COLLECTION = 'tournaments';
@@ -67,8 +83,249 @@ function timestampToDate(timestamp: any): Date {
   return new Date(timestamp);
 }
 
+function convertMatchParticipant(participant: any): TournamentMatchParticipant | null {
+  if (!participant) return null;
+  const key =
+    participant.key ||
+    participant.participantKey ||
+    (participant.userId ? `user:${participant.userId}` : undefined) ||
+    (participant.guestId ? `guest:${participant.guestId}` : undefined);
+
+  if (!key) {
+    return null;
+  }
+
+  return {
+    key,
+    displayName: participant.displayName || participant.name || 'Unknown',
+    seed: typeof participant.seed === 'number' ? participant.seed : undefined,
+    slot:
+      typeof participant.slot === 'number'
+        ? participant.slot
+        : typeof participant.slot === 'string' && participant.slot !== ''
+        ? Number(participant.slot)
+        : undefined,
+  };
+}
+
+function convertMatchScores(scores: any): TournamentMatchScore[] {
+  if (!scores) return [];
+
+  if (Array.isArray(scores)) {
+    return scores
+      .map((score) => ({
+        participantKey: score.participantKey || score.key || score.id || '',
+        score: typeof score.score === 'number' ? score.score : Number(score.value) || 0,
+      }))
+      .filter((entry) => entry.participantKey);
+  }
+
+  if (typeof scores === 'object') {
+    return Object.entries(scores)
+      .map(([participantKey, value]) => ({
+        participantKey,
+        score: typeof value === 'number' ? value : Number(value) || 0,
+      }))
+      .filter((entry) => entry.participantKey);
+  }
+
+  return [];
+}
+
+function convertMatchHistory(history: any): TournamentMatchHistoryEntry[] {
+  if (!Array.isArray(history)) return [];
+
+  return history
+    .map((entry) => ({
+      id: entry.id || entry.historyId || cryptoRandomId(),
+      timestamp: timestampToDate(entry.timestamp || entry.reportedAt || new Date()),
+      reportedByUid: entry.reportedByUid || entry.reportedBy || undefined,
+      reporterDisplayName: entry.reporterDisplayName || entry.reporterName || undefined,
+      result: {
+        scores: convertMatchScores(entry.result?.scores || entry.scores),
+        winnerKey:
+          entry.result?.winnerKey ||
+          entry.winnerKey ||
+          entry.result?.winnerParticipantKey ||
+          entry.winnerParticipantKey ||
+          '',
+        note: entry.result?.note || entry.note || undefined,
+      },
+    }))
+    .map((entry) => ({
+      ...entry,
+      result: {
+        ...entry.result,
+        scores: entry.result.scores.filter((score) => score.participantKey),
+      },
+    }));
+}
+
+function convertMatch(rawMatch: any): TournamentMatch {
+  const participants = Array.isArray(rawMatch?.participants)
+    ? rawMatch.participants
+        .map(convertMatchParticipant)
+        .filter((participant): participant is TournamentMatchParticipant => Boolean(participant))
+    : [];
+
+  const matchId = rawMatch?.id || rawMatch?.matchId || rawMatch?.key || cryptoRandomId();
+  const roundId = rawMatch?.roundId || rawMatch?.round || '';
+
+  return {
+    id: matchId,
+    roundId,
+    order: typeof rawMatch?.order === 'number' ? rawMatch.order : 0,
+    participants,
+    status: ['pending', 'in-progress', 'completed'].includes(rawMatch?.status)
+      ? rawMatch.status
+      : 'pending',
+    scores: convertMatchScores(rawMatch?.scores),
+    winnerKey:
+      rawMatch?.winnerKey ||
+      rawMatch?.winnerParticipantKey ||
+      rawMatch?.result?.winnerKey ||
+      rawMatch?.result?.winnerParticipantKey ||
+      undefined,
+    createdAt: timestampToDate(rawMatch?.createdAt || new Date()),
+    updatedAt: timestampToDate(rawMatch?.updatedAt || rawMatch?.createdAt || new Date()),
+    history: convertMatchHistory(rawMatch?.history),
+  };
+}
+
+function convertMatchesRecord(rawMatches: any): Record<string, TournamentMatch> {
+  if (!rawMatches) return {};
+
+  if (Array.isArray(rawMatches)) {
+    return rawMatches.reduce<Record<string, TournamentMatch>>((acc, match) => {
+      const converted = convertMatch(match);
+      acc[converted.id] = converted;
+      return acc;
+    }, {});
+  }
+
+  if (typeof rawMatches === 'object') {
+    return Object.entries(rawMatches).reduce<Record<string, TournamentMatch>>(
+      (acc, [key, value]) => {
+        const converted = convertMatch({ id: key, ...value });
+        acc[converted.id] = converted;
+        return acc;
+      },
+      {}
+    );
+  }
+
+  return {};
+}
+
+function convertRounds(rawRounds: any): TournamentRound[] {
+  if (!Array.isArray(rawRounds)) return [];
+
+  return rawRounds.map((round, index) => ({
+    id: round?.id || round?.roundId || `${index}`,
+    name: round?.name || `Round ${round?.order ?? index + 1}`,
+    order: typeof round?.order === 'number' ? round.order : index,
+    status: ['pending', 'active', 'completed'].includes(round?.status) ? round.status : 'pending',
+    matchIds: Array.isArray(round?.matchIds) ? round.matchIds : [],
+  }));
+}
+
+function convertTournamentProgress(rawProgress: any): TournamentProgress {
+  const rounds = convertRounds(rawProgress?.rounds);
+  const matches = convertMatchesRecord(rawProgress?.matches);
+
+  return {
+    format:
+      rawProgress?.format ||
+      rawProgress?.type ||
+      (rawProgress?.metadata?.format as TournamentProgress['format']) ||
+      'single-elimination',
+    currentRoundId:
+      rawProgress?.currentRoundId ||
+      (typeof rawProgress?.currentRound === 'string'
+        ? rawProgress.currentRound
+        : undefined),
+    rounds,
+    matches,
+    metadata:
+      rawProgress?.metadata && typeof rawProgress.metadata === 'object'
+        ? rawProgress.metadata
+        : undefined,
+  };
+}
+
+function cryptoRandomId() {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID();
+  }
+  return `match_${Math.random().toString(36).slice(2, 11)}`;
+}
+
+function serializeTournamentProgress(progress: TournamentProgress | null | undefined) {
+  if (!progress) return null;
+
+  const serializedMatches = Object.entries(progress.matches).reduce<Record<string, unknown>>(
+    (acc, [matchId, match]) => {
+      acc[matchId] = {
+        id: match.id,
+        roundId: match.roundId,
+        order: match.order,
+        participants: match.participants.map((participant) => ({
+          key: participant.key,
+          displayName: participant.displayName,
+          seed: participant.seed ?? null,
+          slot: participant.slot ?? null,
+        })),
+        status: match.status,
+        scores: match.scores.map((score) => ({
+          participantKey: score.participantKey,
+          score: score.score,
+        })),
+        winnerKey: match.winnerKey ?? null,
+        createdAt: match.createdAt,
+        updatedAt: match.updatedAt,
+        history: match.history.map((entry) => ({
+          id: entry.id,
+          timestamp: entry.timestamp,
+          reportedByUid: entry.reportedByUid ?? null,
+          reporterDisplayName: entry.reporterDisplayName ?? null,
+          result: {
+            scores: entry.result.scores.map((score) => ({
+              participantKey: score.participantKey,
+              score: score.score,
+            })),
+            winnerKey: entry.result.winnerKey,
+            note: entry.result.note ?? null,
+          },
+        })),
+      };
+      return acc;
+    },
+    {}
+  );
+
+  return {
+    format: progress.format,
+    currentRoundId: progress.currentRoundId ?? null,
+    rounds: progress.rounds.map((round) => ({
+      id: round.id,
+      name: round.name,
+      order: round.order,
+      status: round.status,
+      matchIds: round.matchIds,
+    })),
+    matches: serializedMatches,
+    metadata: progress.metadata ?? {},
+  };
+}
+
+
 // Convert Firestore document to Tournament
 function docToTournament(docData: any, id: string): Tournament {
+  const progress = docData.progress ? convertTournamentProgress(docData.progress) : undefined;
+  const settings = {
+    requireScores: docData.settings?.requireScores ?? true,
+  };
+
   return {
     id,
     code: docData.code,
@@ -84,12 +341,12 @@ function docToTournament(docData: any, id: string): Tournament {
       ...p,
       registeredAt: timestampToDate(p.registeredAt),
     })),
-    winScore: docData.winScore !== undefined ? docData.winScore : undefined,
-    loseScore: docData.loseScore !== undefined ? docData.loseScore : undefined,
     createdAt: timestampToDate(docData.createdAt),
     updatedAt: timestampToDate(docData.updatedAt),
     startedAt: docData.startedAt ? timestampToDate(docData.startedAt) : undefined,
     completedAt: docData.completedAt ? timestampToDate(docData.completedAt) : undefined,
+    progress,
+    settings,
   };
 }
 
@@ -107,13 +364,15 @@ export async function createTournament(
         description: data.description || '',
         type: data.type,
         maxPlayers: data.maxPlayers,
-        winScore: data.winScore !== undefined ? data.winScore : undefined,
-        loseScore: data.loseScore !== undefined ? data.loseScore : undefined,
         status: 'pending' as TournamentStatus,
         ownerId: user.uid,
         ownerDisplayName: user.displayName || 'Unknown',
         ownerEmail: user.email || '',
         players: [],
+        progress: null,
+        settings: {
+          requireScores: data.requireScores ?? true,
+        },
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
@@ -303,8 +562,10 @@ export async function getTournamentsByUserId(userId: string): Promise<Tournament
 
   querySnapshot.forEach((docSnap) => {
     const tournament = docToTournament(docSnap.data(), docSnap.id);
-    // Check if user is in the players array
-    if (tournament.players.some((p) => p.userId === userId)) {
+    const isOwner = tournament.ownerId === userId;
+    const isPlayer = tournament.players.some((p) => p.userId === userId);
+
+    if (isOwner || isPlayer) {
       tournaments.push(tournament);
     }
   });
@@ -328,7 +589,48 @@ export async function updateTournamentStatus(
 
   if (status === 'in-progress') {
     updateData.startedAt = serverTimestamp();
+
+    const tournament = await getTournamentById(tournamentId);
+    if (tournament && tournament.type === 'single-elimination' && !tournament.progress) {
+      const progress = generateSingleEliminationProgress(tournament);
+      updateData.progress = serializeTournamentProgress(progress);
+    }
   } else if (status === 'completed') {
+    updateData.completedAt = serverTimestamp();
+  }
+
+  await updateDoc(tournamentRef, updateData);
+}
+
+export async function reportSingleEliminationMatch(
+  tournamentId: string,
+  payload: SingleEliminationResultPayload
+): Promise<void> {
+  const tournament = await getTournamentById(tournamentId);
+  if (!tournament) {
+    throw new Error('Tournament not found');
+  }
+
+  if (tournament.type !== 'single-elimination') {
+    throw new Error('Tournament type does not support this operation');
+  }
+
+  if (!tournament.progress) {
+    throw new Error('Tournament bracket has not been initialized');
+  }
+
+  const updatedProgress = applySingleEliminationResult(tournament.progress, payload);
+  const finalRound = updatedProgress.rounds[updatedProgress.rounds.length - 1];
+  const isTournamentComplete = finalRound?.status === 'completed';
+
+  const tournamentRef = doc(db, TOURNAMENTS_COLLECTION, tournamentId);
+  const updateData: any = {
+    progress: serializeTournamentProgress(updatedProgress),
+    updatedAt: serverTimestamp(),
+  };
+
+  if (isTournamentComplete) {
+    updateData.status = 'completed';
     updateData.completedAt = serverTimestamp();
   }
 

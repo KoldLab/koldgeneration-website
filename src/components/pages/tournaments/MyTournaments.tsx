@@ -121,53 +121,61 @@ export default function MyTournaments() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 gap-4">
-          {tournaments.map((tournament) => (
-            <Card
-              key={tournament.id}
-              className="p-4 sm:p-6 hover:bg-accent/50 transition-colors cursor-pointer"
-              onClick={() => navigate(`/tournament/${tournament.code}`)}
-            >
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h2 className="text-xl font-bold">{tournament.name}</h2>
-                    {getStatusBadge(tournament.status)}
+          {tournaments.map((tournament) => {
+            const isOwner = user?.uid === tournament.ownerId;
+            return (
+              <Card
+                key={tournament.id}
+                className="p-4 sm:p-6 hover:bg-accent/50 transition-colors cursor-pointer"
+                onClick={() => navigate(`/tournament/${tournament.code}`)}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h2 className="text-xl font-bold">{tournament.name}</h2>
+                      {getStatusBadge(tournament.status)}
+                      {isOwner && (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                          {t('tournament.myTournaments.ownerBadge')}
+                        </span>
+                      )}
+                    </div>
+                    {tournament.description && (
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {tournament.description}
+                      </p>
+                    )}
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                      <span>
+                        {t('tournament.view.code')}: <strong className="text-foreground font-mono">{tournament.code}</strong>
+                      </span>
+                      <span>
+                        {t('tournament.view.type')}: {t(`tournament.types.${getTournamentTypeLabel(tournament.type)}`)}
+                      </span>
+                      <span>
+                        {tournament.players.length} / {tournament.maxPlayers} {t('tournament.view.players')}
+                      </span>
+                      <span>
+                        {t('tournament.view.createdAt')}: {new Date(tournament.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
                   </div>
-                  {tournament.description && (
-                    <p className="text-sm text-muted-foreground mb-3">
-                      {tournament.description}
-                    </p>
-                  )}
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                    <span>
-                      {t('tournament.view.code')}: <strong className="text-foreground font-mono">{tournament.code}</strong>
-                    </span>
-                    <span>
-                      {t('tournament.view.type')}: {t(`tournament.types.${getTournamentTypeLabel(tournament.type)}`)}
-                    </span>
-                    <span>
-                      {tournament.players.length} / {tournament.maxPlayers} {t('tournament.view.players')}
-                    </span>
-                    <span>
-                      {t('tournament.view.createdAt')}: {new Date(tournament.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/tournament/${tournament.code}`);
+                    }}
+                    className="gap-2 shrink-0"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    {t('tournament.myTournaments.view')}
+                  </Button>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/tournament/${tournament.code}`);
-                  }}
-                  className="gap-2 shrink-0"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  {t('tournament.myTournaments.view')}
-                </Button>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>

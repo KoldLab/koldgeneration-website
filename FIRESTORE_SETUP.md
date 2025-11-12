@@ -30,24 +30,14 @@ This guide will help you set up Firestore for the tournament feature.
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Tournaments collection
     match /tournaments/{tournamentId} {
-      // SECURITY: Allow reading individual tournaments (for code-based sharing)
-      // Tournaments are shareable via code, so individual reads are allowed
       allow get: if true;
 
-      // SECURITY: Restrict queries to prevent bulk data scraping
-      // Allow authenticated users to list (for "My Tournaments" feature)
-      // For anonymous users, only allow limited queries with WHERE filters
       allow list: if (
-        // Authenticated users can list tournaments (needed for getTournamentsByUserId)
-        request.auth != null
-        ||
-        // Anonymous users: only allow queries with explicit limits (code lookup)
+        request.auth != null ||
         (request.query.limit != null && request.query.limit <= 10)
       );
 
-      // Only authenticated users can create tournaments
       allow create: if request.auth != null
         && request.resource.data.ownerId == request.auth.uid
         && request.resource.data.code is string
@@ -55,41 +45,44 @@ service cloud.firestore {
         && request.resource.data.maxPlayers is int
         && request.resource.data.status == 'pending';
 
-      // Tournament updates: owner can update anything, authenticated users can register/unregister
-      allow update: if request.auth != null && (
-        // Owner can update anything
-        resource.data.ownerId == request.auth.uid
-        ||
-        // Authenticated users can update tournaments to register/unregister themselves only
+      allow update: if (
+        request.auth != null &&
+        resource.data.ownerId == request.auth.uid &&
+        request.resource.data.ownerId == resource.data.ownerId &&
+        request.resource.data.code == resource.data.code &&
+        request.resource.data.name == resource.data.name &&
+        request.resource.data.type == resource.data.type &&
+        request.resource.data.maxPlayers == resource.data.maxPlayers &&
+        request.resource.data.createdAt == resource.data.createdAt &&
+        request.resource.data.diff(resource.data).changedKeys().hasOnly([
+          'status',
+          'players',
+          'progress',
+          'startedAt',
+          'completedAt',
+          'updatedAt',
+          'winScore',
+          'loseScore'
+        ])
+      ) || (
+        request.auth != null &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['players', 'updatedAt']) &&
+        request.resource.data.ownerId == resource.data.ownerId &&
+        request.resource.data.code == resource.data.code &&
+        request.resource.data.name == resource.data.name &&
+        request.resource.data.type == resource.data.type &&
+        request.resource.data.maxPlayers == resource.data.maxPlayers &&
+        request.resource.data.status == resource.data.status &&
+        request.resource.data.createdAt == resource.data.createdAt &&
         (
-          // Only players array and updatedAt are being modified
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['players', 'updatedAt'])
-          &&
-          // All other fields remain unchanged
-          request.resource.data.ownerId == resource.data.ownerId
-          && request.resource.data.code == resource.data.code
-          && request.resource.data.name == resource.data.name
-          && request.resource.data.type == resource.data.type
-          && request.resource.data.maxPlayers == resource.data.maxPlayers
-          && request.resource.data.status == resource.data.status
-          && request.resource.data.createdAt == resource.data.createdAt
-          &&
-          // Security: Verify array size only changes by 1 (registration or unregistration)
-          (
-            request.resource.data.players.size() == resource.data.players.size() + 1
-            ||
-            request.resource.data.players.size() == resource.data.players.size() - 1
-          )
+          request.resource.data.players.size() == resource.data.players.size() + 1 ||
+          request.resource.data.players.size() == resource.data.players.size() - 1
         )
       );
 
-      // Only the tournament owner can delete their tournament
-      allow delete: if request.auth != null
-        && resource.data.ownerId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.ownerId == request.auth.uid;
     }
 
-    // SECURITY: Deny all access to other collections by default
-    // Add specific rules for other collections as needed
     match /{document=**} {
       allow read, write: if false;
     }

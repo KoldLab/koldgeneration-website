@@ -175,10 +175,10 @@
       "type": "Type de Tournoi",
       "maxPlayers": "Nombre Maximum de Joueurs",
       "maxPlayersHint": "Minimum 2, maximum 128 joueurs",
-      "winScore": "Score de Victoire",
-      "winScoreHint": "Points attribués pour une victoire (optionnel)",
-      "loseScore": "Score de Défaite",
-      "loseScoreHint": "Points attribués pour une défaite (optionnel)",
+      "requireScores": {
+        "title": "Exiger la saisie des scores",
+        "description": "Si désactivé, l'organisateur sélectionne uniquement un vainqueur pour chaque match."
+      },
       "createButton": "Créer le Tournoi",
       "creating": "Création...",
       "error": "Échec de la création du tournoi",
@@ -216,16 +216,73 @@
       "enterPseudonym": "Entrez Votre Pseudonyme",
       "pseudonymPlaceholder": "Choisissez un nom pour jouer",
       "pseudonymHint": "Vous pouvez rejoindre sans vous connecter ! Choisissez simplement un nom et commencez à jouer.",
-      "winScore": "Score de Victoire",
-      "loseScore": "Score de Défaite",
-      "points": "points",
-      "you": "Vous"
+      "you": "Vous",
+      "ownerAddParticipant": {
+        "title": "Ajouter un participant",
+        "description": "Ajoutez manuellement un joueur au tournoi. Il apparaîtra comme participant invité.",
+        "nameLabel": "Nom du participant",
+        "namePlaceholder": "Entrez le nom du participant",
+        "addButton": "Ajouter le participant",
+        "helper": "À utiliser lorsqu'une personne ne peut pas se connecter mais doit être ajoutée.",
+        "errors": {
+          "nameRequired": "Inscrivez un nom de participant avant de l'ajouter."
+        }
+      }
     },
     "myTournaments": {
       "title": "Mes Tournois",
       "description": "Voir tous les tournois auxquels vous avez participé",
       "noTournaments": "Vous n'avez participé à aucun tournoi pour le moment.",
-      "view": "Voir"
+      "view": "Voir",
+      "ownerBadge": "Organisateur"
+    },
+    "bracket": {
+      "singleElimination": {
+        "title": "Arbre à élimination directe"
+      },
+      "roundStatus": {
+        "pending": "À venir",
+        "active": "En cours",
+        "completed": "Terminé"
+      },
+      "matchLabel": "Match {{number}}",
+      "matchStatus": {
+        "pending": "À venir",
+        "in-progress": "En cours",
+        "completed": "Terminé"
+      },
+      "noMatches": "Aucun match pour le moment",
+      "reportResult": "Enregistrer le résultat",
+      "updateResult": "Modifier le résultat",
+      "lastReported": "Dernière mise à jour : {{date}}",
+      "reportedBy": "Enregistré par {{name}}",
+      "tbd": "À déterminer",
+      "awaitingStart": "L'arbre sera généré lorsque le tournoi débutera.",
+      "reportDialog": {
+        "title": "Enregistrer le résultat du match",
+        "description": "Saisissez les scores finaux et sélectionnez le vainqueur pour mettre à jour l'arbre.",
+        "scoresLabel": "Scores",
+        "winnerLabel": "Vainqueur",
+        "scoresOptional": "Les scores sont désactivés pour ce tournoi. Sélectionnez simplement un vainqueur.",
+        "submit": "Valider le résultat",
+        "cancel": "Annuler",
+        "errors": {
+          "winnerRequired": "Sélectionnez un vainqueur pour le match.",
+          "scoreRequired": "Saisissez un score pour chaque participant."
+        }
+      }
+    },
+    "ownerAddParticipant": {
+      "title": "Ajouter un participant",
+      "description": "Ajoutez manuellement un joueur au tournoi. Il apparaîtra comme participant invité.",
+      "nameLabel": "Nom du participant",
+      "namePlaceholder": "Entrez le nom du participant",
+      "addButton": "Ajouter le participant",
+      "helper": "À utiliser lorsqu'une personne ne peut pas se connecter mais doit être ajoutée.",
+      "errors": {
+        "nameRequired": "Inscrivez un nom de participant avant de l'ajouter.",
+        "nameTooLong": "Le nom doit comporter moins de 50 caractères."
+      }
     }
   }
 }
