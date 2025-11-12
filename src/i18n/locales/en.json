@@ -92,14 +92,59 @@
     "mode": "Mode",
     "modes": {
       "stopwatch": "Stopwatch",
-      "countdown": "Countdown"
+      "countdown": "Countdown",
+      "sports": "Sports"
     },
     "minutes": "Minutes",
     "seconds": "Seconds",
+    "duration": "Duration",
     "start": "Start",
     "pause": "Pause",
     "reset": "Reset",
-    "finished": "Time's up!"
+    "finished": "Time's up!",
+    "sports": {
+      "sets": "Sets",
+      "work": "Work Duration",
+      "rest": "Rest Duration",
+      "currentSet": "Set {{current}} of {{total}}",
+      "currentPhase": "Phase: {{phase}}",
+      "phase": {
+        "idle": "Idle",
+        "work": "Work",
+        "rest": "Rest",
+        "finished": "Complete"
+      },
+      "completed": "Workout complete!",
+      "status": {
+        "set": "Current Set",
+        "phase": "Current Phase"
+      }
+    },
+    "workouts": {
+      "title": "Saved Workouts",
+      "localInfo": "Saved locally on this device.",
+      "empty": "No workouts saved yet. Configure sports mode and press the save button.",
+      "summary": "{{sets}} sets • {{work}} | {{rest}}",
+      "saveTooltip": "Save this workout",
+      "saveDialogTitle": "Save Workout",
+      "saveDialogDescription": "Name this configuration so you can reuse it later.",
+      "nameLabel": "Workout name",
+      "namePlaceholder": "e.g. HIIT Pyramid",
+      "cancelButton": "Cancel",
+      "saveButton": "Save",
+      "nameRequired": "Please enter a name.",
+      "saveError": "Failed to save workout. Please try again.",
+      "delete": "Delete workout",
+      "defaultName": "Workout {{index}}",
+      "dialog": {
+        "title": "Save Workout",
+        "description": "Name this configuration so you can reuse it later.",
+        "label": "Workout name",
+        "placeholder": "e.g. HIIT Pyramid",
+        "cancel": "Cancel",
+        "confirm": "Save Workout"
+      }
+    }
   },
   "tournament": {
     "types": {
