@@ -72,7 +72,7 @@ export function NavBar() {
 
       {/* Center: Desktop navigation */}
       <div className="hidden sm:flex flex-1 justify-start items-center ">
-        <NavigationMenu viewport={isMobile}>
+        <NavigationMenu viewport={isMobile} delayDuration={150}>
           <NavigationMenuList className="items-center  gap-2">
             {routesConfig.map((route) => (
               <ListItem key={route.title} {...route} />
@@ -129,7 +129,15 @@ function ListItem({
 
   return (
     <NavigationMenuItem className="group/item">
-      <NavigationMenuTrigger className="group/trigger">
+      <NavigationMenuTrigger
+        className="group/trigger"
+        onPointerDown={(event) => {
+          const state = event.currentTarget.getAttribute('data-state');
+          if (state === 'open') {
+            event.preventDefault();
+          }
+        }}
+      >
         {title}
       </NavigationMenuTrigger>
       <NavigationMenuContent className="left-0 w-max min-w-[calc(100%-0px)] [@media(min-width:768px)]:min-w-[var(--trigger-width,auto)]">
