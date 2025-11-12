@@ -206,7 +206,11 @@ function convertMatchesRecord(rawMatches: any): Record<string, TournamentMatch> 
   if (typeof rawMatches === 'object') {
     return Object.entries(rawMatches).reduce<Record<string, TournamentMatch>>(
       (acc, [key, value]) => {
-        const converted = convertMatch({ id: key, ...value });
+        const converted = convertMatch(
+          typeof value === 'object' && value
+            ? { id: key, ...value }
+            : { id: key }
+        );
         acc[converted.id] = converted;
         return acc;
       },
