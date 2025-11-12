@@ -204,12 +204,18 @@ export default function TournamentView() {
     try {
       const tournamentData = await getTournamentByCode(code);
       if (!tournamentData) {
-        setError(t('tournament.view.notFound'));
-      } else {
-        setTournament(tournamentData);
+        navigate('/tournaments/enter', {
+          replace: true,
+          state: { error: 'notFound', code },
+        });
+        return;
       }
+      setTournament(tournamentData);
     } catch (err: any) {
-      setError(err.message || t('tournament.view.error'));
+      navigate('/tournaments/enter', {
+        replace: true,
+        state: { error: 'generic', code },
+      });
     } finally {
       if (!skipLoading) {
         setLoading(false);

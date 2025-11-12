@@ -30,9 +30,18 @@ export function NavBar() {
   const isMobile = useIsMobile();
   const { user, loading, error } = useAuth();
   const { t } = useTranslation();
-  const routesConfig = getRoutesConfig(t).filter(
-    (route) => user || route.to !== '/tournaments'
-  );
+  const routesConfig = getRoutesConfig(t).map((route) => {
+    if (route.to === '/tournaments' && route.children) {
+      const filteredChildren = route.children.filter((child) => {
+        if (!user && (child.to === '/tournaments/create' || child.to === '/tournaments/my')) {
+          return false;
+        }
+        return true;
+      });
+      return { ...route, children: filteredChildren };
+    }
+    return route;
+  });
 
   return (
     <div className="w-full flex items-center">

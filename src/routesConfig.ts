@@ -46,6 +46,11 @@ export const getRoutesConfig = (t: TFunction): RouteConfig[] => [
         to: '/tournaments/my',
         description: t('routes.tournaments.my.description'),
       },
+      {
+        title: t('routes.tournaments.enter.title'),
+        to: '/tournaments/enter',
+        description: t('routes.tournaments.enter.description'),
+      },
     ],
   },
 ];
@@ -89,6 +94,11 @@ export const routesConfig: RouteConfig[] = [
         title: 'My Tournaments',
         to: '/tournaments/my',
         description: 'View all tournaments you have participated in',
+      },
+      {
+        title: 'Enter Tournament Code',
+        to: '/tournaments/enter',
+        description: 'Join or view a tournament by entering its code',
       },
     ],
   },

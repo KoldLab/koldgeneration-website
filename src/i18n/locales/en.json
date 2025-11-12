@@ -43,12 +43,49 @@
       "my": {
         "title": "My Tournaments",
         "description": "View all tournaments you have participated in"
+      },
+      "enter": {
+        "title": "Enter Tournament Code",
+        "description": "Open the join page to enter a tournament code"
       }
     }
   },
   "home": {
-    "welcome": "Welcome!",
-    "description": "This is my personal website for custom tools and information."
+    "welcome": "Welcome to the Kold Generation Hub",
+    "description": "Explore our tools and tournament features to level up your community events.",
+    "cards": {
+      "tools": {
+        "timer": {
+          "title": "Precision Timer",
+          "description": "Track countdowns, stopwatches, and interval workouts with competitive-grade controls."
+        },
+        "minecraftListGenerator": {
+          "title": "Minecraft List Generator",
+          "description": "Generate clean, shareable lists from Minecraft chest data—perfect for resource management."
+        }
+      },
+      "tournaments": {
+        "create": {
+          "title": "Create Tournament",
+          "description": "Design brackets, configure rules, and publish your tournament in minutes."
+        },
+        "my": {
+          "title": "My Tournaments",
+          "description": "Review and manage the tournaments you organize or participate in."
+        },
+        "view": {
+          "title": "Enter Tournament Code",
+          "description": "Open the join page to enter a tournament code and jump into the bracket."
+        }
+      }
+    },
+    "cardBadge": {
+      "authRequired": "Sign-in required"
+    },
+    "cardButton": {
+      "signInRequired": "Sign in to access",
+      "explore": "Explore"
+    }
   },
   "error": {
     "notFound": {
@@ -231,6 +268,23 @@
       }
     },
       "removeParticipant": "Remove"
+    },
+    "enter": {
+      "title": "Enter a tournament code",
+      "subtitle": "Paste the code you received from an organiser to jump straight into the bracket.",
+      "section": {
+        "title": "Have a code?",
+        "helper": "Codes are usually 6 characters made of letters and numbers."
+      },
+      "label": "Tournament code",
+      "placeholder": "e.g. ABC123",
+      "cta": "Open tournament",
+      "helper": "You'll be redirected straight to the tournament page if the code is valid.",
+      "errors": {
+        "invalid": "Please enter a valid tournament code.",
+        "notFound": "We couldn't find a tournament with that code. Check the code and try again.",
+        "generic": "Something went wrong while opening the tournament. Please try again."
+      }
     },
     "myTournaments": {
       "title": "My Tournaments",

@@ -43,12 +43,49 @@
       "my": {
         "title": "Mes Tournois",
         "description": "Voir tous les tournois auxquels vous avez participé"
+      },
+      "enter": {
+        "title": "Entrer un code de tournoi",
+        "description": "Accéder à la page de saisie d'un code pour rejoindre un tournoi"
       }
     }
   },
   "home": {
-    "welcome": "Bienvenue !",
-    "description": "Ceci est mon site web personnel pour des outils et informations personnalisés."
+    "welcome": "Bienvenue sur le Hub Kold Generation",
+    "description": "Explorez nos outils et fonctionnalités de tournois pour dynamiser vos événements communautaires.",
+    "cards": {
+      "tools": {
+        "timer": {
+          "title": "Minuteur de précision",
+          "description": "Chronométrez comptes à rebours, chronomètres et intervalles avec une précision professionnelle."
+        },
+        "minecraftListGenerator": {
+          "title": "Générateur de listes Minecraft",
+          "description": "Générez des listes partageables à partir de coffres Minecraft : parfait pour gérer vos ressources."
+        }
+      },
+      "tournaments": {
+        "create": {
+          "title": "Créer un tournoi",
+          "description": "Concevez des brackets, définissez les règles et publiez un tournoi en quelques clics."
+        },
+        "my": {
+          "title": "Mes tournois",
+          "description": "Consultez et gérez les tournois que vous organisez ou auxquels vous participez."
+        },
+        "view": {
+          "title": "Entrer un code de tournoi",
+          "description": "Accédez à la page de saisie pour entrer un code et rejoindre le bracket."
+        }
+      }
+    },
+    "cardBadge": {
+      "authRequired": "Connexion requise"
+    },
+    "cardButton": {
+      "signInRequired": "Connectez-vous pour y accéder",
+      "explore": "Explorer"
+    }
   },
   "error": {
     "notFound": {
@@ -231,6 +268,23 @@
         }
       },
       "removeParticipant": "Retirer"
+    },
+    "enter": {
+      "title": "Entrer un code de tournoi",
+      "subtitle": "Collez ici le code fourni par un organisateur pour accéder rapidement au bracket.",
+      "section": {
+        "title": "Un code à saisir ?",
+        "helper": "Les codes comportent généralement 6 caractères, mélange de lettres et de chiffres."
+      },
+      "label": "Code du tournoi",
+      "placeholder": "ex. ABC123",
+      "cta": "Ouvrir le tournoi",
+      "helper": "Vous serez redirigé directement vers le tournoi si le code est valide.",
+      "errors": {
+        "invalid": "Veuillez saisir un code de tournoi valide.",
+        "notFound": "Aucun tournoi ne correspond à ce code. Vérifiez-le et réessayez.",
+        "generic": "Une erreur est survenue lors de l'ouverture du tournoi. Veuillez réessayer."
+      }
     },
     "myTournaments": {
       "title": "Mes Tournois",
