@@ -85,26 +85,39 @@ function timestampToDate(timestamp: any): Date {
 
 function convertMatchParticipant(participant: Record<string, unknown>): TournamentMatchParticipant | null {
   if (!participant) return null;
-  const key =
-    participant.key ||
-    participant.participantKey ||
-    (participant.userId ? `user:${participant.userId}` : undefined) ||
-    (participant.guestId ? `guest:${participant.guestId}` : undefined);
 
-  if (!key) {
+  const keyCandidate =
+    (typeof participant.key === 'string' && participant.key) ||
+    (typeof participant.participantKey === 'string' && participant.participantKey) ||
+    (typeof participant.userId === 'string' && `user:${participant.userId}`) ||
+    (typeof participant.guestId === 'string' && `guest:${participant.guestId}`);
+
+  if (!keyCandidate) {
     return null;
   }
 
+  const displayNameCandidate =
+    typeof participant.displayName === 'string'
+      ? participant.displayName
+      : typeof participant.name === 'string'
+      ? participant.name
+      : 'Unknown';
+
+  const seedCandidate =
+    typeof participant.seed === 'number' ? participant.seed : undefined;
+
+  const slotCandidate =
+    typeof participant.slot === 'number'
+      ? participant.slot
+      : typeof participant.slot === 'string' && participant.slot.trim() !== ''
+      ? Number(participant.slot)
+      : undefined;
+
   return {
-    key,
-    displayName: participant.displayName || participant.name || 'Unknown',
-    seed: typeof participant.seed === 'number' ? participant.seed : undefined,
-    slot:
-      typeof participant.slot === 'number'
-        ? participant.slot
-        : typeof participant.slot === 'string' && participant.slot !== ''
-        ? Number(participant.slot)
-        : undefined,
+    key: keyCandidate,
+    displayName: displayNameCandidate,
+    seed: seedCandidate,
+    slot: slotCandidate,
   };
 }
 
