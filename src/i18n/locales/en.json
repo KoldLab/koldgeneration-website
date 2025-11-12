@@ -167,14 +167,14 @@
     },
     "create": {
       "title": "Create Tournament",
-      "description": "Set up a new tournament and invite players to join",
+      "description": "Set up a new tournament and invite participants to join",
       "name": "Tournament Name",
       "namePlaceholder": "Enter tournament name",
       "description": "Description (optional)",
       "descriptionPlaceholder": "Enter tournament description",
       "type": "Tournament Type",
-      "maxPlayers": "Maximum Players",
-      "maxPlayersHint": "Minimum 2, maximum 128 players",
+      "maxPlayers": "Maximum Participants",
+      "maxPlayersHint": "Minimum 2, maximum 128 participants",
       "requireScores": {
         "title": "Require score entry",
         "description": "When disabled, organizers only select a winner for each match."
@@ -190,7 +190,8 @@
       "error": "Error loading tournament",
       "code": "Code",
       "type": "Type",
-      "players": "Players",
+      "players": "Participants",
+      "participants": "Participants",
       "register": "Register",
       "registering": "Registering...",
       "registerError": "Failed to register",
@@ -198,8 +199,7 @@
       "unregistering": "Unregistering...",
       "unregisterError": "Failed to unregister",
       "loginToManage": "Sign in to save your registrations",
-      "noPlayers": "No players registered yet",
-      "info": "Tournament Information",
+      "noPlayers": "No participants registered yet",
       "createdBy": "Created By",
       "createdAt": "Created At",
       "startedAt": "Started At",
@@ -213,21 +213,24 @@
       "statusError": "Failed to update tournament status",
       "copyLink": "Copy Link",
       "copied": "Copied!",
+      "copyCode": "Copy tournament code",
       "enterPseudonym": "Enter Your Pseudonym",
       "pseudonymPlaceholder": "Choose a name to play as",
       "pseudonymHint": "You can join without signing in! Just choose a name and start playing.",
       "you": "You",
-      "ownerAddParticipant": {
-        "title": "Add Participant",
-        "description": "Manually add a player to the tournament. They will appear as a guest participant.",
-        "nameLabel": "Participant name",
-        "namePlaceholder": "Enter participant name",
-        "addButton": "Add participant",
-        "helper": "Use this when someone can’t sign in but should still be included.",
-        "errors": {
-          "nameRequired": "Enter a participant name before adding."
-        }
+    "ownerAddParticipant": {
+      "title": "Add Participant",
+      "description": "Manually add a participant to the tournament. They will appear as a guest participant.",
+      "nameLabel": "Participant name",
+      "namePlaceholder": "Enter participant name",
+      "addButton": "Add participant",
+      "helper": "Use this when someone can’t sign in but should still be included.",
+      "errors": {
+        "nameRequired": "Enter a participant name before adding.",
+        "nameTooLong": "Please keep the name under 50 characters."
       }
+    },
+      "removeParticipant": "Remove"
     },
     "myTournaments": {
       "title": "My Tournaments",
@@ -274,7 +277,7 @@
     },
     "ownerAddParticipant": {
       "title": "Add Participant",
-      "description": "Manually add a player to the tournament. They will appear as a guest participant.",
+      "description": "Manually add a participant to the tournament. They will appear as a guest participant.",
       "nameLabel": "Participant name",
       "namePlaceholder": "Enter participant name",
       "addButton": "Add participant",

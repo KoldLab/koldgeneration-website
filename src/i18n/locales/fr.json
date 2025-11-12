@@ -167,14 +167,14 @@
     },
     "create": {
       "title": "Créer un Tournoi",
-      "description": "Configurez un nouveau tournoi et invitez des joueurs à rejoindre",
+      "description": "Configurez un nouveau tournoi et invitez des participants à rejoindre",
       "name": "Nom du Tournoi",
       "namePlaceholder": "Entrez le nom du tournoi",
       "description": "Description (optionnel)",
       "descriptionPlaceholder": "Entrez la description du tournoi",
       "type": "Type de Tournoi",
-      "maxPlayers": "Nombre Maximum de Joueurs",
-      "maxPlayersHint": "Minimum 2, maximum 128 joueurs",
+      "maxPlayers": "Nombre maximum de participants",
+      "maxPlayersHint": "Minimum 2, maximum 128 participants",
       "requireScores": {
         "title": "Exiger la saisie des scores",
         "description": "Si désactivé, l'organisateur sélectionne uniquement un vainqueur pour chaque match."
@@ -190,7 +190,8 @@
       "error": "Erreur lors du chargement du tournoi",
       "code": "Code",
       "type": "Type",
-      "players": "Joueurs",
+      "players": "Participants",
+      "participants": "Participants",
       "register": "S'inscrire",
       "registering": "Inscription...",
       "registerError": "Échec de l'inscription",
@@ -198,8 +199,7 @@
       "unregistering": "Désinscription...",
       "unregisterError": "Échec de la désinscription",
       "loginToManage": "Se connecter pour sauvegarder vos inscriptions",
-      "noPlayers": "Aucun joueur inscrit pour le moment",
-      "info": "Informations du Tournoi",
+      "noPlayers": "Aucun participant inscrit pour le moment",
       "createdBy": "Créé Par",
       "createdAt": "Créé Le",
       "startedAt": "Commencé Le",
@@ -213,21 +213,24 @@
       "statusError": "Échec de la mise à jour du statut du tournoi",
       "copyLink": "Copier le Lien",
       "copied": "Copié !",
+      "copyCode": "Copier le code du tournoi",
       "enterPseudonym": "Entrez Votre Pseudonyme",
       "pseudonymPlaceholder": "Choisissez un nom pour jouer",
       "pseudonymHint": "Vous pouvez rejoindre sans vous connecter ! Choisissez simplement un nom et commencez à jouer.",
       "you": "Vous",
       "ownerAddParticipant": {
         "title": "Ajouter un participant",
-        "description": "Ajoutez manuellement un joueur au tournoi. Il apparaîtra comme participant invité.",
+        "description": "Ajoutez manuellement un participant au tournoi. Il apparaîtra comme participant invité.",
         "nameLabel": "Nom du participant",
         "namePlaceholder": "Entrez le nom du participant",
         "addButton": "Ajouter le participant",
         "helper": "À utiliser lorsqu'une personne ne peut pas se connecter mais doit être ajoutée.",
         "errors": {
-          "nameRequired": "Inscrivez un nom de participant avant de l'ajouter."
+          "nameRequired": "Inscrivez un nom de participant avant de l'ajouter.",
+          "nameTooLong": "Le nom doit comporter moins de 50 caractères."
         }
-      }
+      },
+      "removeParticipant": "Retirer"
     },
     "myTournaments": {
       "title": "Mes Tournois",
@@ -274,7 +277,7 @@
     },
     "ownerAddParticipant": {
       "title": "Ajouter un participant",
-      "description": "Ajoutez manuellement un joueur au tournoi. Il apparaîtra comme participant invité.",
+      "description": "Ajoutez manuellement un participant au tournoi. Il apparaîtra comme participant invité.",
       "nameLabel": "Nom du participant",
       "namePlaceholder": "Entrez le nom du participant",
       "addButton": "Ajouter le participant",

@@ -17,9 +17,20 @@ import type {
   TournamentStatus,
   TournamentMatch,
   TournamentMatchScore,
+  TournamentPlayer,
 } from '@/types/tournament';
 import { useTranslation } from 'react-i18next';
-import { User, Loader2, Play, Square, CheckCircle, XCircle, Copy, Check, Pause } from 'lucide-react';
+import {
+  Loader2,
+  Play,
+  Square,
+  CheckCircle,
+  XCircle,
+  Copy,
+  Check,
+  Pause,
+  Trash,
+} from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
@@ -50,6 +61,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { ButtonGroup, ButtonGroupText } from '@/components/ui/button-group';
 
 export default function TournamentView() {
   const { code } = useParams<{ code: string }>();
@@ -73,11 +85,17 @@ export default function TournamentView() {
     name: z
       .string()
       .trim()
-      .min(1, { message: t('tournament.view.ownerAddParticipant.errors.nameRequired') })
-      .max(50, { message: t('tournament.view.ownerAddParticipant.errors.nameTooLong') }),
+      .min(1, {
+        message: t('tournament.view.ownerAddParticipant.errors.nameRequired'),
+      })
+      .max(50, {
+        message: t('tournament.view.ownerAddParticipant.errors.nameTooLong'),
+      }),
   });
 
-  type OwnerAddParticipantFormValues = z.infer<typeof ownerAddParticipantSchema>;
+  type OwnerAddParticipantFormValues = z.infer<
+    typeof ownerAddParticipantSchema
+  >;
 
   const ownerAddParticipantForm = useForm<OwnerAddParticipantFormValues>({
     resolver: zodResolver(ownerAddParticipantSchema),
@@ -85,6 +103,8 @@ export default function TournamentView() {
       name: '',
     },
   });
+  const [removingParticipantId, setRemovingParticipantId] =
+    useState<string>('');
 
   const LOCAL_STORAGE_GUEST_KEY_PREFIX = 'tournament_guest_';
   const LOCAL_STORAGE_REGISTRATIONS_KEY = 'tournament_guest_registrations';
@@ -136,16 +156,24 @@ export default function TournamentView() {
 
   const clearGuestId = (tournamentCode: string) => {
     if (typeof window === 'undefined') return;
-    window.localStorage.removeItem(`${LOCAL_STORAGE_GUEST_KEY_PREFIX}${tournamentCode}`);
+    window.localStorage.removeItem(
+      `${LOCAL_STORAGE_GUEST_KEY_PREFIX}${tournamentCode}`
+    );
   };
 
-  const isOwner = tournament && user && tournament.ownerId === user.uid;
+  const isOwner = Boolean(
+    tournament && user && tournament.ownerId === user.uid
+  );
   const guestId = tournament ? getOrCreateGuestId(tournament.code) : null;
 
-  const isRegisteredAsUser =
-    tournament && user && tournament.players.some((p) => p.userId === user.uid);
-  const isRegisteredAsGuest =
-    tournament && guestId && tournament.players.some((p) => p.guestId === guestId);
+  const isRegisteredAsUser = Boolean(
+    tournament && user && tournament.players.some((p) => p.userId === user.uid)
+  );
+  const isRegisteredAsGuest = Boolean(
+    tournament &&
+      guestId &&
+      tournament.players.some((p) => p.guestId === guestId)
+  );
 
   const isRegistered = Boolean(isRegisteredAsUser || isRegisteredAsGuest);
 
@@ -155,7 +183,7 @@ export default function TournamentView() {
   // - Not already registered (as user or guest)
   // - Not full
   const canRegister =
-    tournament &&
+    !!tournament &&
     !isRegistered &&
     tournament.players.length < tournament.maxPlayers &&
     (tournament.status === 'pending' || tournament.status === 'open');
@@ -166,9 +194,12 @@ export default function TournamentView() {
     }
   }, [code]);
 
-  const loadTournament = async () => {
+  const loadTournament = async (options: { skipLoading?: boolean } = {}) => {
+    const { skipLoading = false } = options;
     if (!code) return;
-    setLoading(true);
+    if (!skipLoading) {
+      setLoading(true);
+    }
     setError('');
     try {
       const tournamentData = await getTournamentByCode(code);
@@ -180,7 +211,9 @@ export default function TournamentView() {
     } catch (err: any) {
       setError(err.message || t('tournament.view.error'));
     } finally {
-      setLoading(false);
+      if (!skipLoading) {
+        setLoading(false);
+      }
     }
   };
 
@@ -193,7 +226,7 @@ export default function TournamentView() {
       setError('');
       try {
         await registerPlayer(tournament.id, user);
-        await loadTournament();
+        await loadTournament({ skipLoading: true });
       } catch (err: any) {
         setError(err.message || t('tournament.view.registerError'));
       } finally {
@@ -217,7 +250,7 @@ export default function TournamentView() {
       recordGuestRegistration(tournament.code);
       setGuestPseudonym('');
       setShowGuestForm(false);
-      await loadTournament();
+      await loadTournament({ skipLoading: true });
     } catch (err: any) {
       setError(err.message || t('tournament.view.registerError'));
     } finally {
@@ -237,7 +270,7 @@ export default function TournamentView() {
         removeGuestRegistrationRecord(tournament.code);
         clearGuestId(tournament.code);
       }
-      await loadTournament();
+      await loadTournament({ skipLoading: true });
     } catch (err: any) {
       setError(err.message || t('tournament.view.unregisterError'));
     } finally {
@@ -251,7 +284,7 @@ export default function TournamentView() {
     setError('');
     try {
       await updateTournamentStatus(tournament.id, newStatus);
-      await loadTournament();
+      await loadTournament({ skipLoading: true });
     } catch (err: any) {
       setError(err.message || t('tournament.view.statusError'));
     } finally {
@@ -301,18 +334,24 @@ export default function TournamentView() {
     setReportErrorMessage('');
   };
 
-  const handleReportSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleReportSubmit = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
     event.preventDefault();
     if (!tournament || !reportMatch) return;
 
     const participants = reportMatch.participants;
     if (participants.length === 0) {
-      setReportErrorMessage(t('tournament.bracket.reportDialog.errors.winnerRequired'));
+      setReportErrorMessage(
+        t('tournament.bracket.reportDialog.errors.winnerRequired')
+      );
       return;
     }
 
     if (!reportWinnerKey) {
-      setReportErrorMessage(t('tournament.bracket.reportDialog.errors.winnerRequired'));
+      setReportErrorMessage(
+        t('tournament.bracket.reportDialog.errors.winnerRequired')
+      );
       return;
     }
 
@@ -321,13 +360,17 @@ export default function TournamentView() {
       for (const participant of participants) {
         const rawScore = reportScores[participant.key];
         if (rawScore === undefined || rawScore === '') {
-          setReportErrorMessage(t('tournament.bracket.reportDialog.errors.scoreRequired'));
+          setReportErrorMessage(
+            t('tournament.bracket.reportDialog.errors.scoreRequired')
+          );
           return;
         }
 
         const numericScore = Number(rawScore);
         if (Number.isNaN(numericScore) || numericScore < 0) {
-          setReportErrorMessage(t('tournament.bracket.reportDialog.errors.scoreRequired'));
+          setReportErrorMessage(
+            t('tournament.bracket.reportDialog.errors.scoreRequired')
+          );
           return;
         }
 
@@ -345,14 +388,16 @@ export default function TournamentView() {
       await reportSingleEliminationMatch(tournament.id, {
         matchId: reportMatch.id,
         winnerKey: reportWinnerKey,
-        winnerParticipant: participants.find((participant) => participant.key === reportWinnerKey),
+        winnerParticipant: participants.find(
+          (participant) => participant.key === reportWinnerKey
+        ),
         scores: parsedScores,
         reportedByUid: user?.uid,
         reporterDisplayName: user?.displayName || user?.email || undefined,
         timestamp: new Date(),
       });
       closeReportDialog();
-      await loadTournament();
+      await loadTournament({ skipLoading: true });
     } catch (err: any) {
       setReportErrorMessage(err.message || t('tournament.view.statusError'));
     } finally {
@@ -372,13 +417,36 @@ export default function TournamentView() {
       try {
         await registerGuestPlayer(tournament.id, values.name.trim(), guestId);
         ownerAddParticipantForm.reset();
-        await loadTournament();
+        await loadTournament({ skipLoading: true });
       } catch (err: any) {
         const message = err.message || t('tournament.view.registerError');
         ownerAddParticipantForm.setError('name', { message });
       }
     }
   );
+
+  const handleRemoveParticipant = async (participant: TournamentPlayer) => {
+    if (!tournament || !isOwner) return;
+
+    const participantKey = participant.userId || participant.guestId;
+    if (!participantKey) return;
+
+    setRemovingParticipantId(participantKey);
+    setError('');
+
+    try {
+      if (participant.userId) {
+        await unregisterPlayer(tournament.id, participant.userId);
+      } else if (participant.guestId) {
+        await unregisterGuestPlayer(tournament.id, participant.guestId);
+      }
+      await loadTournament({ skipLoading: true });
+    } catch (err: any) {
+      setError(err.message || t('tournament.view.unregisterError'));
+    } finally {
+      setRemovingParticipantId('');
+    }
+  };
 
   if (loading) {
     return (
@@ -411,26 +479,52 @@ export default function TournamentView() {
       'single-elimination': 'singleElimination',
       'double-elimination': 'doubleElimination',
       'round-robin': 'roundRobin',
-      'swiss': 'swiss',
+      swiss: 'swiss',
     };
     return typeMap[type] || type;
   };
 
   const getStatusBadge = (status: TournamentStatus) => {
     const statusConfig = {
-      pending: { label: t('tournament.status.pending'), icon: Square, className: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' },
-      open: { label: t('tournament.status.open'), icon: CheckCircle, className: 'bg-green-500/10 text-green-600 dark:text-green-400' },
-      'in-progress': { label: t('tournament.status.inProgress'), icon: Play, className: 'bg-blue-500/10 text-blue-600 dark:text-blue-400' },
-      paused: { label: t('tournament.status.paused'), icon: Pause, className: 'bg-orange-500/10 text-orange-600 dark:text-orange-400' },
-      completed: { label: t('tournament.status.completed'), icon: CheckCircle, className: 'bg-gray-500/10 text-gray-600 dark:text-gray-400' },
-      cancelled: { label: t('tournament.status.cancelled'), icon: XCircle, className: 'bg-red-500/10 text-red-600 dark:text-red-400' },
+      pending: {
+        label: t('tournament.status.pending'),
+        icon: Square,
+        className: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400',
+      },
+      open: {
+        label: t('tournament.status.open'),
+        icon: CheckCircle,
+        className: 'bg-green-500/10 text-green-600 dark:text-green-400',
+      },
+      'in-progress': {
+        label: t('tournament.status.inProgress'),
+        icon: Play,
+        className: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+      },
+      paused: {
+        label: t('tournament.status.paused'),
+        icon: Pause,
+        className: 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
+      },
+      completed: {
+        label: t('tournament.status.completed'),
+        icon: CheckCircle,
+        className: 'bg-gray-500/10 text-gray-600 dark:text-gray-400',
+      },
+      cancelled: {
+        label: t('tournament.status.cancelled'),
+        icon: XCircle,
+        className: 'bg-red-500/10 text-red-600 dark:text-red-400',
+      },
     };
 
     const config = statusConfig[status];
     const Icon = config.icon;
 
     return (
-      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${config.className}`}>
+      <span
+        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${config.className}`}
+      >
         <Icon className="h-3 w-3" />
         {config.label}
       </span>
@@ -442,65 +536,107 @@ export default function TournamentView() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div className="flex-1">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2">{tournament.name}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">
+            {tournament.name}
+          </h1>
           {tournament.description && (
             <p className="text-sm sm:text-base text-muted-foreground mb-2">
               {tournament.description}
             </p>
           )}
-          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            <span className="flex items-center gap-2">
-              {t('tournament.view.code')}: <strong className="text-foreground font-mono">{tournament.code}</strong>
-              {getStatusBadge(tournament.status)}
-            </span>
-            <span>
-              {t('tournament.view.type')}: {t(`tournament.types.${getTournamentTypeLabel(tournament.type)}`)}
-            </span>
-            <span>
-              {tournament.players.length} / {tournament.maxPlayers} {t('tournament.view.players')}
-            </span>
+          <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-sm text-muted-foreground">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={copyTournamentLink}
+              className="gap-1 font-mono"
+            >
+              <span>{tournament.code}</span>
+              {copied ? (
+                <Check className="h-3.5 w-3.5 text-emerald-500" />
+              ) : (
+                <Copy className="h-3.5 w-3.5" />
+              )}
+              <span className="sr-only">{t('tournament.view.copyCode')}</span>
+            </Button>
+            {getStatusBadge(tournament.status)}
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-foreground">
+                {t('tournament.view.type')}
+              </span>
+              <span>
+                {t(
+                  `tournament.types.${getTournamentTypeLabel(tournament.type)}`
+                )}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-foreground">
+                {t('tournament.view.participants')}
+              </span>
+              <span>
+                {tournament.players.length} / {tournament.maxPlayers}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-foreground">
+                {t('tournament.view.createdBy')}
+              </span>
+              <span className="truncate">{tournament.ownerDisplayName}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-foreground">
+                {t('tournament.view.createdAt')}
+              </span>
+              <span>{new Date(tournament.createdAt).toLocaleDateString()}</span>
+            </div>
+            {tournament.startedAt && (
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-foreground">
+                  {t('tournament.view.startedAt')}
+                </span>
+                <span>
+                  {new Date(tournament.startedAt).toLocaleDateString()}
+                </span>
+              </div>
+            )}
+            {tournament.completedAt && (
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-foreground">
+                  {t('tournament.view.completedAt')}
+                </span>
+                <span>
+                  {new Date(tournament.completedAt).toLocaleDateString()}
+                </span>
+              </div>
+            )}
           </div>
         </div>
         {isOwner && (
           <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={copyTournamentLink}
-              className="gap-2"
-            >
-              {copied ? (
-                <>
-                  <Check className="h-4 w-4" />
-                  {t('tournament.view.copied')}
-                </>
-              ) : (
-                <>
-                  <Copy className="h-4 w-4" />
-                  {t('tournament.view.copyLink')}
-                </>
+            {(tournament.status === 'pending' ||
+              tournament.status === 'open') &&
+              tournament.players.length >= 1 && (
+                <Button
+                  onClick={() => handleStatusChange('in-progress')}
+                  disabled={actionLoading}
+                  size="sm"
+                  variant="default"
+                >
+                  {actionLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {t('common.loading')}
+                    </>
+                  ) : (
+                    <>
+                      <Play className="h-4 w-4 mr-2" />
+                      {t('tournament.view.startTournament')}
+                    </>
+                  )}
+                </Button>
               )}
-            </Button>
-                         {(tournament.status === 'pending' || tournament.status === 'open') && tournament.players.length >= 1 && (
-               <Button
-                 onClick={() => handleStatusChange('in-progress')}
-                 disabled={actionLoading}
-                 size="sm"
-                 variant="default"
-               >
-                 {actionLoading ? (
-                   <>
-                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                     {t('common.loading')}
-                   </>
-                 ) : (
-                   <>
-                     <Play className="h-4 w-4 mr-2" />
-                     {t('tournament.view.startTournament')}
-                   </>
-                 )}
-               </Button>
-             )}
             {tournament.status === 'in-progress' && (
               <Button
                 onClick={() => handleStatusChange('paused')}
@@ -541,7 +677,8 @@ export default function TournamentView() {
                 )}
               </Button>
             )}
-        {(tournament.status === 'pending' || tournament.status === 'open') && (
+            {(tournament.status === 'pending' ||
+              tournament.status === 'open') && (
               <Button
                 onClick={() => handleStatusChange('cancelled')}
                 disabled={actionLoading}
@@ -577,7 +714,9 @@ export default function TournamentView() {
           <Card className="p-4">
             <div className="space-y-4">
               <div>
-                <Label htmlFor="pseudonym">{t('tournament.view.enterPseudonym')}</Label>
+                <Label htmlFor="pseudonym">
+                  {t('tournament.view.enterPseudonym')}
+                </Label>
                 <Input
                   id="pseudonym"
                   type="text"
@@ -639,44 +778,52 @@ export default function TournamentView() {
               )}
             </Button>
           )}
-          {isRegistered && tournament.status !== 'completed' && tournament.status !== 'cancelled' && (
-            <Button size="sm" variant="outline" onClick={handleUnregister} disabled={actionLoading}>
-              {actionLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {t('tournament.view.unregistering')}
-                </>
-              ) : (
-                t('tournament.view.unregister')
-              )}
-            </Button>
-          )}
+          {isRegistered &&
+            tournament.status !== 'completed' &&
+            tournament.status !== 'cancelled' && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleUnregister}
+                disabled={actionLoading}
+              >
+                {actionLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {t('tournament.view.unregistering')}
+                  </>
+                ) : (
+                  t('tournament.view.unregister')
+                )}
+              </Button>
+            )}
         </div>
-
       </div>
 
       {/* Owner Controls */}
       {isOwner && (
         <div className="flex flex-wrap gap-2">
-            {(tournament.status === 'open' || tournament.status === 'in-progress' || tournament.status === 'paused') && (
-              <Button
-                onClick={() => handleStatusChange('completed')}
-                disabled={actionLoading}
-                variant="outline"
-              >
-                {actionLoading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    {t('common.loading')}
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    {t('tournament.view.completeTournament')}
-                  </>
-                )}
-              </Button>
-            )}
+          {(tournament.status === 'open' ||
+            tournament.status === 'in-progress' ||
+            tournament.status === 'paused') && (
+            <Button
+              onClick={() => handleStatusChange('completed')}
+              disabled={actionLoading}
+              variant="outline"
+            >
+              {actionLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  {t('common.loading')}
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  {t('tournament.view.completeTournament')}
+                </>
+              )}
+            </Button>
+          )}
         </div>
       )}
 
@@ -715,12 +862,16 @@ export default function TournamentView() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('tournament.view.ownerAddParticipant.nameLabel')}</FormLabel>
+                    <FormLabel>
+                      {t('tournament.view.ownerAddParticipant.nameLabel')}
+                    </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         value={field.value || ''}
-                        placeholder={t('tournament.view.ownerAddParticipant.namePlaceholder')}
+                        placeholder={t(
+                          'tournament.view.ownerAddParticipant.namePlaceholder'
+                        )}
                       />
                     </FormControl>
                     <FormMessage />
@@ -754,88 +905,88 @@ export default function TournamentView() {
       {/* Players List */}
       <Card className="p-4 sm:p-6">
         <h2 className="text-lg font-semibold mb-4">
-          {t('tournament.view.players')} ({tournament.players.length}/{tournament.maxPlayers})
+          {t('tournament.view.players')} ({tournament.players.length}/
+          {tournament.maxPlayers})
         </h2>
         {tournament.players.length === 0 ? (
-          <p className="text-muted-foreground text-sm">{t('tournament.view.noPlayers')}</p>
+          <p className="text-muted-foreground text-sm">
+            {t('tournament.view.noPlayers')}
+          </p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {tournament.players.map((player) => {
-              const isCurrentPlayer =
-                (user && player.userId === user.uid) ||
-                (!user && guestId && player.guestId === guestId);
+          <div className="space-y-2">
+            {tournament.players.map((participant) => {
+              const participantKey =
+                participant.userId ||
+                participant.guestId ||
+                participant.displayName;
+              const isCurrentParticipant =
+                (user && participant.userId === user.uid) ||
+                (!user && guestId && participant.guestId === guestId);
+              const canOwnerRemove =
+                isOwner &&
+                tournament.status !== 'completed' &&
+                tournament.status !== 'cancelled' &&
+                participant.userId !== tournament.ownerId;
 
               return (
-                <div
-                  key={player.userId || player.guestId}
+                <ButtonGroup
+                  key={participantKey}
                   className={cn(
-                    'flex items-center gap-3 p-3 rounded-md border bg-card relative',
-                    isCurrentPlayer && 'border-primary/60 bg-primary/5'
+                    'w-full overflow-hidden rounded-md border bg-background transition',
+                    isCurrentParticipant && 'border-primary/50 bg-primary/5'
                   )}
                 >
-                  {player.photoURL ? (
-                    <img
-                      src={player.photoURL}
-                      alt={player.displayName}
-                      className="w-10 h-10 rounded-full"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-                      <User className="h-5 w-5" />
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium text-sm truncate">{player.displayName}</p>
-                      {isCurrentPlayer && (
-                        <span className="text-xs font-semibold uppercase tracking-wide text-primary">
-                          {t('tournament.view.you')}
-                        </span>
+                  <ButtonGroupText
+                    className={cn(
+                      'flex flex-1 items-center justify-between',
+                      isCurrentParticipant && 'text-primary'
+                    )}
+                  >
+                    <div className="min-w-0 p-1">
+                      <p className="truncate font-medium text-sm">
+                        {participant.displayName}
+                      </p>
+                      {isOwner && participant.email && (
+                        <p className="truncate text-xs text-muted-foreground">
+                          {participant.email}
+                        </p>
                       )}
                     </div>
-                    {isOwner && player.email && (
-                      <p className="text-xs text-muted-foreground truncate">{player.email}</p>
+                    {isCurrentParticipant && (
+                      <span className="text-xs font-semibold uppercase tracking-wide">
+                        {t('tournament.view.you')}
+                      </span>
                     )}
-                  </div>
-                </div>
+                  </ButtonGroupText>
+                  {canOwnerRemove && (
+                    <Button
+                      size="icon"
+                      variant="destructive"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        handleRemoveParticipant(participant);
+                      }}
+                      disabled={
+                        removingParticipantId === participantKey ||
+                        actionLoading
+                      }
+                    >
+                      {removingParticipantId === participantKey ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash className="h-4 w-4" />
+                      )}
+                      <span className="sr-only">
+                        {t('tournament.view.removeParticipant')}
+                      </span>
+                    </Button>
+                  )}
+                </ButtonGroup>
               );
             })}
           </div>
         )}
       </Card>
-
-      {/* Tournament Info */}
-      <Card className="p-4 sm:p-6">
-        <h2 className="text-lg font-semibold mb-4">{t('tournament.view.info')}</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-          <div>
-            <p className="text-muted-foreground mb-1">{t('tournament.view.createdBy')}</p>
-            <p className="font-medium">{tournament.ownerDisplayName}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground mb-1">{t('tournament.view.createdAt')}</p>
-            <p className="font-medium">
-              {new Date(tournament.createdAt).toLocaleDateString()}
-            </p>
-          </div>
-          {tournament.startedAt && (
-            <div>
-              <p className="text-muted-foreground mb-1">{t('tournament.view.startedAt')}</p>
-              <p className="font-medium">
-                {new Date(tournament.startedAt).toLocaleDateString()}
-              </p>
-            </div>
-          )}
-          {tournament.completedAt && (
-            <div>
-                <p className="text-muted-foreground mb-1">{t('tournament.view.completedAt')}</p>
-                <p className="font-medium">
-                  {new Date(tournament.completedAt).toLocaleDateString()}
-                </p>
-              </div>
-            )}
-          </div>
-        </Card>
 
       <Dialog
         open={reportDialogOpen}
@@ -847,7 +998,9 @@ export default function TournamentView() {
       >
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{t('tournament.bracket.reportDialog.title')}</DialogTitle>
+            <DialogTitle>
+              {t('tournament.bracket.reportDialog.title')}
+            </DialogTitle>
             <DialogDescription>
               {t('tournament.bracket.reportDialog.description')}
             </DialogDescription>
@@ -889,16 +1042,26 @@ export default function TournamentView() {
                 )}
 
                 <div className="space-y-2">
-                  <Label>{t('tournament.bracket.reportDialog.winnerLabel')}</Label>
-                  <Select value={reportWinnerKey} onValueChange={setReportWinnerKey}>
+                  <Label>
+                    {t('tournament.bracket.reportDialog.winnerLabel')}
+                  </Label>
+                  <Select
+                    value={reportWinnerKey}
+                    onValueChange={setReportWinnerKey}
+                  >
                     <SelectTrigger>
                       <SelectValue
-                        placeholder={t('tournament.bracket.reportDialog.winnerLabel')}
+                        placeholder={t(
+                          'tournament.bracket.reportDialog.winnerLabel'
+                        )}
                       />
                     </SelectTrigger>
                     <SelectContent>
                       {reportMatch.participants.map((participant) => (
-                        <SelectItem key={participant.key} value={participant.key}>
+                        <SelectItem
+                          key={participant.key}
+                          value={participant.key}
+                        >
                           {participant.displayName}
                         </SelectItem>
                       ))}
