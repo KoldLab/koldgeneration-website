@@ -7,6 +7,7 @@ import {
   updateDoc,
   query,
   where,
+  limit,
   serverTimestamp,
   Timestamp,
 } from 'firebase/firestore';
@@ -143,7 +144,11 @@ export async function createTournament(
 
 // Get tournament by code
 export async function getTournamentByCode(code: string): Promise<Tournament | null> {
-  const q = query(collection(db, TOURNAMENTS_COLLECTION), where('code', '==', code));
+  const q = query(
+    collection(db, TOURNAMENTS_COLLECTION),
+    where('code', '==', code),
+    limit(1)
+  );
   const querySnapshot = await getDocs(q);
 
   if (querySnapshot.empty) {

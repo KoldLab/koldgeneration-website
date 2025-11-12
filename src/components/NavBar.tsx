@@ -30,7 +30,9 @@ export function NavBar() {
   const isMobile = useIsMobile();
   const { user, loading, error } = useAuth();
   const { t } = useTranslation();
-  const routesConfig = getRoutesConfig(t);
+  const routesConfig = getRoutesConfig(t).filter(
+    (route) => user || route.to !== '/tournaments'
+  );
 
   return (
     <div className="w-full flex items-center">

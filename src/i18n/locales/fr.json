@@ -197,7 +197,7 @@
       "unregister": "Se désinscrire",
       "unregistering": "Désinscription...",
       "unregisterError": "Échec de la désinscription",
-      "loginToRegister": "Se connecter pour s'inscrire",
+      "loginToManage": "Se connecter pour sauvegarder vos inscriptions",
       "noPlayers": "Aucun joueur inscrit pour le moment",
       "info": "Informations du Tournoi",
       "createdBy": "Créé Par",
@@ -218,7 +218,8 @@
       "pseudonymHint": "Vous pouvez rejoindre sans vous connecter ! Choisissez simplement un nom et commencez à jouer.",
       "winScore": "Score de Victoire",
       "loseScore": "Score de Défaite",
-      "points": "points"
+      "points": "points",
+      "you": "Vous"
     },
     "myTournaments": {
       "title": "Mes Tournois",

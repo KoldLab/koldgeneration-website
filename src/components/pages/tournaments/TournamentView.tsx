@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { User, Loader2, Play, Square, CheckCircle, XCircle, Copy, Check, Pause } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 
 export default function TournamentView() {
   const { code } = useParams<{ code: string }>();
@@ -30,28 +31,68 @@ export default function TournamentView() {
   const [guestPseudonym, setGuestPseudonym] = useState<string>('');
   const [showGuestForm, setShowGuestForm] = useState<boolean>(false);
 
-  // Generate or retrieve guest ID from localStorage
-  const getOrCreateGuestId = (tournamentCode: string): string => {
-    const storageKey = `tournament_guest_${tournamentCode}`;
-    let guestId = localStorage.getItem(storageKey);
+  const LOCAL_STORAGE_GUEST_KEY_PREFIX = 'tournament_guest_';
+  const LOCAL_STORAGE_REGISTRATIONS_KEY = 'tournament_guest_registrations';
+
+  const getOrCreateGuestId = (tournamentCode: string): string | null => {
+    if (typeof window === 'undefined') return null;
+    const storageKey = `${LOCAL_STORAGE_GUEST_KEY_PREFIX}${tournamentCode}`;
+    let guestId = window.localStorage.getItem(storageKey);
     if (!guestId) {
-      // Generate a simple unique ID (not cryptographically secure, but sufficient for this use case)
       guestId = `guest_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-      localStorage.setItem(storageKey, guestId);
+      window.localStorage.setItem(storageKey, guestId);
     }
     return guestId;
   };
 
+  const recordGuestRegistration = (tournamentCode: string) => {
+    if (typeof window === 'undefined') return;
+    try {
+      const existing = JSON.parse(
+        window.localStorage.getItem(LOCAL_STORAGE_REGISTRATIONS_KEY) || '[]'
+      ) as string[];
+      if (!existing.includes(tournamentCode)) {
+        window.localStorage.setItem(
+          LOCAL_STORAGE_REGISTRATIONS_KEY,
+          JSON.stringify([...existing, tournamentCode])
+        );
+      }
+    } catch (err) {
+      console.warn('Failed to persist guest registration', err);
+    }
+  };
+
+  const removeGuestRegistrationRecord = (tournamentCode: string) => {
+    if (typeof window === 'undefined') return;
+    try {
+      const existing = JSON.parse(
+        window.localStorage.getItem(LOCAL_STORAGE_REGISTRATIONS_KEY) || '[]'
+      ) as string[];
+      if (existing.includes(tournamentCode)) {
+        window.localStorage.setItem(
+          LOCAL_STORAGE_REGISTRATIONS_KEY,
+          JSON.stringify(existing.filter((code) => code !== tournamentCode))
+        );
+      }
+    } catch (err) {
+      console.warn('Failed to update guest registration record', err);
+    }
+  };
+
+  const clearGuestId = (tournamentCode: string) => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.removeItem(`${LOCAL_STORAGE_GUEST_KEY_PREFIX}${tournamentCode}`);
+  };
+
   const isOwner = tournament && user && tournament.ownerId === user.uid;
   const guestId = tournament ? getOrCreateGuestId(tournament.code) : null;
-  
-  // Check if user (authenticated) is registered
-  const isRegisteredAsUser = tournament && user && tournament.players.some((p) => p.userId === user.uid);
-  
-  // Check if guest is registered
-  const isRegisteredAsGuest = tournament && guestId && tournament.players.some((p) => p.guestId === guestId);
-  
-  const isRegistered = isRegisteredAsUser || isRegisteredAsGuest;
+
+  const isRegisteredAsUser =
+    tournament && user && tournament.players.some((p) => p.userId === user.uid);
+  const isRegisteredAsGuest =
+    tournament && guestId && tournament.players.some((p) => p.guestId === guestId);
+
+  const isRegistered = Boolean(isRegisteredAsUser || isRegisteredAsGuest);
 
   // Can register if:
   // - Tournament exists
@@ -90,8 +131,8 @@ export default function TournamentView() {
 
   const handleRegister = async () => {
     if (!tournament) return;
-    
-    // If user is logged in, register as authenticated user
+
+    // Authenticated registration
     if (user) {
       setActionLoading(true);
       setError('');
@@ -103,27 +144,29 @@ export default function TournamentView() {
       } finally {
         setActionLoading(false);
       }
-    } else {
-      // Show guest form if pseudonym is not set
-      if (!guestPseudonym.trim()) {
-        setShowGuestForm(true);
-        return;
-      }
-      
-      // Register as guest
-      if (!guestId) return;
-      setActionLoading(true);
-      setError('');
-      try {
-        await registerGuestPlayer(tournament.id, guestPseudonym.trim(), guestId);
-        setGuestPseudonym('');
-        setShowGuestForm(false);
-        await loadTournament();
-      } catch (err: any) {
-        setError(err.message || t('tournament.view.registerError'));
-      } finally {
-        setActionLoading(false);
-      }
+      return;
+    }
+
+    // Guest registration flow
+    if (!guestPseudonym.trim()) {
+      setShowGuestForm(true);
+      return;
+    }
+
+    if (!guestId) return;
+
+    setActionLoading(true);
+    setError('');
+    try {
+      await registerGuestPlayer(tournament.id, guestPseudonym.trim(), guestId);
+      recordGuestRegistration(tournament.code);
+      setGuestPseudonym('');
+      setShowGuestForm(false);
+      await loadTournament();
+    } catch (err: any) {
+      setError(err.message || t('tournament.view.registerError'));
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -133,13 +176,11 @@ export default function TournamentView() {
     setError('');
     try {
       if (user && isRegisteredAsUser) {
-        // Unregister authenticated user
         await unregisterPlayer(tournament.id, user.uid);
       } else if (guestId && isRegisteredAsGuest) {
-        // Unregister guest
         await unregisterGuestPlayer(tournament.id, guestId);
-        // Clear guest ID from localStorage
-        localStorage.removeItem(`tournament_guest_${tournament.code}`);
+        removeGuestRegistrationRecord(tournament.code);
+        clearGuestId(tournament.code);
       }
       await loadTournament();
     } catch (err: any) {
@@ -366,7 +407,6 @@ export default function TournamentView() {
 
       {/* Action Buttons */}
       <div className="flex flex-col gap-4">
-        {/* Guest Pseudonym Form */}
         {canRegister && !user && showGuestForm && (
           <Card className="p-4">
             <div className="space-y-4">
@@ -391,8 +431,8 @@ export default function TournamentView() {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button 
-                  onClick={handleRegister} 
+                <Button
+                  onClick={handleRegister}
                   disabled={actionLoading || !guestPseudonym.trim()}
                 >
                   {actionLoading ? (
@@ -404,8 +444,8 @@ export default function TournamentView() {
                     t('tournament.view.register')
                   )}
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => {
                     setShowGuestForm(false);
                     setGuestPseudonym('');
@@ -418,7 +458,6 @@ export default function TournamentView() {
           </Card>
         )}
 
-        {/* Register/Unregister Buttons */}
         <div className="flex flex-wrap gap-2">
           {canRegister && (!showGuestForm || user) && (
             <Button onClick={handleRegister} disabled={actionLoading}>
@@ -445,7 +484,8 @@ export default function TournamentView() {
             </Button>
           )}
         </div>
-                </div>
+
+      </div>
 
       {/* Owner Controls */}
       {isOwner && (
@@ -481,30 +521,46 @@ export default function TournamentView() {
           <p className="text-muted-foreground text-sm">{t('tournament.view.noPlayers')}</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {tournament.players.map((player) => (
-              <div
-                key={player.userId || player.guestId}
-                className="flex items-center gap-3 p-3 rounded-md border bg-card"
-              >
-                {player.photoURL ? (
-                  <img
-                    src={player.photoURL}
-                    alt={player.displayName}
-                    className="w-10 h-10 rounded-full"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-                    <User className="h-5 w-5" />
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">{player.displayName}</p>
-                  {isOwner && (
-                    <p className="text-xs text-muted-foreground truncate">{player.email}</p>
+            {tournament.players.map((player) => {
+              const isCurrentPlayer =
+                (user && player.userId === user.uid) ||
+                (!user && guestId && player.guestId === guestId);
+
+              return (
+                <div
+                  key={player.userId || player.guestId}
+                  className={cn(
+                    'flex items-center gap-3 p-3 rounded-md border bg-card relative',
+                    isCurrentPlayer && 'border-primary/60 bg-primary/5'
                   )}
+                >
+                  {player.photoURL ? (
+                    <img
+                      src={player.photoURL}
+                      alt={player.displayName}
+                      className="w-10 h-10 rounded-full"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
+                      <User className="h-5 w-5" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-sm truncate">{player.displayName}</p>
+                      {isCurrentPlayer && (
+                        <span className="text-xs font-semibold uppercase tracking-wide text-primary">
+                          {t('tournament.view.you')}
+                        </span>
+                      )}
+                    </div>
+                    {isOwner && player.email && (
+                      <p className="text-xs text-muted-foreground truncate">{player.email}</p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </Card>

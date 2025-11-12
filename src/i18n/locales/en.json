@@ -197,7 +197,7 @@
       "unregister": "Unregister",
       "unregistering": "Unregistering...",
       "unregisterError": "Failed to unregister",
-      "loginToRegister": "Sign in to Register",
+      "loginToManage": "Sign in to save your registrations",
       "noPlayers": "No players registered yet",
       "info": "Tournament Information",
       "createdBy": "Created By",
@@ -218,7 +218,8 @@
       "pseudonymHint": "You can join without signing in! Just choose a name and start playing.",
       "winScore": "Win Score",
       "loseScore": "Lose Score",
-      "points": "points"
+      "points": "points",
+      "you": "You"
     },
     "myTournaments": {
       "title": "My Tournaments",
