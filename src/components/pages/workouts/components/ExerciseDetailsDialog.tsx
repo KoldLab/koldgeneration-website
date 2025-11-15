@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Dumbbell,
   Download,
@@ -68,8 +69,8 @@ export default function ExerciseDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 gap-0">
+        <DialogHeader className="px-6 pt-6 pb-4 shrink-0">
           <DialogTitle className="text-2xl">{exercise.name}</DialogTitle>
           <DialogDescription>
             {exercise.overview ||
@@ -77,222 +78,224 @@ export default function ExerciseDetailsDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Exercise GIF/Image/Video */}
-          {(exercise.gifUrl || exercise.imageUrl || exercise.videoUrl) && (
-            <div className="aspect-video bg-muted rounded-lg overflow-hidden">
-              {exercise.videoUrl ? (
-                <video
-                  src={exercise.videoUrl}
-                  controls
-                  className="w-full h-full object-cover"
-                >
-                  Your browser does not support the video tag.
-                </video>
-              ) : exercise.gifUrl ? (
-                <img
-                  src={exercise.gifUrl}
-                  alt={exercise.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    // Fallback to imageUrl if GIF fails
-                    if (exercise.imageUrl) {
-                      e.currentTarget.src = exercise.imageUrl;
-                    } else {
+        <ScrollArea className="flex-1 min-h-0 px-6">
+          <div className="space-y-6">
+            {/* Exercise GIF/Image/Video */}
+            {(exercise.gifUrl || exercise.imageUrl || exercise.videoUrl) && (
+              <div className="aspect-video bg-muted rounded-lg overflow-hidden">
+                {exercise.videoUrl ? (
+                  <video
+                    src={exercise.videoUrl}
+                    controls
+                    className="w-full h-full object-cover"
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                ) : exercise.gifUrl ? (
+                  <img
+                    src={exercise.gifUrl}
+                    alt={exercise.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // Fallback to imageUrl if GIF fails
+                      if (exercise.imageUrl) {
+                        e.currentTarget.src = exercise.imageUrl;
+                      } else {
+                        e.currentTarget.style.display = 'none';
+                      }
+                    }}
+                  />
+                ) : exercise.imageUrl ? (
+                  <img
+                    src={exercise.imageUrl}
+                    alt={exercise.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
                       e.currentTarget.style.display = 'none';
-                    }
-                  }}
-                />
-              ) : exercise.imageUrl ? (
-                <img
-                  src={exercise.imageUrl}
-                  alt={exercise.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              ) : null}
-            </div>
-          )}
-
-          {/* Body Parts & Equipment Group */}
-          {(exercise.bodyParts?.length > 0 ||
-            exercise.equipments?.length > 0) && (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {/* Body Parts */}
-              {exercise.bodyParts && exercise.bodyParts.length > 0 && (
-                <div>
-                  <h3 className="font-semibold mb-2 flex items-center gap-2">
-                    <PersonStanding className="h-4 w-4" />
-                    {t('workouts.exerciseLibrary.exercise.bodyParts')}
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {exercise.bodyParts.map((part: any, index: number) => {
-                      const partValue = getStringValue(part);
-                      return (
-                        <Badge key={index} variant="default">
-                          {partValue}
-                        </Badge>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Equipment */}
-              {exercise.equipments && exercise.equipments.length > 0 && (
-                <div>
-                  <h3 className="font-semibold mb-2 flex items-center gap-2">
-                    <Dumbbell className="h-4 w-4" />
-                    {t('workouts.exerciseLibrary.exercise.equipment')}
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {exercise.equipments.map((eq: any, index: number) => {
-                      const eqValue = getStringValue(eq);
-                      return (
-                        <Badge key={index} variant="secondary">
-                          {eqValue}
-                        </Badge>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Muscles Group - Target and Secondary together */}
-          {(exercise.targetMuscles?.length > 0 ||
-            exercise.secondaryMuscles?.length > 0) && (
-            <div>
-              <h3 className="font-semibold mb-3">Muscles</h3>
-              <div className="space-y-3">
-                {/* Target Muscles */}
-                {exercise.targetMuscles &&
-                  exercise.targetMuscles.length > 0 && (
-                    <div>
-                      <h4 className="text-sm font-medium mb-2 text-muted-foreground">
-                        {t('workouts.exerciseLibrary.exercise.targetMuscles')}
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {exercise.targetMuscles.map(
-                          (muscle: any, index: number) => {
-                            const muscleValue = getStringValue(muscle);
-                            return (
-                              <Badge key={index} variant="outline">
-                                {muscleValue}
-                              </Badge>
-                            );
-                          }
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                {/* Secondary Muscles */}
-                {exercise.secondaryMuscles &&
-                  exercise.secondaryMuscles.length > 0 && (
-                    <div>
-                      <h4 className="text-sm font-medium mb-2 text-muted-foreground">
-                        {t(
-                          'workouts.exerciseLibrary.exercise.secondaryMuscles'
-                        )}
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {exercise.secondaryMuscles.map(
-                          (muscle: any, index: number) => {
-                            const muscleValue = getStringValue(muscle);
-                            return (
-                              <Badge
-                                key={index}
-                                variant="outline"
-                                className="bg-secondary/50"
-                              >
-                                {muscleValue}
-                              </Badge>
-                            );
-                          }
-                        )}
-                      </div>
-                    </div>
-                  )}
+                    }}
+                  />
+                ) : null}
               </div>
-            </div>
-          )}
+            )}
 
-          <Separator />
+            {/* Body Parts & Equipment Group */}
+            {(exercise.bodyParts?.length > 0 ||
+              exercise.equipments?.length > 0) && (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {/* Body Parts */}
+                {exercise.bodyParts && exercise.bodyParts.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold mb-2 flex items-center gap-2">
+                      <PersonStanding className="h-4 w-4" />
+                      {t('workouts.exerciseLibrary.exercise.bodyParts')}
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {exercise.bodyParts.map((part: any, index: number) => {
+                        const partValue = getStringValue(part);
+                        return (
+                          <Badge key={index} variant="default">
+                            {partValue}
+                          </Badge>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
-          {/* Instructions */}
-          {exercise.instructions && exercise.instructions.length > 0 && (
-            <div>
-              <h3 className="font-semibold mb-3">
-                {t('workouts.exerciseLibrary.exercise.instructions')}
-              </h3>
-              <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
-                {exercise.instructions.map((instruction, index) => (
-                  <li key={index} className="pl-2">
-                    {instruction}
-                  </li>
-                ))}
-              </ol>
-            </div>
-          )}
-
-          {/* Tips */}
-          {exercise.exerciseTips && exercise.exerciseTips.length > 0 && (
-            <div>
-              <h3 className="font-semibold mb-3">
-                {t('workouts.exerciseLibrary.exercise.tips')}
-              </h3>
-              <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                {exercise.exerciseTips.map((tip, index) => (
-                  <li key={index} className="pl-2">
-                    {tip}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Variations */}
-          {exercise.variations && exercise.variations.length > 0 && (
-            <div>
-              <h3 className="font-semibold mb-3">
-                {t('workouts.exerciseLibrary.exercise.variations')}
-              </h3>
-              <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                {exercise.variations.map((variation, index) => (
-                  <li key={index} className="pl-2">
-                    {variation}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Keywords */}
-          {exercise.keywords && exercise.keywords.length > 0 && (
-            <div>
-              <h3 className="font-semibold mb-2">Keywords</h3>
-              <div className="flex flex-wrap gap-2">
-                {exercise.keywords.slice(0, 10).map((keyword) => (
-                  <Badge key={keyword} variant="outline" className="text-xs">
-                    {keyword}
-                  </Badge>
-                ))}
-                {exercise.keywords.length > 10 && (
-                  <Badge variant="outline" className="text-xs">
-                    +{exercise.keywords.length - 10} more
-                  </Badge>
+                {/* Equipment */}
+                {exercise.equipments && exercise.equipments.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold mb-2 flex items-center gap-2">
+                      <Dumbbell className="h-4 w-4" />
+                      {t('workouts.exerciseLibrary.exercise.equipment')}
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {exercise.equipments.map((eq: any, index: number) => {
+                        const eqValue = getStringValue(eq);
+                        return (
+                          <Badge key={index} variant="secondary">
+                            {eqValue}
+                          </Badge>
+                        );
+                      })}
+                    </div>
+                  </div>
                 )}
               </div>
-            </div>
-          )}
-        </div>
+            )}
+
+            {/* Muscles Group - Target and Secondary together */}
+            {(exercise.targetMuscles?.length > 0 ||
+              exercise.secondaryMuscles?.length > 0) && (
+              <div>
+                <h3 className="font-semibold mb-3">Muscles</h3>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {/* Target Muscles */}
+                  {exercise.targetMuscles &&
+                    exercise.targetMuscles.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-medium mb-2 text-muted-foreground">
+                          {t('workouts.exerciseLibrary.exercise.targetMuscles')}
+                        </h4>
+                        <div className="flex flex-wrap gap-2">
+                          {exercise.targetMuscles.map(
+                            (muscle: any, index: number) => {
+                              const muscleValue = getStringValue(muscle);
+                              return (
+                                <Badge key={index} variant="outline">
+                                  {muscleValue}
+                                </Badge>
+                              );
+                            }
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                  {/* Secondary Muscles */}
+                  {exercise.secondaryMuscles &&
+                    exercise.secondaryMuscles.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-medium mb-2 text-muted-foreground">
+                          {t(
+                            'workouts.exerciseLibrary.exercise.secondaryMuscles'
+                          )}
+                        </h4>
+                        <div className="flex flex-wrap gap-2">
+                          {exercise.secondaryMuscles.map(
+                            (muscle: any, index: number) => {
+                              const muscleValue = getStringValue(muscle);
+                              return (
+                                <Badge
+                                  key={index}
+                                  variant="outline"
+                                  className="bg-secondary/50"
+                                >
+                                  {muscleValue}
+                                </Badge>
+                              );
+                            }
+                          )}
+                        </div>
+                      </div>
+                    )}
+                </div>
+              </div>
+            )}
+
+            <Separator />
+
+            {/* Instructions */}
+            {exercise.instructions && exercise.instructions.length > 0 && (
+              <div>
+                <h3 className="font-semibold mb-3">
+                  {t('workouts.exerciseLibrary.exercise.instructions')}
+                </h3>
+                <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
+                  {exercise.instructions.map((instruction, index) => (
+                    <li key={index} className="pl-2">
+                      {instruction}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+
+            {/* Tips */}
+            {exercise.exerciseTips && exercise.exerciseTips.length > 0 && (
+              <div>
+                <h3 className="font-semibold mb-3">
+                  {t('workouts.exerciseLibrary.exercise.tips')}
+                </h3>
+                <ul className="list-disc list-inside space-y-2 text-muted-foreground">
+                  {exercise.exerciseTips.map((tip, index) => (
+                    <li key={index} className="pl-2">
+                      {tip}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Variations */}
+            {exercise.variations && exercise.variations.length > 0 && (
+              <div>
+                <h3 className="font-semibold mb-3">
+                  {t('workouts.exerciseLibrary.exercise.variations')}
+                </h3>
+                <ul className="list-disc list-inside space-y-2 text-muted-foreground">
+                  {exercise.variations.map((variation, index) => (
+                    <li key={index} className="pl-2">
+                      {variation}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Keywords */}
+            {exercise.keywords && exercise.keywords.length > 0 && (
+              <div>
+                <h3 className="font-semibold mb-2">Keywords</h3>
+                <div className="flex flex-wrap gap-2">
+                  {exercise.keywords.slice(0, 10).map((keyword) => (
+                    <Badge key={keyword} variant="outline" className="text-xs">
+                      {keyword}
+                    </Badge>
+                  ))}
+                  {exercise.keywords.length > 10 && (
+                    <Badge variant="outline" className="text-xs">
+                      +{exercise.keywords.length - 10} more
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
 
         {/* Actions */}
-        <div className="flex gap-3 pt-4 border-t">
+        <div className="flex gap-3 p-6 pt-4 border-t shrink-0">
           {userId && (
             <Button
               onClick={handleImport}
