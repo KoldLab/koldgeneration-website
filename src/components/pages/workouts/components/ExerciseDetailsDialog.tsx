@@ -69,7 +69,7 @@ export default function ExerciseDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 gap-0">
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 gap-0">
         <DialogHeader className="px-6 pt-6 pb-4 shrink-0">
           <DialogTitle className="text-2xl">{exercise.name}</DialogTitle>
           <DialogDescription>
@@ -295,8 +295,8 @@ export default function ExerciseDetailsDialog({
         </ScrollArea>
 
         {/* Actions */}
-        <div className="flex gap-3 p-6 pt-4 border-t shrink-0">
-          {userId && (
+        {userId && (
+          <div className="flex gap-3 p-6 pt-4 border-t shrink-0">
             <Button
               onClick={handleImport}
               disabled={importing || imported}
@@ -319,11 +319,8 @@ export default function ExerciseDetailsDialog({
                 </>
               )}
             </Button>
-          )}
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {t('common.cancel')}
-          </Button>
-        </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
