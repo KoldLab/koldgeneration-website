@@ -233,12 +233,14 @@ export default function LogWorkout() {
         WorkoutLog,
         'id' | 'userId' | 'createdAt' | 'updatedAt'
       > = {
-        routineId: selectedRoutine?.id,
-        routineName: selectedRoutine?.name,
+        ...(selectedRoutine?.id && { routineId: selectedRoutine.id }),
+        ...(selectedRoutine?.name && { routineName: selectedRoutine.name }),
         date: workoutDate,
         exercises: workoutEntries,
-        notes: workoutNotes || undefined,
-        duration: workoutDuration ? parseInt(workoutDuration, 10) : undefined,
+        ...(workoutNotes && { notes: workoutNotes }),
+        ...(workoutDuration && {
+          duration: parseInt(workoutDuration, 10),
+        }),
       };
 
       await createWorkoutLog(user.uid, workoutLog);

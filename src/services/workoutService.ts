@@ -9,6 +9,7 @@ import {
   query,
   where,
   orderBy,
+  limit,
   Timestamp,
   serverTimestamp,
 } from 'firebase/firestore';
@@ -22,9 +23,9 @@ import type {
 } from '@/types/workout';
 
 // Collection names
-const EXERCISES_COLLECTION = 'workouts/exercises';
-const ROUTINES_COLLECTION = 'workouts/routines';
-const LOGS_COLLECTION = 'workouts/logs';
+const EXERCISES_COLLECTION = 'exercises';
+const ROUTINES_COLLECTION = 'routines';
+const LOGS_COLLECTION = 'workoutLogs';
 
 // Helper: Convert Firestore timestamp to Date
 function timestampToDate(timestamp: any): Date {
@@ -278,19 +279,35 @@ export async function deleteRoutine(routineId: string): Promise<void> {
 // ==================== WORKOUT LOGS ====================
 
 /**
+ * Helper: Remove undefined values from an object
+ */
+function removeUndefined<T extends Record<string, any>>(obj: T): Partial<T> {
+  const cleaned: Partial<T> = {};
+  for (const key in obj) {
+    if (obj[key] !== undefined) {
+      cleaned[key] = obj[key];
+    }
+  }
+  return cleaned;
+}
+
+/**
  * Create a new workout log
  */
 export async function createWorkoutLog(
   userId: string,
   logData: Omit<WorkoutLog, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
 ): Promise<WorkoutLog> {
-  const logRef = await addDoc(collection(db, LOGS_COLLECTION), {
+  // Remove undefined values before saving
+  const cleanedData = removeUndefined({
     ...logData,
     userId,
     date: dateToTimestamp(logData.date),
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
+
+  const logRef = await addDoc(collection(db, LOGS_COLLECTION), cleanedData);
 
   const docSnap = await getDoc(logRef);
   if (!docSnap.exists()) {
