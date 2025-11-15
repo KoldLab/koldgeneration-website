@@ -419,7 +419,22 @@
       "addToWorkout": "Ajouter à l'Entraînement"
     },
     "history": {
-      "comingSoon": "Fonctionnalité d'historique d'entraînements à venir"
+      "title": "Historique des Entraînements",
+      "description": "Voir tous vos entraînements passés",
+      "comingSoon": "Fonctionnalité d'historique d'entraînements à venir",
+      "noWorkouts": "Aucun entraînement pour le moment. Commencez à enregistrer vos entraînements !",
+      "error": "Échec du chargement de l'historique des entraînements",
+      "today": "Aujourd'hui",
+      "yesterday": "Hier",
+      "freeWorkout": "Entraînement Libre",
+      "routine": "Routine",
+      "exercise": "exercice",
+      "exercises": "exercices",
+      "set": "série",
+      "sets": "séries",
+      "reps": "rép",
+      "completed": "Terminé",
+      "notes": "Notes"
     },
     "routines": {
       "comingSoon": "Fonctionnalité de routines d'entraînement à venir"

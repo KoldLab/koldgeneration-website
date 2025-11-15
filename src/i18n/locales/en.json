@@ -419,7 +419,22 @@
       "addToWorkout": "Add to Workout"
     },
     "history": {
-      "comingSoon": "Workout History feature coming soon"
+      "title": "Workout History",
+      "description": "View all your past workouts",
+      "comingSoon": "Workout History feature coming soon",
+      "noWorkouts": "No workouts yet. Start logging your workouts!",
+      "error": "Failed to load workout history",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "freeWorkout": "Free Workout",
+      "routine": "Routine",
+      "exercise": "exercise",
+      "exercises": "exercises",
+      "set": "set",
+      "sets": "sets",
+      "reps": "reps",
+      "completed": "Done",
+      "notes": "Notes"
     },
     "routines": {
       "comingSoon": "Workout Routines feature coming soon"

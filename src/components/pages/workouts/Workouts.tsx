@@ -4,6 +4,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import ExerciseLibrary from './ExerciseLibrary';
 import LogWorkout from './LogWorkout';
+import WorkoutHistory from './WorkoutHistory';
 
 export default function Workouts() {
   const { t } = useTranslation();
@@ -37,13 +38,7 @@ export default function Workouts() {
         </TabsContent>
 
         <TabsContent value="history" className="mt-6">
-          <Card className="p-6">
-            <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-              <p className="text-muted-foreground text-center">
-                {t('workouts.history.comingSoon')}
-              </p>
-            </div>
-          </Card>
+          <WorkoutHistory />
         </TabsContent>
 
         <TabsContent value="routines" className="mt-6">

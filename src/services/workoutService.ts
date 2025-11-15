@@ -354,7 +354,8 @@ export async function getWorkoutLogsByUserId(
     q = query(q, where('date', '<=', dateToTimestamp(options.endDate)));
   }
 
-  // Order by date (most recent first)
+  // Order by date (most recent first), then by createdAt for workouts on the same date
+  // Requires composite index: userId (Ascending), date (Descending), createdAt (Descending)
   q = query(q, orderBy('date', 'desc'), orderBy('createdAt', 'desc'));
 
   // Add limit if provided
