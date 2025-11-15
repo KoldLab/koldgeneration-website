@@ -33,6 +33,14 @@
         "description": "Stopwatch and countdown timer with precision timing"
       }
     },
+    "workouts": {
+      "title": "Workouts",
+      "description": "Track your fitness journey with workout logging and routines",
+      "exercises": {
+        "title": "Exercise Library",
+        "description": "Browse and import exercises from the database"
+      }
+    },
     "tournaments": {
       "title": "Tournaments",
       "description": "Create and manage tournaments",
@@ -207,7 +215,7 @@
       "description": "Set up a new tournament and invite participants to join",
       "name": "Tournament Name",
       "namePlaceholder": "Enter tournament name",
-      "description": "Description (optional)",
+      "descriptionLabel": "Description (optional)",
       "descriptionPlaceholder": "Enter tournament description",
       "type": "Tournament Type",
       "maxPlayers": "Maximum Participants",
@@ -255,18 +263,18 @@
       "pseudonymPlaceholder": "Choose a name to play as",
       "pseudonymHint": "You can join without signing in! Just choose a name and start playing.",
       "you": "You",
-    "ownerAddParticipant": {
-      "title": "Add Participant",
-      "description": "Manually add a participant to the tournament. They will appear as a guest participant.",
-      "nameLabel": "Participant name",
-      "namePlaceholder": "Enter participant name",
-      "addButton": "Add participant",
-      "helper": "Use this when someone can’t sign in but should still be included.",
-      "errors": {
-        "nameRequired": "Enter a participant name before adding.",
-        "nameTooLong": "Please keep the name under 50 characters."
-      }
-    },
+      "ownerAddParticipant": {
+        "title": "Add Participant",
+        "description": "Manually add a participant to the tournament. They will appear as a guest participant.",
+        "nameLabel": "Participant name",
+        "namePlaceholder": "Enter participant name",
+        "addButton": "Add participant",
+        "helper": "Use this when someone can’t sign in but should still be included.",
+        "errors": {
+          "nameRequired": "Enter a participant name before adding.",
+          "nameTooLong": "Please keep the name under 50 characters."
+        }
+      },
       "removeParticipant": "Remove"
     },
     "enter": {
@@ -339,6 +347,46 @@
       "errors": {
         "nameRequired": "Enter a participant name before adding.",
         "nameTooLong": "Please keep the name under 50 characters."
+      }
+    }
+  },
+  "workouts": {
+    "title": "Workouts",
+    "description": "Track your fitness journey with workout logging and routines",
+    "exerciseLibrary": {
+      "title": "Exercise Library",
+      "description": "Browse and import exercises from the database",
+      "search": "Search exercises...",
+      "noResults": "No exercises found",
+      "loading": "Loading exercises...",
+      "error": "Failed to load exercises",
+      "filters": {
+        "title": "Filters",
+        "bodyPart": "Body Part",
+        "equipment": "Equipment",
+        "targetMuscle": "Target Muscle",
+        "clearFilters": "Clear Filters",
+        "all": "All"
+      },
+      "exercise": {
+        "name": "Exercise Name",
+        "bodyParts": "Body Parts",
+        "equipment": "Equipment",
+        "targetMuscles": "Target Muscles",
+        "secondaryMuscles": "Secondary Muscles",
+        "viewDetails": "View Details",
+        "import": "Import Exercise",
+        "imported": "Imported",
+        "instructions": "Instructions",
+        "tips": "Tips",
+        "variations": "Variations",
+        "overview": "Overview",
+        "relatedExercises": "Related Exercises"
+      },
+      "details": {
+        "title": "Exercise Details",
+        "importSuccess": "Exercise imported successfully",
+        "importError": "Failed to import exercise"
       }
     }
   }

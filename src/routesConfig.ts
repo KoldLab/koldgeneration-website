@@ -32,6 +32,18 @@ export const getRoutesConfig = (t: TFunction): RouteConfig[] => [
     ],
   },
   {
+    title: t('routes.workouts.title'),
+    to: '/workouts',
+    description: t('routes.workouts.description'),
+    children: [
+      {
+        title: t('routes.workouts.exercises.title'),
+        to: '/workouts/exercises',
+        description: t('routes.workouts.exercises.description'),
+      },
+    ],
+  },
+  {
     title: t('routes.tournaments.title'),
     to: '/tournaments',
     description: t('routes.tournaments.description'),
