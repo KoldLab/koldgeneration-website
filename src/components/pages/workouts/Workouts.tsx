@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import ExerciseLibrary from './ExerciseLibrary';
-import { Loader2 } from 'lucide-react';
+import LogWorkout from './LogWorkout';
 
 export default function Workouts() {
   const { t } = useTranslation();
@@ -20,9 +20,7 @@ export default function Workouts() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="log">
-            {t('workouts.tabs.log')}
-          </TabsTrigger>
+          <TabsTrigger value="log">{t('workouts.tabs.log')}</TabsTrigger>
           <TabsTrigger value="history">
             {t('workouts.tabs.history')}
           </TabsTrigger>
@@ -35,13 +33,7 @@ export default function Workouts() {
         </TabsList>
 
         <TabsContent value="log" className="mt-6">
-          <Card className="p-6">
-            <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-              <p className="text-muted-foreground text-center">
-                {t('workouts.logWorkout.comingSoon')}
-              </p>
-            </div>
-          </Card>
+          <LogWorkout />
         </TabsContent>
 
         <TabsContent value="history" className="mt-6">
@@ -71,4 +63,3 @@ export default function Workouts() {
     </div>
   );
 }
-

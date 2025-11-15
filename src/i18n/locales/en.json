@@ -40,6 +40,10 @@
     "workouts": {
       "title": "Workouts",
       "description": "Track your fitness journey with workout logging and routines",
+      "dashboard": {
+        "title": "Dashboard",
+        "description": "View and manage your workouts"
+      },
       "exercises": {
         "title": "Exercise Library",
         "description": "Browse and import exercises from the database"
@@ -368,7 +372,40 @@
       "exercises": "Exercise Library"
     },
     "logWorkout": {
-      "comingSoon": "Log Workout feature coming soon"
+      "title": "Log Workout",
+      "description": "Record a new workout session",
+      "date": "Date",
+      "duration": "Duration",
+      "overallNotes": "Overall Workout Notes",
+      "notesPlaceholder": "Add any notes about your workout...",
+      "startFromRoutine": "Start from Routine",
+      "selectRoutine": "Select a routine",
+      "startFromScratch": "Start from Scratch",
+      "exercises": "Exercises",
+      "addExercise": "Add Exercise",
+      "addFirstExercise": "Add Your First Exercise",
+      "noExercisesMessage": "No exercises added yet. Add exercises to start logging your workout.",
+      "noExercisesAvailable": "No exercises available. Please add exercises to your library first.",
+      "noExercisesError": "Please add at least one exercise to log a workout.",
+      "noSetsError": "Please add at least one set to at least one exercise.",
+      "dateRequired": "Please select a date for your workout.",
+      "saveWorkout": "Save Workout",
+      "saving": "Saving...",
+      "saveSuccess": "Workout saved successfully!",
+      "saveError": "Failed to save workout. Please try again.",
+      "errorLoadingData": "Failed to load exercises and routines.",
+      "errorLoadingRoutine": "Failed to load routine."
+    },
+    "exerciseSelector": {
+      "title": "Add Exercise",
+      "browse": "Browse Exercises",
+      "create": "Create Custom",
+      "customName": "Exercise Name",
+      "customNamePlaceholder": "Enter exercise name",
+      "customDescription": "Description",
+      "customDescriptionPlaceholder": "Enter exercise description (optional)",
+      "createExercise": "Create Exercise",
+      "creating": "Creating..."
     },
     "history": {
       "comingSoon": "Workout History feature coming soon"
