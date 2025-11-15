@@ -1,8 +1,9 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { X, Copy } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import type { ExerciseSet } from '@/types/workout';
 
 interface SetInputProps {
@@ -10,6 +11,7 @@ interface SetInputProps {
   setNumber: number;
   onUpdate: (set: ExerciseSet) => void;
   onRemove?: () => void;
+  onDuplicate?: () => void;
   showRemove?: boolean;
 }
 
@@ -18,6 +20,7 @@ export default function SetInput({
   setNumber,
   onUpdate,
   onRemove,
+  onDuplicate,
   showRemove = false,
 }: SetInputProps) {
   const handleRepsChange = (value: string) => {
@@ -35,63 +38,70 @@ export default function SetInput({
   };
 
   return (
-    <div className="flex items-center gap-4 p-3 border rounded-md">
+    <div className="flex items-center gap-3 p-3 border rounded-md">
       <div className="flex-shrink-0 w-8 text-sm font-medium text-muted-foreground">
         {setNumber}
       </div>
 
-      <div className="flex-1 grid grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <Label htmlFor={`reps-${setNumber}`} className="text-xs">
-            Reps
-          </Label>
-          <Input
-            id={`reps-${setNumber}`}
-            type="number"
-            min="0"
-            value={set.reps ?? ''}
-            onChange={(e) => handleRepsChange(e.target.value)}
-            placeholder="0"
-            className="h-9"
-          />
-        </div>
+      <div className="flex-1 grid grid-cols-2 gap-3">
+        <Input
+          id={`reps-${setNumber}`}
+          type="number"
+          min="0"
+          value={set.reps ?? ''}
+          onChange={(e) => handleRepsChange(e.target.value)}
+          placeholder="Reps"
+          className="h-9"
+        />
 
-        <div className="space-y-1">
-          <Label htmlFor={`weight-${setNumber}`} className="text-xs">
-            Weight
-          </Label>
-          <Input
-            id={`weight-${setNumber}`}
-            type="number"
-            min="0"
-            step="0.5"
-            value={set.weight ?? ''}
-            onChange={(e) => handleWeightChange(e.target.value)}
-            placeholder="0"
-            className="h-9"
-          />
-        </div>
+        <Input
+          id={`weight-${setNumber}`}
+          type="number"
+          min="0"
+          step="0.5"
+          value={set.weight ?? ''}
+          onChange={(e) => handleWeightChange(e.target.value)}
+          placeholder="Weight"
+          className="h-9"
+        />
       </div>
 
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-2">
-          <Switch
+          <Checkbox
             id={`completed-${setNumber}`}
             checked={set.completed}
             onCheckedChange={handleCompletedChange}
+            className={cn(
+              'data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 data-[state=checked]:text-white'
+            )}
           />
           <Label htmlFor={`completed-${setNumber}`} className="text-xs cursor-pointer">
             Done
           </Label>
         </div>
 
-        {showRemove && onRemove && (
+        {onDuplicate && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={onDuplicate}
+            className="h-8 w-8"
+            title="Duplicate set"
+          >
+            <Copy className="h-4 w-4" />
+          </Button>
+        )}
+
+        {onRemove && (
           <Button
             type="button"
             variant="ghost"
             size="icon"
             onClick={onRemove}
-            className="h-8 w-8"
+            className="h-8 w-8 text-destructive hover:text-destructive"
+            title="Delete set"
           >
             <X className="h-4 w-4" />
           </Button>

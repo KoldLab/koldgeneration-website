@@ -82,7 +82,7 @@ export default function ExerciseDetailsDialog({
           <div className="space-y-6">
             {/* Exercise GIF/Image/Video */}
             {(exercise.gifUrl || exercise.imageUrl || exercise.videoUrl) && (
-              <div className="aspect-video bg-muted rounded-lg overflow-hidden">
+              <div className="aspect-square bg-muted rounded-lg overflow-hidden">
                 {exercise.videoUrl ? (
                   <video
                     src={exercise.videoUrl}

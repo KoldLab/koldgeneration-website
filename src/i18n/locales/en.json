@@ -10,7 +10,11 @@
     "goHome": "Go Home",
     "user": "User",
     "cancel": "Cancel",
-    "retry": "Retry"
+    "retry": "Retry",
+    "yes": "Yes",
+    "no": "No",
+    "previous": "Previous",
+    "next": "Next"
   },
   "nav": {
     "home": "Home",
@@ -407,6 +411,13 @@
       "createExercise": "Create Exercise",
       "creating": "Creating..."
     },
+    "exerciseGrid": {
+      "columns": "Columns",
+      "columnsLabel": "Columns",
+      "itemsPerPage": "Items Per Page",
+      "showGif": "Show GIF",
+      "addToWorkout": "Add to Workout"
+    },
     "history": {
       "comingSoon": "Workout History feature coming soon"
     },
@@ -426,6 +437,7 @@
         "equipment": "Equipment",
         "targetMuscle": "Target Muscle",
         "clearFilters": "Clear Filters",
+        "resetFilters": "Reset Filters",
         "all": "All"
       },
       "exercise": {

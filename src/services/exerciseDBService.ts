@@ -34,13 +34,19 @@ interface ExerciseDBResponse<T> {
 
 export interface ExerciseDBFilterParams {
   bodyParts?: string; // Comma-separated values (e.g., "upper arms,chest")
-  equipment?: string; // Comma-separated values (e.g., "dumbbell,barbell")
+  equipments?: string; // Comma-separated values (e.g., "dumbbell,barbell") - API uses 'equipments' (plural)
+  equipment?: string; // Alias for equipments for backward compatibility
   muscles?: string; // Comma-separated values (e.g., "chest,triceps") - target muscles
-  search?: string; // Search query
+  secondaryMuscles?: string; // Comma-separated values for secondary muscles
+  exerciseType?: string; // Exercise type (e.g., "strength", "cardio")
+  difficulty?: string; // Difficulty level (e.g., "intermediate")
+  search?: string; // Search query (supports advanced search, not just fuzzy matching)
   sortBy?: string; // Sort field (e.g., "name")
   sortOrder?: 'asc' | 'desc'; // Sort order
-  limit?: number;
-  offset?: number;
+  limit?: number; // Max results (min: 1, max: 25, default: 10)
+  offset?: number; // Offset for pagination
+  after?: string; // Exercise ID to paginate after (for forward pagination)
+  before?: string; // Exercise ID to paginate before (for backward pagination)
 }
 
 // Helper function to make API requests
@@ -114,14 +120,26 @@ export async function getAllExercises(
 
     // Use the filter endpoint for all requests
     if (params?.bodyParts) queryParams.append('bodyParts', params.bodyParts);
-    if (params?.equipment) queryParams.append('equipment', params.equipment);
+    // Support both 'equipments' (API standard) and 'equipment' (backward compatibility)
+    if (params?.equipments) {
+      queryParams.append('equipments', params.equipments);
+    } else if (params?.equipment) {
+      queryParams.append('equipments', params.equipment);
+    }
     if (params?.muscles) queryParams.append('muscles', params.muscles);
+    if (params?.secondaryMuscles)
+      queryParams.append('secondaryMuscles', params.secondaryMuscles);
+    if (params?.exerciseType)
+      queryParams.append('exerciseType', params.exerciseType);
+    if (params?.difficulty) queryParams.append('difficulty', params.difficulty);
     if (params?.search) queryParams.append('search', params.search);
     if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
     if (params?.sortOrder) queryParams.append('sortOrder', params.sortOrder);
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.offset !== undefined)
       queryParams.append('offset', params.offset.toString());
+    if (params?.after) queryParams.append('after', params.after);
+    if (params?.before) queryParams.append('before', params.before);
 
     const endpoint = `${API_VERSION}/exercises/filter${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     const fullUrl = `${API_BASE_URL}${endpoint}`;

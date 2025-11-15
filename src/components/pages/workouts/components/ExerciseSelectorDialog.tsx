@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Dialog,
@@ -15,17 +15,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Loader2, Search, X, Dumbbell, Plus } from 'lucide-react';
+import { Loader2, Plus } from 'lucide-react';
 import { getAllExercises } from '@/services/exerciseDBService';
 import { createExercise } from '@/services/workoutService';
 import { useExerciseFilterStore } from '@/stores/exerciseFilterStore';
+import ExerciseGrid from './ExerciseGrid';
+import ExerciseDetailsDialog from './ExerciseDetailsDialog';
+import ExerciseFilters from './ExerciseFilters';
 import type { ExerciseDBExercise, ExerciseEntry } from '@/types/workout';
 
 interface ExerciseSelectorDialogProps {
@@ -47,26 +43,30 @@ export default function ExerciseSelectorDialog({
   // Browse tab state
   const [exercises, setExercises] = useState<ExerciseDBExercise[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedBodyPart, setSelectedBodyPart] = useState<string>('all');
-  const [selectedEquipment, setSelectedEquipment] = useState<string>('all');
-  const [selectedTargetMuscle, setSelectedTargetMuscle] =
-    useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  // Get filter and display options from store
+  const {
+    searchQuery,
+    selectedBodyPart,
+    selectedEquipment,
+    selectedTargetMuscle,
+    columns,
+    itemsPerPage,
+    showGif,
+    setDisplayOptions,
+    loadFilters,
+  } = useExerciseFilterStore();
 
   // Create tab state
   const [customName, setCustomName] = useState('');
   const [customDescription, setCustomDescription] = useState('');
   const [creating, setCreating] = useState(false);
 
-  // Filter options
-  const {
-    bodyParts,
-    muscles: targetMuscles,
-    equipments: equipment,
-    loadFilters,
-  } = useExerciseFilterStore();
+  // Selected exercise for details dialog
+  const [selectedExercise, setSelectedExercise] =
+    useState<ExerciseDBExercise | null>(null);
 
   // Load filter options
   useEffect(() => {
@@ -77,16 +77,22 @@ export default function ExerciseSelectorDialog({
   const loadExercises = useCallback(async () => {
     setLoading(true);
     try {
-      const limit = 20;
+      const limit = Math.min(itemsPerPage, 100); // API max is 100, but we cap at 100
       const filterParams: any = {
         limit,
         offset: (currentPage - 1) * limit,
+        sortBy: 'name', // Default sort by name
+        sortOrder: 'asc', // Default ascending order
       };
+
+      // Add filters (API supports comma-separated values for multiple selections)
       if (selectedBodyPart !== 'all') filterParams.bodyParts = selectedBodyPart;
       if (selectedEquipment !== 'all')
-        filterParams.equipment = selectedEquipment;
+        filterParams.equipments = selectedEquipment; // Use 'equipments' (plural) as per API
       if (selectedTargetMuscle !== 'all')
         filterParams.muscles = selectedTargetMuscle;
+
+      // Advanced search - supports fuzzy matching and more
       if (searchQuery.trim()) filterParams.search = searchQuery.trim();
 
       const result = await getAllExercises(filterParams);
@@ -107,6 +113,7 @@ export default function ExerciseSelectorDialog({
     selectedTargetMuscle,
     searchQuery,
     currentPage,
+    itemsPerPage,
   ]);
 
   useEffect(() => {
@@ -121,13 +128,7 @@ export default function ExerciseSelectorDialog({
     }
   }, [selectedBodyPart, selectedEquipment, selectedTargetMuscle, searchQuery]);
 
-  const handleSelectExerciseDB = (exercise: ExerciseDBExercise) => {
-    const entry: ExerciseEntry = {
-      exerciseId: exercise.exerciseId,
-      exerciseName: exercise.name,
-      sets: [],
-      notes: '',
-    };
+  const handleSelectExercise = (entry: ExerciseEntry) => {
     onSelectExercise(entry);
     onOpenChange(false);
   };
@@ -164,26 +165,6 @@ export default function ExerciseSelectorDialog({
     }
   };
 
-  const clearFilters = () => {
-    setSearchQuery('');
-    setSelectedBodyPart('all');
-    setSelectedEquipment('all');
-    setSelectedTargetMuscle('all');
-  };
-
-  const hasActiveFilters =
-    searchQuery ||
-    selectedBodyPart !== 'all' ||
-    selectedEquipment !== 'all' ||
-    selectedTargetMuscle !== 'all';
-
-  const getStringValue = (value: string | { name: string } | any): string => {
-    if (typeof value === 'string') return value;
-    if (value && typeof value === 'object' && 'name' in value)
-      return value.name;
-    return String(value || '');
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="mb-8 flex h-[calc(100vh-2rem)] min-w-[calc(100vw-2rem)] flex-col justify-between gap-0 p-0">
@@ -210,223 +191,32 @@ export default function ExerciseSelectorDialog({
 
                 <TabsContent value="browse" className="mt-4">
                   <div className="px-6 space-y-4">
-                    {/* Search */}
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        type="text"
-                        placeholder={t('workouts.exerciseLibrary.search')}
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10"
-                      />
-                      {searchQuery && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7"
-                          onClick={() => setSearchQuery('')}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-
-                    {/* Filters */}
-                    <div className="grid gap-4 sm:grid-cols-3">
-                      <div className="space-y-2">
-                        <Label>
-                          {t('workouts.exerciseLibrary.filters.bodyPart')}
-                        </Label>
-                        <Select
-                          value={selectedBodyPart}
-                          onValueChange={setSelectedBodyPart}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">
-                              {t('workouts.exerciseLibrary.filters.all')}
-                            </SelectItem>
-                            {bodyParts.map((part: any, index: number) => (
-                              <SelectItem
-                                key={index}
-                                value={getStringValue(part)}
-                              >
-                                {getStringValue(part)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>
-                          {t('workouts.exerciseLibrary.filters.equipment')}
-                        </Label>
-                        <Select
-                          value={selectedEquipment}
-                          onValueChange={setSelectedEquipment}
-                        >
-                          <SelectTrigger className="w-full">
-                          <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">
-                              {t('workouts.exerciseLibrary.filters.all')}
-                            </SelectItem>
-                            {equipment.map((eq: any, index: number) => (
-                              <SelectItem
-                                key={index}
-                                value={getStringValue(eq)}
-                              >
-                                {getStringValue(eq)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>
-                          {t('workouts.exerciseLibrary.filters.targetMuscle')}
-                        </Label>
-                        <Select
-                          value={selectedTargetMuscle}
-                          onValueChange={setSelectedTargetMuscle}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">
-                              {t('workouts.exerciseLibrary.filters.all')}
-                            </SelectItem>
-                            {targetMuscles.map((muscle: any, index: number) => (
-                              <SelectItem
-                                key={index}
-                                value={getStringValue(muscle)}
-                              >
-                                {getStringValue(muscle)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    {hasActiveFilters && (
-                      <Button
-                        variant="outline"
-                        onClick={clearFilters}
-                        size="sm"
-                      >
-                        <X className="h-4 w-4 mr-2" />
-                        {t('workouts.exerciseLibrary.filters.clearFilters')}
-                      </Button>
-                    )}
+                    {/* Search and Filters */}
+                    <ExerciseFilters />
                   </div>
 
                   {/* Exercise Grid */}
                   <div className="px-6 py-4">
-                    {loading && exercises.length === 0 ? (
-                      <div className="flex items-center justify-center h-full min-h-[400px]">
-                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                      </div>
-                    ) : exercises.length === 0 ? (
-                      <Card className="p-12 text-center">
-                        <p className="text-muted-foreground">
-                          {t('workouts.exerciseLibrary.noResults')}
-                        </p>
-                      </Card>
-                    ) : (
-                      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                        {exercises.map((exercise) => (
-                          <Card
-                            key={exercise.exerciseId}
-                            className="p-4 hover:shadow-lg transition-shadow cursor-pointer"
-                            onClick={() => handleSelectExerciseDB(exercise)}
-                          >
-                            <div className="space-y-3">
-                              <div className="aspect-video bg-muted rounded-md flex items-center justify-center overflow-hidden">
-                                {exercise.gifUrl ? (
-                                  <img
-                                    src={exercise.gifUrl}
-                                    alt={exercise.name}
-                                    className="w-full h-full object-cover"
-                                    onError={(e) => {
-                                      if (exercise.imageUrl) {
-                                        e.currentTarget.src = exercise.imageUrl;
-                                      } else {
-                                        e.currentTarget.style.display = 'none';
-                                      }
-                                    }}
-                                  />
-                                ) : exercise.imageUrl ? (
-                                  <img
-                                    src={exercise.imageUrl}
-                                    alt={exercise.name}
-                                    className="w-full h-full object-cover"
-                                  />
-                                ) : (
-                                  <Dumbbell className="h-12 w-12 text-muted-foreground/50" />
-                                )}
-                              </div>
-                              <h3 className="font-semibold line-clamp-2">
-                                {exercise.name}
-                              </h3>
-                              {exercise.bodyParts &&
-                                exercise.bodyParts.length > 0 && (
-                                  <div className="flex flex-wrap gap-1">
-                                    {exercise.bodyParts
-                                      .slice(0, 2)
-                                      .map((part: any, index: number) => (
-                                        <span
-                                          key={index}
-                                          className="px-2 py-1 text-xs bg-primary/10 text-primary rounded-full"
-                                        >
-                                          {getStringValue(part)}
-                                        </span>
-                                      ))}
-                                  </div>
-                                )}
-                            </div>
-                          </Card>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Pagination */}
-                    {!loading && totalPages > 1 && (
-                      <div className="flex items-center justify-center gap-2 mt-6">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            setCurrentPage((prev) => Math.max(1, prev - 1))
-                          }
-                          disabled={currentPage === 1}
-                        >
-                          Previous
-                        </Button>
-                        <span className="text-sm text-muted-foreground">
-                          {currentPage} / {totalPages}
-                        </span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            setCurrentPage((prev) =>
-                              Math.min(totalPages, prev + 1)
-                            )
-                          }
-                          disabled={currentPage === totalPages}
-                        >
-                          Next
-                        </Button>
-                      </div>
-                    )}
+                    <ExerciseGrid
+                      exercises={exercises}
+                      loading={loading}
+                      mode="select"
+                      onSelectExercise={handleSelectExercise}
+                      onViewDetails={(exercise) =>
+                        setSelectedExercise(exercise)
+                      }
+                      columns={columns}
+                      itemsPerPage={itemsPerPage}
+                      showGif={showGif}
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={setCurrentPage}
+                      showDisplayControls={true}
+                      onDisplayOptionsChange={(options) => {
+                        setDisplayOptions(options);
+                        setCurrentPage(1); // Reset to page 1 when options change
+                      }}
+                    />
                   </div>
                 </TabsContent>
 
@@ -494,6 +284,16 @@ export default function ExerciseSelectorDialog({
           </DialogClose>
         </DialogFooter>
       </DialogContent>
+
+      {/* Exercise Details Dialog */}
+      {selectedExercise && (
+        <ExerciseDetailsDialog
+          exercise={selectedExercise}
+          open={!!selectedExercise}
+          onOpenChange={(open) => !open && setSelectedExercise(null)}
+          userId={userId}
+        />
+      )}
     </Dialog>
   );
 }

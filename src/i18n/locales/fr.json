@@ -10,7 +10,11 @@
     "goHome": "Retour à l'accueil",
     "user": "Utilisateur",
     "cancel": "Annuler",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "yes": "Oui",
+    "no": "Non",
+    "previous": "Précédent",
+    "next": "Suivant"
   },
   "nav": {
     "home": "Accueil",
@@ -407,6 +411,13 @@
       "createExercise": "Créer l'Exercice",
       "creating": "Création..."
     },
+    "exerciseGrid": {
+      "columns": "Colonnes",
+      "columnsLabel": "Colonnes",
+      "itemsPerPage": "Éléments Par Page",
+      "showGif": "Afficher le GIF",
+      "addToWorkout": "Ajouter à l'Entraînement"
+    },
     "history": {
       "comingSoon": "Fonctionnalité d'historique d'entraînements à venir"
     },
@@ -426,6 +437,7 @@
         "equipment": "Équipement",
         "targetMuscle": "Muscle Cible",
         "clearFilters": "Effacer les Filtres",
+        "resetFilters": "Réinitialiser les Filtres",
         "all": "Tous"
       },
       "exercise": {

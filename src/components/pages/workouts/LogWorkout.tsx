@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWorkoutStore } from '@/stores/workoutStore';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,7 +32,6 @@ import {
   getRoutineById,
 } from '@/services/workoutService';
 import type {
-  Exercise,
   ExerciseEntry,
   WorkoutRoutine,
   WorkoutLog,
@@ -43,29 +43,89 @@ export default function LogWorkout() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  // Get workout state from store
+  const {
+    workoutEntries,
+    workoutDate: storedWorkoutDate,
+    workoutDuration: storedWorkoutDuration,
+    workoutNotes: storedWorkoutNotes,
+    selectedRoutineId: storedSelectedRoutineId,
+    collapsedExercises,
+    setWorkoutEntries,
+    setWorkoutDate,
+    setWorkoutDuration,
+    setWorkoutNotes,
+    setSelectedRoutineId,
+    updateWorkoutEntry,
+    removeWorkoutEntry,
+    addWorkoutEntry,
+    clearWorkout,
+    setExerciseCollapsed,
+  } = useWorkoutStore();
+
   // Data
-  const [exercises, setExercises] = useState<Exercise[]>([]);
   const [routines, setRoutines] = useState<WorkoutRoutine[]>([]);
-  const [workoutEntries, setWorkoutEntries] = useState<ExerciseEntry[]>([]);
   const [exerciseSelectorOpen, setExerciseSelectorOpen] = useState(false);
 
-  // Form state
-  const [selectedRoutineId, setSelectedRoutineId] = useState<string>('none');
+  // Form state - initialize from store or defaults
   const today = new Date();
-  const [workoutDate, setWorkoutDate] = useState<Date | undefined>(today);
+  const [workoutDate, setWorkoutDateState] = useState<Date | undefined>(
+    storedWorkoutDate ? new Date(storedWorkoutDate) : today
+  );
   const [workoutDateMonth, setWorkoutDateMonth] = useState<Date | undefined>(
-    today
+    storedWorkoutDate ? new Date(storedWorkoutDate) : today
   );
   const [workoutDateOpen, setWorkoutDateOpen] = useState(false);
   const [workoutDateValue, setWorkoutDateValue] = useState<string>(
-    today.toLocaleDateString('en-US', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-    })
+    storedWorkoutDate
+      ? new Date(storedWorkoutDate).toLocaleDateString('en-US', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+        })
+      : today.toLocaleDateString('en-US', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+        })
   );
-  const [workoutDuration, setWorkoutDuration] = useState<string>('');
-  const [workoutNotes, setWorkoutNotes] = useState<string>('');
+  const [selectedRoutineId, setSelectedRoutineIdState] = useState<string>(
+    storedSelectedRoutineId || 'none'
+  );
+  const [workoutDuration, setWorkoutDurationState] = useState<string>(
+    storedWorkoutDuration || ''
+  );
+  const [workoutNotes, setWorkoutNotesState] = useState<string>(
+    storedWorkoutNotes || ''
+  );
+
+  // Sync local state with store
+  useEffect(() => {
+    if (storedWorkoutDate) {
+      const date = new Date(storedWorkoutDate);
+      setWorkoutDateState(date);
+      setWorkoutDateMonth(date);
+      setWorkoutDateValue(
+        date.toLocaleDateString('en-US', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+        })
+      );
+    }
+  }, [storedWorkoutDate]);
+
+  useEffect(() => {
+    setSelectedRoutineIdState(storedSelectedRoutineId);
+  }, [storedSelectedRoutineId]);
+
+  useEffect(() => {
+    setWorkoutDurationState(storedWorkoutDuration);
+  }, [storedWorkoutDuration]);
+
+  useEffect(() => {
+    setWorkoutNotesState(storedWorkoutNotes);
+  }, [storedWorkoutNotes]);
 
   // Load exercises and routines
   useEffect(() => {
@@ -74,11 +134,10 @@ export default function LogWorkout() {
     const loadData = async () => {
       setLoading(true);
       try {
-        const [exercisesData, routinesData] = await Promise.all([
+        const [, routinesData] = await Promise.all([
           getExercisesByUserId(user.uid),
           getRoutinesByUserId(user.uid),
         ]);
-        setExercises(exercisesData);
         setRoutines(routinesData);
       } catch (error) {
         console.error('Error loading data:', error);
@@ -122,18 +181,25 @@ export default function LogWorkout() {
   };
 
   const handleSelectExercise = (entry: ExerciseEntry) => {
-    setWorkoutEntries([...workoutEntries, entry]);
+    // Automatically add 1 set when exercise is selected
+    const entryWithSet: ExerciseEntry = {
+      ...entry,
+      sets: [
+        {
+          setNumber: 1,
+          completed: false,
+        },
+      ],
+    };
+    addWorkoutEntry(entryWithSet);
   };
 
   const handleUpdateEntry = (index: number, updatedEntry: ExerciseEntry) => {
-    const updated = [...workoutEntries];
-    updated[index] = updatedEntry;
-    setWorkoutEntries(updated);
+    updateWorkoutEntry(index, updatedEntry);
   };
 
   const handleRemoveEntry = (index: number) => {
-    const updated = workoutEntries.filter((_, i) => i !== index);
-    setWorkoutEntries(updated);
+    removeWorkoutEntry(index);
   };
 
   const handleSaveWorkout = async () => {
@@ -178,11 +244,10 @@ export default function LogWorkout() {
       await createWorkoutLog(user.uid, workoutLog);
       toast.success(t('workouts.logWorkout.saveSuccess'));
 
-      // Reset form
-      setWorkoutEntries([]);
-      setSelectedRoutineId('none');
+      // Reset form and clear store
+      clearWorkout();
       const resetDate = new Date();
-      setWorkoutDate(resetDate);
+      setWorkoutDateState(resetDate);
       setWorkoutDateMonth(resetDate);
       setWorkoutDateValue(
         resetDate.toLocaleDateString('en-US', {
@@ -191,8 +256,9 @@ export default function LogWorkout() {
           year: 'numeric',
         })
       );
-      setWorkoutDuration('');
-      setWorkoutNotes('');
+      setSelectedRoutineIdState('none');
+      setWorkoutDurationState('');
+      setWorkoutNotesState('');
     } catch (error) {
       console.error('Error saving workout:', error);
       toast.error(t('workouts.logWorkout.saveError'));
@@ -236,8 +302,9 @@ export default function LogWorkout() {
                   setWorkoutDateValue(e.target.value);
                   const parsedDate = parseDate(e.target.value);
                   if (parsedDate) {
-                    setWorkoutDate(parsedDate);
+                    setWorkoutDateState(parsedDate);
                     setWorkoutDateMonth(parsedDate);
+                    setWorkoutDate(parsedDate);
                   }
                 }}
                 onKeyDown={(e) => {
@@ -269,8 +336,9 @@ export default function LogWorkout() {
                     month={workoutDateMonth}
                     onMonthChange={setWorkoutDateMonth}
                     onSelect={(date) => {
-                      setWorkoutDate(date);
+                      setWorkoutDateState(date);
                       if (date) {
+                        setWorkoutDate(date);
                         setWorkoutDateValue(
                           date.toLocaleDateString('en-US', {
                             day: '2-digit',
@@ -296,7 +364,10 @@ export default function LogWorkout() {
               type="number"
               min="0"
               value={workoutDuration}
-              onChange={(e) => setWorkoutDuration(e.target.value)}
+              onChange={(e) => {
+                setWorkoutDurationState(e.target.value);
+                setWorkoutDuration(e.target.value);
+              }}
               placeholder="Optional"
             />
           </div>
@@ -309,7 +380,10 @@ export default function LogWorkout() {
             </Label>
             <Select
               value={selectedRoutineId}
-              onValueChange={setSelectedRoutineId}
+              onValueChange={(value) => {
+                setSelectedRoutineIdState(value);
+                setSelectedRoutineId(value);
+              }}
             >
               <SelectTrigger id="routine-select">
                 <SelectValue
@@ -337,7 +411,10 @@ export default function LogWorkout() {
           <Textarea
             id="workout-notes"
             value={workoutNotes}
-            onChange={(e) => setWorkoutNotes(e.target.value)}
+            onChange={(e) => {
+              setWorkoutNotesState(e.target.value);
+              setWorkoutNotes(e.target.value);
+            }}
             placeholder={t('workouts.logWorkout.notesPlaceholder')}
             rows={3}
           />
@@ -387,6 +464,10 @@ export default function LogWorkout() {
                 }
                 onRemove={() => handleRemoveEntry(index)}
                 showRemove={true}
+                isCollapsed={collapsedExercises[entry.exerciseId] || false}
+                onCollapsedChange={(collapsed) =>
+                  setExerciseCollapsed(entry.exerciseId, collapsed)
+                }
               />
             ))}
           </div>

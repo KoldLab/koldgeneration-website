@@ -16,9 +16,35 @@ interface ExerciseFilterState {
   isLoaded: boolean;
   error: string | null;
 
+  // Filter state (persisted across components)
+  searchQuery: string;
+  selectedBodyPart: string;
+  selectedEquipment: string;
+  selectedTargetMuscle: string;
+
+  // Display options (persisted across components)
+  columns: number;
+  itemsPerPage: number;
+  showGif: boolean;
+
   // Actions
   loadFilters: () => Promise<void>;
   reset: () => void;
+  // Filter actions
+  setSearchQuery: (query: string) => void;
+  setSelectedBodyPart: (part: string) => void;
+  setSelectedEquipment: (equipment: string) => void;
+  setSelectedTargetMuscle: (muscle: string) => void;
+  clearFilters: () => void;
+  // Display options actions
+  setColumns: (columns: number) => void;
+  setItemsPerPage: (items: number) => void;
+  setShowGif: (show: boolean) => void;
+  setDisplayOptions: (options: {
+    columns: number;
+    itemsPerPage: number;
+    showGif: boolean;
+  }) => void;
 }
 
 const initialState = {
@@ -28,6 +54,15 @@ const initialState = {
   isLoading: false,
   isLoaded: false,
   error: null,
+  // Filter state defaults
+  searchQuery: '',
+  selectedBodyPart: 'all',
+  selectedEquipment: 'all',
+  selectedTargetMuscle: 'all',
+  // Display options defaults
+  columns: 4,
+  itemsPerPage: 20,
+  showGif: true,
 };
 
 export const useExerciseFilterStore = create<ExerciseFilterState>((set, get) => ({
@@ -72,6 +107,50 @@ export const useExerciseFilterStore = create<ExerciseFilterState>((set, get) => 
 
   reset: () => {
     set(initialState);
+  },
+
+  // Filter actions
+  setSearchQuery: (query: string) => {
+    set({ searchQuery: query });
+  },
+  setSelectedBodyPart: (part: string) => {
+    set({ selectedBodyPart: part });
+  },
+  setSelectedEquipment: (equipment: string) => {
+    set({ selectedEquipment: equipment });
+  },
+  setSelectedTargetMuscle: (muscle: string) => {
+    set({ selectedTargetMuscle: muscle });
+  },
+  clearFilters: () => {
+    set({
+      searchQuery: '',
+      selectedBodyPart: 'all',
+      selectedEquipment: 'all',
+      selectedTargetMuscle: 'all',
+    });
+  },
+
+  // Display options actions
+  setColumns: (columns: number) => {
+    set({ columns });
+  },
+  setItemsPerPage: (items: number) => {
+    set({ itemsPerPage: items });
+  },
+  setShowGif: (show: boolean) => {
+    set({ showGif: show });
+  },
+  setDisplayOptions: (options: {
+    columns: number;
+    itemsPerPage: number;
+    showGif: boolean;
+  }) => {
+    set({
+      columns: options.columns,
+      itemsPerPage: options.itemsPerPage,
+      showGif: options.showGif,
+    });
   },
 }));
 
