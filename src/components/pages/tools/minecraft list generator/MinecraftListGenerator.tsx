@@ -17,8 +17,9 @@ import {
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { ChevronDown, Copy, Check } from 'lucide-react';
+import { ChevronDown, Copy, Check, EyeOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 interface MinecraftItem {
   Slot: number;
@@ -37,7 +38,7 @@ const MinecraftListGenerator = () => {
   const [error, setError] = useState<string>('');
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [font, setFont] = useState('Arial');
-  const [columns, setColumns] = useState(1);
+  const [columns, setColumns] = useState(2);
   const [rows, setRows] = useState(0); // 0 means auto-calculate based on columns
   const [backgroundColor, setBackgroundColor] = useState('');
   const [fontColor, setFontColor] = useState('#000000');
@@ -45,6 +46,7 @@ const MinecraftListGenerator = () => {
   const [iconSize, setIconSize] = useState(64);
   const [previewOpen, setPreviewOpen] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [headerText, setHeaderText] = useState(t('minecraft.itemsRequired'));
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const fonts = [
@@ -85,7 +87,8 @@ const MinecraftListGenerator = () => {
   const formatItemsAsText = (): string => {
     if (items.length === 0) return '';
 
-    let text = `${t('minecraft.itemsRequired')}\n\n`;
+    const header = headerText || t('minecraft.itemsRequired');
+    let text = `${header}\n\n`;
     items.forEach((item) => {
       const name = formatItemName(item.id);
       text += `${item.count} - ${name}\n`;
@@ -153,14 +156,12 @@ const MinecraftListGenerator = () => {
     }
 
     // Title
+    const header = headerText || t('minecraft.itemsRequired');
+    const cleanHeader = header.replace(/^- | -$/g, '');
     ctx.textAlign = 'center';
     ctx.fillStyle = fontColor;
     ctx.font = `bold 60px ${font}`;
-    ctx.fillText(
-      `${t('minecraft.itemsRequired').replace(/^- | -$/g, '')}:`,
-      canvas.width / 2,
-      padding + 60
-    );
+    ctx.fillText(`${cleanHeader}:`, canvas.width / 2, padding + 60);
 
     // Load all item images
     try {
@@ -276,6 +277,7 @@ const MinecraftListGenerator = () => {
     fontColor,
     fontSize,
     iconSize,
+    headerText,
     t,
   ]);
 
@@ -446,135 +448,194 @@ const MinecraftListGenerator = () => {
 
             <CollapsibleContent>
               {/* Settings */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 p-3 sm:p-4 bg-muted/50 rounded-md">
-                <div className="relative">
-                  <Label htmlFor="font-select" className="mb-2">
-                    {t('minecraft.font')}
-                  </Label>
-                  <Select value={font} onValueChange={setFont}>
-                    <SelectTrigger
-                      id="font-select"
-                      style={{ fontFamily: font }}
-                    >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {fonts.map((fontOption) => (
-                        <SelectItem
-                          key={fontOption}
-                          value={fontOption}
-                          style={{ fontFamily: fontOption }}
+              <div className="space-y-6 mb-4 p-3 sm:p-4 bg-muted/50 rounded-md">
+                {/* Font Changing Group */}
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold text-foreground mb-3">
+                    Font
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                    <div>
+                      <Label htmlFor="header-text">
+                        {t('minecraft.headerText')}
+                      </Label>
+                      <Input
+                        id="header-text"
+                        type="text"
+                        value={headerText}
+                        onChange={(e) => setHeaderText(e.target.value)}
+                        placeholder={t('minecraft.headerTextPlaceholder')}
+                        className="mt-2"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="font-select">{t('minecraft.font')}</Label>
+                      <Select value={font} onValueChange={setFont}>
+                        <SelectTrigger
+                          id="font-select"
+                          style={{ fontFamily: font }}
+                          className="mt-2 w-full min-h-[44px]"
                         >
-                          {fontOption}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="columns">{t('minecraft.columns')}</Label>
-                  <Input
-                    id="columns"
-                    type="number"
-                    min="1"
-                    max="10"
-                    value={columns}
-                    onChange={(e) =>
-                      setColumns(Math.max(1, parseInt(e.target.value) || 1))
-                    }
-                    className="mt-2"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="rows">{t('minecraft.rows')}</Label>
-                  <Input
-                    id="rows"
-                    type="number"
-                    min="0"
-                    max="50"
-                    value={rows}
-                    onChange={(e) =>
-                      setRows(Math.max(0, parseInt(e.target.value) || 0))
-                    }
-                    className="mt-2"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="bg-color">
-                    {t('minecraft.backgroundColor')}
-                  </Label>
-                  <div className="flex gap-2 mt-2">
-                    <Input
-                      id="bg-color"
-                      type="color"
-                      value={backgroundColor || '#ffffff'}
-                      onChange={(e) => setBackgroundColor(e.target.value)}
-                      className="w-20"
-                    />
-                    <Input
-                      type="text"
-                      placeholder="Transparent"
-                      value={backgroundColor}
-                      onChange={(e) => setBackgroundColor(e.target.value)}
-                      className="flex-1"
-                    />
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {fonts.map((fontOption) => (
+                            <SelectItem
+                              key={fontOption}
+                              value={fontOption}
+                              style={{ fontFamily: fontOption }}
+                            >
+                              {fontOption}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="font-size">
+                        {t('minecraft.fontSize')}
+                      </Label>
+                      <Input
+                        id="font-size"
+                        type="number"
+                        min="12"
+                        max="72"
+                        value={fontSize}
+                        onChange={(e) =>
+                          setFontSize(
+                            Math.max(
+                              12,
+                              Math.min(72, parseInt(e.target.value) || 28)
+                            )
+                          )
+                        }
+                        className="mt-2"
+                      />
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <Label htmlFor="font-color">{t('minecraft.fontColor')}</Label>
-                  <div className="flex gap-2 mt-2">
-                    <Input
-                      id="font-color"
-                      type="color"
-                      value={fontColor}
-                      onChange={(e) => setFontColor(e.target.value)}
-                      className="w-20"
-                    />
-                    <Input
-                      type="text"
-                      value={fontColor}
-                      onChange={(e) => setFontColor(e.target.value)}
-                      className="flex-1"
-                    />
+
+                {/* Color Group */}
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold text-foreground mb-3">
+                    Color
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                      <Label htmlFor="bg-color">
+                        {t('minecraft.backgroundColor')}
+                      </Label>
+                      <div className="flex gap-2 mt-2">
+                        <Input
+                          id="bg-color"
+                          type="color"
+                          value={backgroundColor || '#ffffff'}
+                          onChange={(e) => setBackgroundColor(e.target.value)}
+                          className="w-20"
+                        />
+                        <Input
+                          type="text"
+                          placeholder="Transparent"
+                          value={backgroundColor}
+                          onChange={(e) => setBackgroundColor(e.target.value)}
+                          className="flex-1"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => {
+                            setBackgroundColor('');
+                            toast.success(t('minecraft.transparentBackground'));
+                          }}
+                          title={t(
+                            'minecraft.transparentBackgroundDescription'
+                          )}
+                          className="flex-shrink-0"
+                        >
+                          <EyeOff className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="font-color">
+                        {t('minecraft.fontColor')}
+                      </Label>
+                      <div className="flex gap-2 mt-2">
+                        <Input
+                          id="font-color"
+                          type="color"
+                          value={fontColor}
+                          onChange={(e) => setFontColor(e.target.value)}
+                          className="w-20"
+                        />
+                        <Input
+                          type="text"
+                          value={fontColor}
+                          onChange={(e) => setFontColor(e.target.value)}
+                          className="flex-1"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <Label htmlFor="font-size">{t('minecraft.fontSize')}</Label>
-                  <Input
-                    id="font-size"
-                    type="number"
-                    min="12"
-                    max="72"
-                    value={fontSize}
-                    onChange={(e) =>
-                      setFontSize(
-                        Math.max(
-                          12,
-                          Math.min(72, parseInt(e.target.value) || 28)
-                        )
-                      )
-                    }
-                    className="mt-2"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="icon-size">{t('minecraft.iconSize')}</Label>
-                  <Input
-                    id="icon-size"
-                    type="number"
-                    min="16"
-                    max="128"
-                    value={iconSize}
-                    onChange={(e) =>
-                      setIconSize(
-                        Math.max(
-                          16,
-                          Math.min(128, parseInt(e.target.value) || 64)
-                        )
-                      )
-                    }
-                    className="mt-2"
-                  />
+
+                {/* Grid Group */}
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold text-foreground mb-3">
+                    Grid
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                    <div>
+                      <Label htmlFor="columns">{t('minecraft.columns')}</Label>
+                      <Input
+                        id="columns"
+                        type="number"
+                        min="1"
+                        max="10"
+                        value={columns}
+                        onChange={(e) =>
+                          setColumns(Math.max(1, parseInt(e.target.value) || 1))
+                        }
+                        className="mt-2"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="rows">{t('minecraft.rows')}</Label>
+                      <Input
+                        id="rows"
+                        type="number"
+                        min="0"
+                        max="50"
+                        value={rows}
+                        onChange={(e) =>
+                          setRows(Math.max(0, parseInt(e.target.value) || 0))
+                        }
+                        className="mt-2"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="icon-size">
+                        {t('minecraft.iconSize')}
+                      </Label>
+                      <Input
+                        id="icon-size"
+                        type="number"
+                        min="16"
+                        max="128"
+                        value={iconSize}
+                        onChange={(e) =>
+                          setIconSize(
+                            Math.max(
+                              16,
+                              Math.min(128, parseInt(e.target.value) || 64)
+                            )
+                          )
+                        }
+                        className="mt-2"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
               {previewUrl && (

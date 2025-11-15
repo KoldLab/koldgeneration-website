@@ -28,12 +28,18 @@ export const router = createBrowserRouter([
         element: <Tools />,
         children: [
           {
-            path: '/tools/minecraft-list-generator',
-            element: <MinecraftListGenerator />,
-          },
-          {
             path: '/tools/timer',
             element: <Timer />,
+          },
+        ],
+      },
+      {
+        path: '/minecraft-tools',
+        element: <Tools />,
+        children: [
+          {
+            path: '/minecraft-tools/list-generator',
+            element: <MinecraftListGenerator />,
           },
         ],
       },

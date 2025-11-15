@@ -24,13 +24,17 @@
     "tools": {
       "title": "Tools",
       "description": "All personal utilities and scripts",
-      "minecraftListGenerator": {
-        "title": "Minecraft List Generator",
-        "description": "Generate formatted item lists and images from Minecraft chest NBT data"
-      },
       "timer": {
         "title": "Timer",
         "description": "Stopwatch and countdown timer with precision timing"
+      }
+    },
+    "minecraftTools": {
+      "title": "Minecraft Tools",
+      "description": "Tools for Minecraft content creation",
+      "listGenerator": {
+        "title": "Chest Contents Image Generator",
+        "description": "Create customizable images showing the contents of your Minecraft chest"
       }
     },
     "workouts": {
@@ -108,10 +112,12 @@
     }
   },
   "minecraft": {
-    "title": "Minecraft List Generator",
-    "description": "Transform your Minecraft chest NBT data into beautifully formatted item lists. Generate text lists or custom PNG images with customizable fonts, colors, and layouts.",
-    "pasteJson": "Paste your JSON here...",
+    "title": "Minecraft Chest Contents Image Generator",
+    "description": "Create customizable images showing the contents of your Minecraft chest. Perfect for tutorials - displays item names, quantities, and icons. Also generates a formatted text list you can copy.",
+    "pasteJson": "Paste your chest NBT data here...",
     "itemsRequired": "- Items required -",
+    "headerText": "Header Text",
+    "headerTextPlaceholder": "Enter header text (e.g., 'Items required', 'Chest contents', etc.)",
     "generate": "Generate",
     "test": "Test",
     "preview": "Preview",
@@ -120,6 +126,8 @@
     "fontSize": "Font Size",
     "fontColor": "Font Color",
     "backgroundColor": "Background Color",
+    "transparentBackground": "Set transparent background",
+    "transparentBackgroundDescription": "Click to remove the background color, making it transparent",
     "columns": "Columns",
     "rows": "Rows (0 = auto)",
     "iconSize": "Icon Size",
@@ -354,7 +362,7 @@
     "title": "Workouts",
     "description": "Track your fitness journey with workout logging and routines",
     "exerciseLibrary": {
-      "title": "Exercise Library",
+      "title": "Exercise Library *work in progress*",
       "description": "Browse and import exercises from the database",
       "search": "Search exercises...",
       "noResults": "No exercises found",

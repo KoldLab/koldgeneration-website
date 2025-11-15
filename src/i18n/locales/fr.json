@@ -16,40 +16,52 @@
     "home": "Accueil",
     "tools": "Outils"
   },
-  "routes": {
-    "home": {
-      "title": "Accueil",
-      "description": "Page d'accueil principale"
-    },
-    "tools": {
-      "title": "Outils",
-      "description": "Toutes les utilitaires et scripts personnels",
-      "minecraftListGenerator": {
-        "title": "Générateur de Liste Minecraft",
-        "description": "Générer des listes d'objets formatées et des images à partir des données NBT de coffre Minecraft"
+    "routes": {
+      "home": {
+        "title": "Accueil",
+        "description": "Page d'accueil principale"
       },
-      "timer": {
-        "title": "Minuteur",
-        "description": "Chronomètre et compte à rebours avec minutage précis"
+      "tools": {
+        "title": "Outils",
+        "description": "Toutes les utilitaires et scripts personnels",
+        "timer": {
+          "title": "Minuteur",
+          "description": "Chronomètre et compte à rebours avec minutage précis"
+        }
+      },
+      "minecraftTools": {
+        "title": "Outils Minecraft",
+        "description": "Outils pour la création de contenu Minecraft",
+        "listGenerator": {
+          "title": "Générateur d'Image de Contenu de Coffre",
+          "description": "Créez des images personnalisables montrant le contenu de votre coffre Minecraft"
+        }
+      },
+      "workouts": {
+        "title": "Entraînements",
+        "description": "Suivez votre parcours fitness avec l'enregistrement d'entraînements et de routines",
+        "exercises": {
+          "title": "Bibliothèque d'Exercices",
+          "description": "Parcourir et importer des exercices depuis la base de données"
+        }
+      },
+      "tournaments": {
+        "title": "Tournois",
+        "description": "Créer et gérer des tournois",
+        "create": {
+          "title": "Créer un Tournoi",
+          "description": "Créer un nouveau tournoi"
+        },
+        "my": {
+          "title": "Mes Tournois",
+          "description": "Voir tous les tournois auxquels vous avez participé"
+        },
+        "enter": {
+          "title": "Entrer un code de tournoi",
+          "description": "Accéder à la page de saisie d'un code pour rejoindre un tournoi"
+        }
       }
     },
-    "tournaments": {
-      "title": "Tournois",
-      "description": "Créer et gérer des tournois",
-      "create": {
-        "title": "Créer un Tournoi",
-        "description": "Créer un nouveau tournoi"
-      },
-      "my": {
-        "title": "Mes Tournois",
-        "description": "Voir tous les tournois auxquels vous avez participé"
-      },
-      "enter": {
-        "title": "Entrer un code de tournoi",
-        "description": "Accéder à la page de saisie d'un code pour rejoindre un tournoi"
-      }
-    }
-  },
   "home": {
     "welcome": "Bienvenue sur le Hub Kold Generation",
     "description": "Explorez nos outils et fonctionnalités de tournois pour dynamiser vos événements communautaires.",
@@ -100,10 +112,12 @@
     }
   },
   "minecraft": {
-    "title": "Générateur de Liste Minecraft",
-    "description": "Transformez vos données NBT de coffre Minecraft en listes d'objets joliment formatées. Générez des listes de texte ou des images PNG personnalisées avec des polices, couleurs et mises en page personnalisables.",
-    "pasteJson": "Collez votre JSON ici...",
+    "title": "Générateur d'Image de Contenu de Coffre Minecraft",
+    "description": "Créez des images personnalisables montrant le contenu de votre coffre Minecraft. Parfait pour les tutoriels - affiche les noms d'objets, les quantités et les icônes. Génère également une liste de texte formatée que vous pouvez copier.",
+    "pasteJson": "Collez vos données NBT de coffre ici...",
     "itemsRequired": "- Items requis -",
+    "headerText": "Texte d'En-tête",
+    "headerTextPlaceholder": "Entrez le texte d'en-tête (ex. 'Items requis', 'Contenu du coffre', etc.)",
     "generate": "Générer",
     "test": "Test",
     "preview": "Aperçu",
@@ -112,6 +126,8 @@
     "fontSize": "Taille de Police",
     "fontColor": "Couleur du Texte",
     "backgroundColor": "Couleur de Fond",
+    "transparentBackground": "Définir le fond transparent",
+    "transparentBackgroundDescription": "Cliquez pour supprimer la couleur de fond, la rendant transparente",
     "columns": "Colonnes",
     "rows": "Lignes (0 = auto)",
     "iconSize": "Taille des Icônes",
@@ -340,6 +356,104 @@
         "nameRequired": "Inscrivez un nom de participant avant de l'ajouter.",
         "nameTooLong": "Le nom doit comporter moins de 50 caractères."
       }
+    }
+  },
+  "workouts": {
+    "title": "Entraînements",
+    "description": "Suivez votre parcours fitness avec l'enregistrement d'entraînements et de routines",
+    "exerciseLibrary": {
+      "title": "Bibliothèque d'Exercices *en cours de développement*",
+      "description": "Parcourir et importer des exercices depuis la base de données",
+      "search": "Rechercher des exercices...",
+      "noResults": "Aucun exercice trouvé",
+      "loading": "Chargement des exercices...",
+      "error": "Échec du chargement des exercices",
+      "filters": {
+        "title": "Filtres",
+        "bodyPart": "Partie du Corps",
+        "equipment": "Équipement",
+        "targetMuscle": "Muscle Cible",
+        "clearFilters": "Effacer les Filtres",
+        "all": "Tous"
+      },
+      "exercise": {
+        "name": "Nom de l'Exercice",
+        "bodyParts": "Parties du Corps",
+        "equipment": "Équipement",
+        "targetMuscles": "Muscles Cibles",
+        "secondaryMuscles": "Muscles Secondaires",
+        "viewDetails": "Voir les Détails",
+        "import": "Importer l'Exercice",
+        "imported": "Importé",
+        "instructions": "Instructions",
+        "tips": "Conseils",
+        "variations": "Variations",
+        "overview": "Aperçu",
+        "relatedExercises": "Exercices Connexes"
+      },
+      "details": {
+        "title": "Détails de l'Exercice",
+        "importSuccess": "Exercice importé avec succès",
+        "importError": "Échec de l'importation de l'exercice"
+      }
+    },
+    "dashboard": {
+      "title": "Journal d'Entraînement",
+      "description": "Suivez et consultez l'historique de vos entraînements",
+      "newWorkout": "Nouvel Entraînement",
+      "noWorkouts": "Aucun entraînement pour le moment. Commencez votre premier entraînement !",
+      "loading": "Chargement des entraînements...",
+      "error": "Échec du chargement des entraînements",
+      "retry": "Réessayer"
+    },
+    "calendar": {
+      "title": "Vue Calendrier",
+      "workoutCount": "{{count}} entraînement",
+      "workoutCount_plural": "{{count}} entraînements",
+      "selectDate": "Sélectionnez une date pour voir les entraînements",
+      "today": "Aujourd'hui",
+      "noWorkoutsOnDate": "Aucun entraînement à cette date"
+    },
+    "list": {
+      "title": "Vue Liste",
+      "recent": "Entraînements Récents",
+      "groupedBy": "Entraînements du {{date}}"
+    },
+    "stats": {
+      "totalWorkouts": "Total des Entraînements",
+      "totalDays": "Jours Actifs",
+      "currentStreak": "Série Actuelle",
+      "lastWorkout": "Dernier Entraînement"
+    },
+    "log": {
+      "title": "Enregistrer un Entraînement",
+      "description": "Enregistrer une nouvelle session d'entraînement",
+      "date": "Date",
+      "duration": "Durée (minutes)",
+      "overallNotes": "Notes sur l'Entraînement",
+      "saveWorkout": "Enregistrer l'Entraînement",
+      "startFromScratch": "Commencer depuis le Début",
+      "startFromRoutine": "Commencer depuis une Routine"
+    },
+    "exercise": {
+      "name": "Nom de l'Exercice",
+      "description": "Description",
+      "sets": "Séries",
+      "reps": "Répétitions",
+      "weight": "Poids",
+      "charge": "Poids/Charge",
+      "notes": "Notes",
+      "addSet": "Ajouter une Série",
+      "removeSet": "Retirer une Série",
+      "completed": "Terminé",
+      "overallNotes": "Notes sur l'Exercice"
+    },
+    "routine": {
+      "name": "Nom de la Routine",
+      "description": "Description",
+      "addExercise": "Ajouter un Exercice",
+      "saveRoutine": "Enregistrer la Routine",
+      "loadRoutine": "Charger la Routine"
     }
   }
 }

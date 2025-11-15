@@ -8,14 +8,16 @@ const getAPIBaseURL = () => {
   }
   // In production, use proxy to avoid CORS
   if (import.meta.env.PROD) {
-    return '/api/exercisedb'; // Use proxy path
+    return '/api/exercisedb'; // Use proxy path (proxy adds /api/ prefix)
   }
   // In development, use direct URL
   return 'https://kold-exercisedb-api.vercel.app';
 };
 
 const API_BASE_URL = getAPIBaseURL();
-const API_VERSION = '/v1';
+// API_VERSION: In prod, proxy adds /api/ prefix, so we only need /v1
+// In dev, we need full /api/v1 path
+const API_VERSION = import.meta.env.PROD ? '/v1' : '/api/v1';
 
 // API Response types
 interface ExerciseDBResponse<T> {

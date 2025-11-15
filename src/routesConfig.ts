@@ -20,14 +20,21 @@ export const getRoutesConfig = (t: TFunction): RouteConfig[] => [
     description: t('routes.tools.description'),
     children: [
       {
-        title: t('routes.tools.minecraftListGenerator.title'),
-        to: '/tools/minecraft-list-generator',
-        description: t('routes.tools.minecraftListGenerator.description'),
-      },
-      {
         title: t('routes.tools.timer.title'),
         to: '/tools/timer',
         description: t('routes.tools.timer.description'),
+      },
+    ],
+  },
+  {
+    title: t('routes.minecraftTools.title'),
+    to: '/minecraft-tools',
+    description: t('routes.minecraftTools.description'),
+    children: [
+      {
+        title: t('routes.minecraftTools.listGenerator.title'),
+        to: '/minecraft-tools/list-generator',
+        description: t('routes.minecraftTools.listGenerator.description'),
       },
     ],
   },
@@ -80,15 +87,22 @@ export const routesConfig: RouteConfig[] = [
     description: 'All personal utilities and scripts',
     children: [
       {
-        title: 'Minecraft List Generator',
-        to: '/tools/minecraft-list-generator',
-        description:
-          'Generate formatted item lists and images from Minecraft chest NBT data',
-      },
-      {
         title: 'Timer',
         to: '/tools/timer',
         description: 'Stopwatch and countdown timer with precision timing',
+      },
+    ],
+  },
+  {
+    title: 'Minecraft Tools',
+    to: '/minecraft-tools',
+    description: 'Tools for Minecraft content creation',
+    children: [
+      {
+        title: 'Chest Contents Image Generator',
+        to: '/minecraft-tools/list-generator',
+        description:
+          'Create customizable images showing the contents of your Minecraft chest',
       },
     ],
   },

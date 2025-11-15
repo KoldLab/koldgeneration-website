@@ -38,7 +38,7 @@ export default function Home() {
       title: t('home.cards.tools.minecraftListGenerator.title'),
       description: t('home.cards.tools.minecraftListGenerator.description'),
       icon: <FileText className="h-12 w-12 text-white drop-shadow-lg" />,
-      to: '/tools/minecraft-list-generator',
+      to: '/minecraft-tools/list-generator',
       gradient: 'from-orange-500 via-amber-500 to-rose-500',
     },
     {
