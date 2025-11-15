@@ -9,6 +9,7 @@ import TournamentView from './components/pages/tournaments/TournamentView';
 import MyTournaments from './components/pages/tournaments/MyTournaments';
 import EnterTournament from './components/pages/tournaments/EnterTournament';
 import ExerciseLibrary from './components/pages/workouts/ExerciseLibrary';
+import Workouts from './components/pages/workouts/Workouts';
 import ErrorBoundary from './components/ErrorBoundary';
 import NotFound from './components/pages/NotFound';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -44,8 +45,20 @@ export const router = createBrowserRouter([
         ],
       },
       {
+        path: '/workouts',
+        element: (
+          <ProtectedRoute>
+            <Workouts />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: '/workouts/exercises',
-        element: <ExerciseLibrary />,
+        element: (
+          <ProtectedRoute>
+            <ExerciseLibrary />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/tournaments/create',

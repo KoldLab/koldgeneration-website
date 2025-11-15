@@ -361,6 +361,21 @@
   "workouts": {
     "title": "Entraînements",
     "description": "Suivez votre parcours fitness avec l'enregistrement d'entraînements et de routines",
+    "tabs": {
+      "log": "Enregistrer un Entraînement",
+      "history": "Historique",
+      "routines": "Routines",
+      "exercises": "Bibliothèque d'Exercices"
+    },
+    "logWorkout": {
+      "comingSoon": "Fonctionnalité d'enregistrement d'entraînement à venir"
+    },
+    "history": {
+      "comingSoon": "Fonctionnalité d'historique d'entraînements à venir"
+    },
+    "routines": {
+      "comingSoon": "Fonctionnalité de routines d'entraînement à venir"
+    },
     "exerciseLibrary": {
       "title": "Bibliothèque d'Exercices *en cours de développement*",
       "description": "Parcourir et importer des exercices depuis la base de données",

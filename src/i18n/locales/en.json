@@ -361,6 +361,21 @@
   "workouts": {
     "title": "Workouts",
     "description": "Track your fitness journey with workout logging and routines",
+    "tabs": {
+      "log": "Log Workout",
+      "history": "History",
+      "routines": "Routines",
+      "exercises": "Exercise Library"
+    },
+    "logWorkout": {
+      "comingSoon": "Log Workout feature coming soon"
+    },
+    "history": {
+      "comingSoon": "Workout History feature coming soon"
+    },
+    "routines": {
+      "comingSoon": "Workout Routines feature coming soon"
+    },
     "exerciseLibrary": {
       "title": "Exercise Library *work in progress*",
       "description": "Browse and import exercises from the database",
