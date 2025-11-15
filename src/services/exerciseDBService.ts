@@ -1,9 +1,21 @@
 import type { ExerciseDBExercise } from '@/types/workout';
 
-const API_BASE_URL =
-  import.meta.env.VITE_EXERCISEDB_API_URL ||
-  'https://kold-exercisedb-api.vercel.app';
-const API_VERSION = '/api/v1';
+// Use proxy in production to avoid CORS issues, direct URL in development or if explicitly set
+const getAPIBaseURL = () => {
+  // If explicitly set, use it
+  if (import.meta.env.VITE_EXERCISEDB_API_URL) {
+    return import.meta.env.VITE_EXERCISEDB_API_URL;
+  }
+  // In production, use proxy to avoid CORS
+  if (import.meta.env.PROD) {
+    return '/api/exercisedb'; // Use proxy path
+  }
+  // In development, use direct URL
+  return 'https://kold-exercisedb-api.vercel.app';
+};
+
+const API_BASE_URL = getAPIBaseURL();
+const API_VERSION = '/v1';
 
 // API Response types
 interface ExerciseDBResponse<T> {
