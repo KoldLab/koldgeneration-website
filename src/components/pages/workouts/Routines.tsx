@@ -30,7 +30,6 @@ import {
 import {
   Plus,
   Play,
-  Edit,
   Trash2,
   Loader2,
   Calendar,
@@ -39,6 +38,13 @@ import {
   ChevronUp,
   Info,
 } from 'lucide-react';
+import {
+  Item,
+  ItemGroup,
+  ItemContent,
+  ItemTitle,
+  ItemDescription,
+} from '@/components/ui/item';
 import { toast } from 'sonner';
 import CreateEditRoutineDialog from './components/CreateEditRoutineDialog';
 import ExerciseDetailsDialog from './components/ExerciseDetailsDialog';
@@ -59,9 +65,6 @@ export default function Routines() {
 
   // Dialog states
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [editingRoutine, setEditingRoutine] = useState<WorkoutRoutine | null>(
-    null
-  );
   const [routineToDelete, setRoutineToDelete] = useState<WorkoutRoutine | null>(
     null
   );
@@ -137,13 +140,6 @@ export default function Routines() {
   const handleRoutineCreated = (routine: WorkoutRoutine) => {
     setRoutines([routine, ...routines]);
     setIsCreateDialogOpen(false);
-  };
-
-  const handleRoutineUpdated = (updatedRoutine: WorkoutRoutine) => {
-    setRoutines(
-      routines.map((r) => (r.id === updatedRoutine.id ? updatedRoutine : r))
-    );
-    setEditingRoutine(null);
   };
 
   const toggleRoutineExpansion = (routineId: string) => {
@@ -371,72 +367,38 @@ export default function Routines() {
                     </button>
 
                     {expandedRoutines.has(routine.id) && (
-                      <div className="space-y-2 pt-2">
+                      <ItemGroup className="pt-2">
                         {routine.exercises.map((exercise, index) => (
-                          <div
-                            key={index}
-                            className="p-2 rounded-md bg-muted/50 space-y-1"
-                          >
-                            <div className="flex items-center gap-2">
-                              <span className="font-semibold text-sm">
+                          <Item key={index} variant="muted">
+                            <ItemContent>
+                              <ItemTitle className="flex items-center gap-2">
                                 {exercise.exerciseName}
-                              </span>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleExerciseNameClick(exercise, routine, e);
-                                }}
-                                className="text-muted-foreground hover:text-foreground transition-colors"
-                                aria-label={t(
-                                  'workouts.history.viewExerciseDetails'
-                                )}
-                              >
-                                <Info className="h-4 w-4" />
-                              </button>
-                            </div>
-                            {exercise.notes && (
-                              <p className="text-xs text-muted-foreground">
-                                {exercise.notes}
-                              </p>
-                            )}
-                            {exercise.sets.length > 0 && (
-                              <div className="pt-2 space-y-1">
-                                <h6 className="font-semibold text-xs">
-                                  {t('workouts.history.sets')}
-                                </h6>
-                                <div className="space-y-1">
-                                  {exercise.sets.map((set, setIndex) => (
-                                    <div
-                                      key={setIndex}
-                                      className="flex items-center justify-between text-xs py-1 px-2 bg-muted/30 rounded"
-                                    >
-                                      <span className="font-medium">
-                                        {t(
-                                          'workouts.history.tableHeaders.sets'
-                                        )}{' '}
-                                        {set.setNumber}
-                                      </span>
-                                      <div className="flex items-center gap-3">
-                                        <span>
-                                          {set.reps
-                                            ? `${set.reps} ${t('workouts.history.tableHeaders.reps')}`
-                                            : t('workouts.history.noReps')}
-                                        </span>
-                                        {' - '}
-                                        <span>
-                                          {set.weight
-                                            ? `${set.weight} kg`
-                                            : t('workouts.history.noWeight')}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleExerciseNameClick(
+                                      exercise,
+                                      routine,
+                                      e
+                                    );
+                                  }}
+                                  className="text-muted-foreground hover:text-foreground transition-colors"
+                                  aria-label={t(
+                                    'workouts.history.viewExerciseDetails'
+                                  )}
+                                >
+                                  <Info className="h-4 w-4" />
+                                </button>
+                              </ItemTitle>
+                              {exercise.notes && (
+                                <ItemDescription>
+                                  {exercise.notes}
+                                </ItemDescription>
+                              )}
+                            </ItemContent>
+                          </Item>
                         ))}
-                      </div>
+                      </ItemGroup>
                     )}
                   </div>
                 )}
@@ -464,13 +426,6 @@ export default function Routines() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setEditingRoutine(routine)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
                     onClick={() => setRoutineToDelete(routine)}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -488,16 +443,6 @@ export default function Routines() {
         onOpenChange={setIsCreateDialogOpen}
         onRoutineCreated={handleRoutineCreated}
       />
-
-      {/* Edit Routine Dialog */}
-      {editingRoutine && (
-        <CreateEditRoutineDialog
-          open={!!editingRoutine}
-          onOpenChange={(open) => !open && setEditingRoutine(null)}
-          routine={editingRoutine}
-          onRoutineUpdated={handleRoutineUpdated}
-        />
-      )}
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog

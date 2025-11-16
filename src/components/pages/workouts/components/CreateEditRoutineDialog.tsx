@@ -19,11 +19,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Plus, X, Edit } from 'lucide-react';
+import {
+  Item,
+  ItemGroup,
+  ItemContent,
+  ItemTitle,
+  ItemDescription,
+  ItemActions,
+} from '@/components/ui/item';
+import { Loader2, Plus, X } from 'lucide-react';
 import { toast } from 'sonner';
 import ExerciseSelectorDialog from './ExerciseSelectorDialog';
-import ExerciseEntryForm from './ExerciseEntryForm';
-import { useWorkoutStore } from '@/stores/workoutStore';
 
 interface CreateEditRoutineDialogProps {
   open: boolean;
@@ -47,7 +53,6 @@ export default function CreateEditRoutineDialog({
   const [exercises, setExercises] = useState<ExerciseEntry[]>([]);
   const [saving, setSaving] = useState(false);
   const [isExerciseSelectorOpen, setIsExerciseSelectorOpen] = useState(false);
-  const [editingExerciseIndex, setEditingExerciseIndex] = useState<number | null>(null);
 
   const isEditing = !!routine;
 
@@ -56,7 +61,13 @@ export default function CreateEditRoutineDialog({
     if (open && routine) {
       setName(routine.name);
       setDescription(routine.description || '');
-      setExercises(routine.exercises || []);
+      // Remove sets when loading routine - routines don't need sets
+      setExercises(
+        (routine.exercises || []).map((ex) => ({
+          ...ex,
+          sets: [],
+        }))
+      );
     } else if (open && !routine) {
       // Reset for new routine
       setName('');
@@ -66,15 +77,13 @@ export default function CreateEditRoutineDialog({
   }, [open, routine]);
 
   const handleAddExercise = (entry: ExerciseEntry) => {
-    setExercises([...exercises, entry]);
+    // Remove sets when adding to routine - routines don't need sets
+    const entryWithoutSets: ExerciseEntry = {
+      ...entry,
+      sets: [],
+    };
+    setExercises([...exercises, entryWithoutSets]);
     setIsExerciseSelectorOpen(false);
-  };
-
-  const handleUpdateExercise = (index: number, updatedEntry: ExerciseEntry) => {
-    const updated = [...exercises];
-    updated[index] = updatedEntry;
-    setExercises(updated);
-    setEditingExerciseIndex(null);
   };
 
   const handleRemoveExercise = (index: number) => {
@@ -199,60 +208,27 @@ export default function CreateEditRoutineDialog({
                   <p>{t('workouts.routines.noExercises')}</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <ItemGroup>
                   {exercises.map((exercise, index) => (
-                    <div key={index}>
-                      {editingExerciseIndex === index ? (
-                        <ExerciseEntryForm
-                          entry={exercise}
-                          onSave={(updated) =>
-                            handleUpdateExercise(index, updated)
-                          }
-                          onCancel={() => setEditingExerciseIndex(null)}
-                        />
-                      ) : (
-                        <Card>
-                          <CardContent className="p-4">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <h4 className="font-semibold">
-                                  {exercise.exerciseName}
-                                </h4>
-                                {exercise.notes && (
-                                  <p className="text-sm text-muted-foreground mt-1">
-                                    {exercise.notes}
-                                  </p>
-                                )}
-                                <p className="text-sm text-muted-foreground mt-1">
-                                  {exercise.sets.length}{' '}
-                                  {exercise.sets.length === 1
-                                    ? t('workouts.routines.setCount')
-                                    : t('workouts.routines.setsCount')}
-                                </p>
-                              </div>
-                              <div className="flex gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => setEditingExerciseIndex(index)}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleRemoveExercise(index)}
-                                >
-                                  <X className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      )}
-                    </div>
+                    <Item key={index} size="sm">
+                      <ItemContent>
+                        <ItemTitle>{exercise.exerciseName}</ItemTitle>
+                        {exercise.notes && (
+                          <ItemDescription>{exercise.notes}</ItemDescription>
+                        )}
+                      </ItemContent>
+                      <ItemActions>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveExercise(index)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </ItemActions>
+                    </Item>
                   ))}
-                </div>
+                </ItemGroup>
               )}
             </div>
           </div>
