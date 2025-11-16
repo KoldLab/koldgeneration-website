@@ -542,11 +542,11 @@ export default function TournamentView() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div className="flex-1">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2">
+          <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
             {tournament.name}
           </h1>
           {tournament.description && (
-            <p className="text-sm sm:text-base text-muted-foreground mb-2">
+            <p className="text-muted-foreground text-xl leading-7 [&:not(:first-child)]:mt-6">
               {tournament.description}
             </p>
           )}
@@ -854,10 +854,10 @@ export default function TournamentView() {
       {isOwner && tournament.status !== 'completed' && (
         <Card className="p-4 sm:p-6 space-y-4">
           <div>
-            <h2 className="text-lg font-semibold">
+            <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0">
               {t('tournament.view.ownerAddParticipant.title')}
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="leading-7 [&:not(:first-child)]:mt-6">
               {t('tournament.view.ownerAddParticipant.description')}
             </p>
           </div>
@@ -910,7 +910,7 @@ export default function TournamentView() {
 
       {/* Players List */}
       <Card className="p-4 sm:p-6">
-        <h2 className="text-lg font-semibold mb-4">
+        <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0 mb-4">
           {t('tournament.view.players')} ({tournament.players.length}/
           {tournament.maxPlayers})
         </h2>

@@ -60,10 +60,10 @@ export default function EnterTournament() {
   return (
     <div className="mx-auto flex w-full max-w-lg flex-col gap-6">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2">
+        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
           {t('tournament.enter.title')}
         </h1>
-        <p className="text-sm sm:text-base text-muted-foreground">
+        <p className="text-muted-foreground text-xl leading-7 [&:not(:first-child)]:mt-6">
           {t('tournament.enter.subtitle')}
         </p>
       </div>
@@ -75,10 +75,10 @@ export default function EnterTournament() {
               <KeyRound className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold">
+              <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0">
                 {t('tournament.enter.section.title')}
               </h2>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 {t('tournament.enter.section.helper')}
               </p>
             </div>

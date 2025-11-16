@@ -281,8 +281,10 @@ export default function LogWorkout() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold">{t('workouts.logWorkout.title')}</h2>
-        <p className="text-muted-foreground mt-1">
+        <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0">
+          {t('workouts.logWorkout.title')}
+        </h2>
+        <p className="leading-7 [&:not(:first-child)]:mt-6">
           {t('workouts.logWorkout.description')}
         </p>
       </div>
@@ -426,7 +428,7 @@ export default function LogWorkout() {
       {/* Exercises */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-xl font-semibold">
+          <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
             {t('workouts.logWorkout.exercises')} ({workoutEntries.length})
           </h3>
           <Button

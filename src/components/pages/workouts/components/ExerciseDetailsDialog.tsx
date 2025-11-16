@@ -125,7 +125,7 @@ export default function ExerciseDetailsDialog({
                 {/* Body Parts */}
                 {exercise.bodyParts && exercise.bodyParts.length > 0 && (
                   <div>
-                    <h3 className="font-semibold mb-2 flex items-center gap-2">
+                    <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight mb-2 flex items-center gap-2">
                       <PersonStanding className="h-4 w-4" />
                       {t('workouts.exerciseLibrary.exercise.bodyParts')}
                     </h3>
@@ -145,7 +145,7 @@ export default function ExerciseDetailsDialog({
                 {/* Equipment */}
                 {exercise.equipments && exercise.equipments.length > 0 && (
                   <div>
-                    <h3 className="font-semibold mb-2 flex items-center gap-2">
+                    <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight mb-2 flex items-center gap-2">
                       <Dumbbell className="h-4 w-4" />
                       {t('workouts.exerciseLibrary.exercise.equipment')}
                     </h3>
@@ -168,7 +168,9 @@ export default function ExerciseDetailsDialog({
             {(exercise.targetMuscles?.length > 0 ||
               exercise.secondaryMuscles?.length > 0) && (
               <div>
-                <h3 className="font-semibold mb-3">Muscles</h3>
+                <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight mb-3">
+                  Muscles
+                </h3>
                 <div className="grid gap-4 sm:grid-cols-2">
                   {/* Target Muscles */}
                   {exercise.targetMuscles &&
@@ -228,7 +230,7 @@ export default function ExerciseDetailsDialog({
             {/* Instructions */}
             {exercise.instructions && exercise.instructions.length > 0 && (
               <div>
-                <h3 className="font-semibold mb-3">
+                <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight mb-3">
                   {t('workouts.exerciseLibrary.exercise.instructions')}
                 </h3>
                 <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
@@ -244,7 +246,7 @@ export default function ExerciseDetailsDialog({
             {/* Tips */}
             {exercise.exerciseTips && exercise.exerciseTips.length > 0 && (
               <div>
-                <h3 className="font-semibold mb-3">
+                <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight mb-3">
                   {t('workouts.exerciseLibrary.exercise.tips')}
                 </h3>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground">
@@ -260,7 +262,7 @@ export default function ExerciseDetailsDialog({
             {/* Variations */}
             {exercise.variations && exercise.variations.length > 0 && (
               <div>
-                <h3 className="font-semibold mb-3">
+                <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight mb-3">
                   {t('workouts.exerciseLibrary.exercise.variations')}
                 </h3>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground">
@@ -276,7 +278,9 @@ export default function ExerciseDetailsDialog({
             {/* Keywords */}
             {exercise.keywords && exercise.keywords.length > 0 && (
               <div>
-                <h3 className="font-semibold mb-2">Keywords</h3>
+                <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight mb-2">
+                  Keywords
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {exercise.keywords.slice(0, 10).map((keyword) => (
                     <Badge key={keyword} variant="outline" className="text-xs">

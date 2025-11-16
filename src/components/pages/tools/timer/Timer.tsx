@@ -480,11 +480,13 @@ const Timer = () => {
   return (
     <div className="container mx-auto max-w-5xl p-6 space-y-6">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold flex items-center gap-2">
+        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance flex items-center gap-2">
           <TimerIcon className="h-8 w-8" />
           {t('timer.title')}
         </h1>
-        <p className="text-muted-foreground">{t('timer.description')}</p>
+        <p className="text-muted-foreground text-xl leading-7 [&:not(:first-child)]:mt-6">
+          {t('timer.description')}
+        </p>
       </div>
 
       <div className="flex flex-col gap-6 lg:flex-row">

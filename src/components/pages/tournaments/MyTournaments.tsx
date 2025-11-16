@@ -139,10 +139,10 @@ export default function MyTournaments() {
   return (
     <div className="w-full max-w-4xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2">
+        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
           {t('tournament.myTournaments.title')}
         </h1>
-        <p className="text-sm sm:text-base text-muted-foreground">
+        <p className="text-muted-foreground text-xl leading-7 [&:not(:first-child)]:mt-6">
           {t('tournament.myTournaments.description')}
         </p>
       </div>
@@ -169,7 +169,7 @@ export default function MyTournaments() {
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h2 className="text-xl font-bold">{tournament.name}</h2>
+                      <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0">{tournament.name}</h2>
                       {getStatusBadge(tournament.status)}
                       {isOwner && (
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">

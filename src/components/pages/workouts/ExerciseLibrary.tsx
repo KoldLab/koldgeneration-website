@@ -140,11 +140,11 @@ export default function ExerciseLibrary() {
     <div className="container mx-auto max-w-7xl p-6 space-y-6">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold flex items-center gap-2">
+        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance flex items-center gap-2">
           <Dumbbell className="h-8 w-8" />
           {t('workouts.exerciseLibrary.title')}
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground text-xl leading-7 [&:not(:first-child)]:mt-6">
           {t('workouts.exerciseLibrary.description')}
         </p>
       </div>
@@ -153,7 +153,7 @@ export default function ExerciseLibrary() {
       <Card className="p-4 space-y-4">
         <div className="flex items-center gap-2">
           <Filter className="h-5 w-5 text-muted-foreground" />
-          <h3 className="font-semibold">
+          <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
             {t('workouts.exerciseLibrary.filters.title')}
           </h3>
         </div>

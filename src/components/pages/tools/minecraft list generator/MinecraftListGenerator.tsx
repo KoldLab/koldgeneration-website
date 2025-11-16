@@ -361,10 +361,10 @@ const MinecraftListGenerator = () => {
   return (
     <div className="flex flex-col w-full gap-2">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2">
+        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
           {t('minecraft.title')}
         </h1>
-        <p className="text-sm sm:text-base text-muted-foreground">
+        <p className="text-muted-foreground text-xl leading-7 [&:not(:first-child)]:mt-6">
           {t('minecraft.description')}
         </p>
       </div>
@@ -451,7 +451,7 @@ const MinecraftListGenerator = () => {
               <div className="space-y-6 mb-4 p-3 sm:p-4 bg-muted/50 rounded-md">
                 {/* Font Changing Group */}
                 <div className="space-y-2">
-                  <h3 className="text-sm font-semibold text-foreground mb-3">
+                  <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight mb-3">
                     Font
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
@@ -517,7 +517,7 @@ const MinecraftListGenerator = () => {
 
                 {/* Color Group */}
                 <div className="space-y-2">
-                  <h3 className="text-sm font-semibold text-foreground mb-3">
+                  <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight mb-3">
                     Color
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -582,7 +582,7 @@ const MinecraftListGenerator = () => {
 
                 {/* Grid Group */}
                 <div className="space-y-2">
-                  <h3 className="text-sm font-semibold text-foreground mb-3">
+                  <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight mb-3">
                     Grid
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">

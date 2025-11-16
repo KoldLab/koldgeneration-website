@@ -31,7 +31,7 @@ export function SingleEliminationBracket({
   return (
     <div className="mt-10">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold">
+        <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0">
           {t('tournament.bracket.singleElimination.title')}
         </h2>
       </div>

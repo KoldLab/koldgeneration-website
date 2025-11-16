@@ -49,8 +49,10 @@ export default function Workouts() {
   return (
     <div className="w-full space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">{t('workouts.title')}</h1>
-        <p className="text-muted-foreground mt-2">
+        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
+          {t('workouts.title')}
+        </h1>
+        <p className="text-muted-foreground text-xl leading-7 [&:not(:first-child)]:mt-6">
           {t('workouts.description')}
         </p>
       </div>

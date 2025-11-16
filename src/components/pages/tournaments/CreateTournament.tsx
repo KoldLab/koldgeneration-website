@@ -137,10 +137,10 @@ export default function CreateTournament() {
   return (
     <div className="w-full max-w-2xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2">
+        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
           {t('tournament.create.title')}
         </h1>
-        <p className="text-sm sm:text-base text-muted-foreground">
+        <p className="text-muted-foreground text-xl leading-7 [&:not(:first-child)]:mt-6">
           {t('tournament.create.description')}
         </p>
       </div>

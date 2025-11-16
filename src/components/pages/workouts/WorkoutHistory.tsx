@@ -224,8 +224,10 @@ export default function WorkoutHistory() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">{t('workouts.history.title')}</h2>
-          <p className="text-muted-foreground mt-1">
+          <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0">
+            {t('workouts.history.title')}
+          </h2>
+          <p className="leading-7 [&:not(:first-child)]:mt-6">
             {t('workouts.history.description')} ({workouts.length})
           </p>
         </div>
@@ -253,7 +255,7 @@ export default function WorkoutHistory() {
                   {monthGroup.year}
                 </span>
                 <h3
-                  className={`text-3xl font-bold ${
+                  className={`scroll-m-20 text-2xl font-semibold tracking-tight ${
                     isCurrentMonth ? 'underline' : ''
                   }`}
                 >
@@ -303,7 +305,7 @@ export default function WorkoutHistory() {
 
                       <CardContent>
                         <div className="space-y-3">
-                          <h5 className="font-semibold text-sm flex items-center gap-2">
+                          <h5 className="text-lg font-semibold flex items-center gap-2">
                             <Dumbbell className="h-4 w-4" />
                             {t('workouts.history.exercises')}
                           </h5>
@@ -468,7 +470,7 @@ export default function WorkoutHistory() {
             <div className="space-y-4">
               {selectedWorkout.notes && (
                 <div className="p-4 bg-muted rounded-md">
-                  <h4 className="font-semibold mb-2">
+                  <h4 className="scroll-m-20 text-xl font-semibold tracking-tight mb-2">
                     {t('workouts.history.notes')}
                   </h4>
                   <p className="text-sm text-muted-foreground whitespace-pre-wrap">
@@ -478,7 +480,7 @@ export default function WorkoutHistory() {
               )}
 
               <div className="space-y-3">
-                <h4 className="font-semibold flex items-center gap-2">
+                <h4 className="scroll-m-20 text-xl font-semibold tracking-tight flex items-center gap-2">
                   <Dumbbell className="h-4 w-4" />
                   {t('workouts.history.exercises')}
                 </h4>

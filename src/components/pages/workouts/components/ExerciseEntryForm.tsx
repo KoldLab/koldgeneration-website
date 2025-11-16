@@ -95,7 +95,7 @@ export default function ExerciseEntryForm({
       <Card className="p-4">
         <CollapsibleTrigger asChild>
           <div className="flex items-center justify-between w-full cursor-pointer">
-            <h3 className="font-semibold text-lg">{entry.exerciseName}</h3>
+            <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">{entry.exerciseName}</h3>
             <div className="flex items-center gap-2">
               {onCollapsedChange && (
                 <Button

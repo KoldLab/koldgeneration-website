@@ -1,0 +1,111 @@
+---
+alwaysApply: true
+---
+
+# Typography Rules
+
+Follow these typography patterns consistently across the codebase. These utility classes provide a cohesive typography system.
+
+## Headings
+
+### h1
+
+- Use for main page titles
+- Classes: `scroll-m-20 text-4xl font-extrabold tracking-tight text-balance`
+- Optional: Add `text-center` for centered headings
+
+### h2
+
+- Use for major section headings
+- Classes: `scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0`
+- Includes bottom border separator
+
+### h3
+
+- Use for subsection headings
+- Classes: `scroll-m-20 text-2xl font-semibold tracking-tight`
+- Add `mt-8` for spacing when not first child
+
+### h4
+
+- Use for minor section headings
+- Classes: `scroll-m-20 text-xl font-semibold tracking-tight`
+
+## Body Text
+
+### Paragraph (p)
+
+- Default paragraph styling
+- Classes: `leading-7 [&:not(:first-child)]:mt-6`
+- Automatically adds top margin except for first child
+
+### Lead Text
+
+- Use for introductory/lead paragraphs
+- Classes: `text-muted-foreground text-xl`
+- Combines larger text with muted color
+
+### Large Text
+
+- Use for emphasized text
+- Classes: `text-lg font-semibold`
+
+### Small Text
+
+- Use for labels, captions, or secondary text
+- Classes: `text-sm leading-none font-medium`
+
+### Muted Text
+
+- Use for helper text, descriptions, or less important content
+- Classes: `text-muted-foreground text-sm`
+
+## Special Elements
+
+### Blockquote
+
+- Use for quotes or highlighted text
+- Classes: `mt-6 border-l-2 pl-6 italic`
+- Left border with padding and italic styling
+
+### Inline Code
+
+- Use for code snippets within text
+- Classes: `bg-muted relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold`
+- Muted background with rounded corners and monospace font
+
+### Lists (ul)
+
+- Use for unordered lists
+- Classes: `my-6 ml-6 list-disc [&>li]:mt-2`
+- Disc bullets with proper spacing between items
+
+### Links (a)
+
+- Use within paragraphs or text
+- Classes: `text-primary font-medium underline underline-offset-4`
+- Primary color with underline
+
+## Tables
+
+### Table Container
+
+- Wrap tables in: `<div className="my-6 w-full overflow-y-auto">`
+
+### Table Structure
+
+- Table: `className="w-full"`
+- Header row: `className="even:bg-muted m-0 border-t p-0"`
+- Header cell: `className="border px-4 py-2 text-left font-bold [&[align=center]]:text-center [&[align=right]]:text-right"`
+- Body row: `className="even:bg-muted m-0 border-t p-0"`
+- Body cell: `className="border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right"`
+
+## General Rules
+
+1. **Consistency**: Always use these exact class combinations for each element type
+2. **Spacing**: Use `[&:not(:first-child)]:mt-6` pattern for automatic spacing between paragraphs
+3. **Scroll margins**: Include `scroll-m-20` on all headings for better scroll behavior
+4. **Tracking**: Use `tracking-tight` on headings for better readability
+5. **Text balance**: Use `text-balance` on h1 for better text wrapping
+6. **Muted colors**: Use `text-muted-foreground` for secondary/helper text
+7. **Responsive**: These classes work across all screen sizes

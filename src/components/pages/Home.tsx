@@ -69,10 +69,10 @@ export default function Home() {
   return (
     <div className="w-full space-y-6">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2">
+        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
           {t('home.welcome')}
         </h1>
-        <p className="text-sm sm:text-base text-muted-foreground">
+        <p className="text-muted-foreground text-xl leading-7 [&:not(:first-child)]:mt-6">
           {t('home.description')}
         </p>
       </div>
