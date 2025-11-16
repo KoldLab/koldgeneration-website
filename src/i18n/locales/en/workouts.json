@@ -60,10 +60,10 @@
     "yesterday": "Yesterday",
     "freeWorkout": "Free Workout",
     "routine": "Routine",
-    "exercise": "exercise",
+    "exercise": "Exercise",
     "exercises": "Exercises",
-    "set": "set",
-    "sets": "sets",
+    "set": "Set",
+    "sets": "Sets",
     "reps": "reps",
     "completed": "Done",
     "notes": "Notes",
@@ -81,6 +81,8 @@
     "details": "Details",
     "deleteFromHistory": "Delete from History",
     "workoutLoaded": "Workout loaded. Ready to log!",
+    "viewExerciseDetails": "View exercise details",
+    "exerciseDetailsNotAvailable": "Exercise details from ExerciseDB are not available for this exercise.",
     "tableHeaders": {
       "exercises": "Exercises",
       "sets": "Sets",
@@ -131,4 +133,3 @@
     }
   }
 }
-

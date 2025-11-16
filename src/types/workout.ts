@@ -48,7 +48,8 @@ export interface Exercise {
 
 // Exercise Entry (Exercise within a Workout)
 export interface ExerciseEntry {
-  exerciseId: string; // Reference to Exercise
+  exerciseId?: string; // Reference to Exercise (for custom exercises)
+  exerciseDBId?: string; // Reference to ExerciseDB exercise (for ExerciseDB exercises)
   exerciseName: string; // Snapshot of name at time of logging
   sets: ExerciseSet[];
   notes?: string; // Comments for this exercise in this workout

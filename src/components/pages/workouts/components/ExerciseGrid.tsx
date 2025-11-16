@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/select';
 import { Loader2, Dumbbell, Info, Plus } from 'lucide-react';
 import type { ExerciseDBExercise, ExerciseEntry } from '@/types/workout';
+import { useExerciseCacheStore } from '@/stores/exerciseCacheStore';
 
 interface ExerciseGridProps {
   exercises: ExerciseDBExercise[];
@@ -255,10 +256,15 @@ function ExerciseCard({
 }) {
   const { t } = useTranslation();
 
+  const { setExercise: cacheExercise } = useExerciseCacheStore();
+
   const handleSelect = () => {
     if (onSelectExercise) {
+      // Cache the exercise when it's selected for a workout
+      cacheExercise(exercise);
+
       const entry: ExerciseEntry = {
-        exerciseId: exercise.exerciseId,
+        exerciseDBId: exercise.exerciseId, // Use ExerciseDB ID directly
         exerciseName: exercise.name,
         sets: [],
         notes: '',

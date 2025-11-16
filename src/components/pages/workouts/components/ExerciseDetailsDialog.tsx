@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Dialog,
@@ -19,6 +19,7 @@ import {
   PersonStanding,
 } from 'lucide-react';
 import type { ExerciseDBExercise } from '@/types/workout';
+import { useExerciseCacheStore } from '@/stores/exerciseCacheStore';
 
 // Helper function to safely extract string value (handles both string and object with name property)
 const getStringValue = (value: string | { name: string } | any): string => {
@@ -41,8 +42,16 @@ export default function ExerciseDetailsDialog({
   userId,
 }: ExerciseDetailsDialogProps) {
   const { t } = useTranslation();
+  const { setExercise: cacheExercise } = useExerciseCacheStore();
   const [importing, setImporting] = useState(false);
   const [imported, setImported] = useState(false);
+
+  // Cache the exercise when dialog opens
+  useEffect(() => {
+    if (open && exercise) {
+      cacheExercise(exercise);
+    }
+  }, [open, exercise, cacheExercise]);
 
   const handleImport = async () => {
     if (!userId) {

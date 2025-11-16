@@ -11,7 +11,11 @@ import {
   createRoutine,
   getExerciseById,
 } from '@/services/workoutService';
-import { getExerciseById as getExerciseDBById } from '@/services/exerciseDBService';
+import {
+  getExerciseById as getExerciseDBById,
+  getAllExercises,
+} from '@/services/exerciseDBService';
+import { useExerciseCacheStore } from '@/stores/exerciseCacheStore';
 import type {
   WorkoutLog,
   WorkoutRoutine,
@@ -89,6 +93,8 @@ export default function WorkoutHistory() {
   const [expandedExercises, setExpandedExercises] = React.useState<Set<string>>(
     new Set()
   );
+  const { getExercise: getCachedExercise, setExercise: cacheExercise } =
+    useExerciseCacheStore();
 
   React.useEffect(() => {
     if (!user) return;
@@ -150,7 +156,8 @@ export default function WorkoutHistory() {
   const handleStartWorkout = (workout: WorkoutLog) => {
     // Convert workout log exercises to workout entries (without set data)
     const entries = workout.exercises.map((ex) => ({
-      exerciseId: ex.exerciseId,
+      ...(ex.exerciseId && { exerciseId: ex.exerciseId }),
+      ...(ex.exerciseDBId && { exerciseDBId: ex.exerciseDBId }),
       exerciseName: ex.exerciseName,
       sets: [], // Start with empty sets
       notes: ex.notes,
@@ -190,7 +197,8 @@ export default function WorkoutHistory() {
         name: routineName,
         description: workout.notes || '',
         exercises: workout.exercises.map((ex) => ({
-          exerciseId: ex.exerciseId,
+          ...(ex.exerciseId && { exerciseId: ex.exerciseId }),
+          ...(ex.exerciseDBId && { exerciseDBId: ex.exerciseDBId }),
           exerciseName: ex.exerciseName,
           sets: [],
           notes: ex.notes,
@@ -240,24 +248,108 @@ export default function WorkoutHistory() {
     setLoadingExerciseDetails(true);
 
     try {
-      // Try to get the exercise from Firestore
-      const firestoreExercise = await getExerciseById(exercise.exerciseId);
+      // If exercise has exerciseDBId, check cache first, then fetch from ExerciseDB API
+      if (exercise.exerciseDBId) {
+        // Check cache first
+        const cached = getCachedExercise(exercise.exerciseDBId);
+        if (cached) {
+          setExerciseDBDetails(cached);
+          setLoadingExerciseDetails(false);
+          return;
+        }
 
-      // If it has an exerciseDBId, fetch full details from ExerciseDB API
-      if (firestoreExercise?.exerciseDBId) {
+        // Not in cache, fetch from API
         try {
-          const exerciseDBData = await getExerciseDBById(
-            firestoreExercise.exerciseDBId
-          );
+          const exerciseDBData = await getExerciseDBById(exercise.exerciseDBId);
           setExerciseDBDetails(exerciseDBData);
+          // Cache it for future use
+          cacheExercise(exerciseDBData);
         } catch (err) {
           console.error('Failed to fetch ExerciseDB details:', err);
           // Continue without ExerciseDB details
         }
+      } else if (exercise.exerciseId) {
+        // For custom exercises, try to get from Firestore
+        try {
+          const firestoreExercise = await getExerciseById(exercise.exerciseId);
+
+          // If it has an exerciseDBId, check cache first, then fetch from ExerciseDB API
+          if (firestoreExercise?.exerciseDBId) {
+            // Check cache first
+            const cached = getCachedExercise(firestoreExercise.exerciseDBId);
+            if (cached) {
+              setExerciseDBDetails(cached);
+              setLoadingExerciseDetails(false);
+              return;
+            }
+
+            // Not in cache, fetch from API
+            try {
+              const exerciseDBData = await getExerciseDBById(
+                firestoreExercise.exerciseDBId
+              );
+              setExerciseDBDetails(exerciseDBData);
+              // Cache it for future use
+              cacheExercise(exerciseDBData);
+            } catch (err) {
+              console.error('Failed to fetch ExerciseDB details:', err);
+              // Continue without ExerciseDB details
+            }
+          }
+        } catch (err: any) {
+          // Handle permission errors or missing exercises gracefully
+          const isPermissionError =
+            err?.code === 'permission-denied' ||
+            err?.code === 'missing-permissions' ||
+            err?.message?.includes('permissions') ||
+            err?.message?.includes('Missing or insufficient');
+
+          if (isPermissionError) {
+            console.warn(
+              'Cannot access exercise from Firestore (permission denied). Trying to search ExerciseDB by name as fallback...'
+            );
+
+            // Try to search ExerciseDB by exercise name as a fallback
+            try {
+              const searchResult = await getAllExercises({
+                search: exercise.exerciseName,
+                limit: 5, // Limit to 5 results
+              });
+
+              // Try to find an exact match by name
+              const exactMatch = searchResult.exercises.find(
+                (ex) =>
+                  ex.name.toLowerCase() === exercise.exerciseName.toLowerCase()
+              );
+
+              if (exactMatch) {
+                setExerciseDBDetails(exactMatch);
+                // Cache it for future use
+                cacheExercise(exactMatch);
+                console.log(
+                  'Found exercise in ExerciseDB by name:',
+                  exactMatch.name
+                );
+              } else if (searchResult.exercises.length > 0) {
+                // If no exact match, use the first result (closest match)
+                const closestMatch = searchResult.exercises[0];
+                setExerciseDBDetails(closestMatch);
+                // Cache it for future use
+                cacheExercise(closestMatch);
+                console.log(
+                  'Using closest match from ExerciseDB:',
+                  closestMatch.name
+                );
+              }
+            } catch (searchErr) {
+              console.warn('Failed to search ExerciseDB by name:', searchErr);
+              // Continue without ExerciseDB details
+            }
+          } else {
+            console.error('Failed to fetch exercise:', err);
+          }
+        }
       }
-    } catch (err) {
-      console.error('Failed to fetch exercise:', err);
-      // Continue without exercise details
     } finally {
       setLoadingExerciseDetails(false);
     }
@@ -387,148 +479,344 @@ export default function WorkoutHistory() {
                             <Dumbbell className="h-4 w-4" />
                             {t('workouts.history.exercises')}
                           </h5>
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>
-                                  {t('workouts.history.tableHeaders.exercises')}
-                                </TableHead>
-                                <TableHead>
-                                  {t('workouts.history.tableHeaders.sets')}
-                                </TableHead>
-                                <TableHead className="text-right">
-                                  {t('workouts.history.tableHeaders.reps')}
-                                </TableHead>
-                                <TableHead className="text-right">
-                                  {t('workouts.history.tableHeaders.weight')}
-                                </TableHead>
-                                <TableHead className="text-center">
-                                  {t('workouts.history.tableHeaders.status')}
-                                </TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {workout.exercises.map((exercise, index) => {
-                                const totalSets = exercise.sets.length;
-                                const totalReps = exercise.sets.reduce(
-                                  (sum, set) => sum + (set.reps || 0),
-                                  0
-                                );
-                                const avgWeight =
-                                  exercise.sets.filter((s) => s.weight).length >
-                                  0
-                                    ? exercise.sets
-                                        .filter((s) => s.weight)
-                                        .reduce(
-                                          (sum, set) => sum + (set.weight || 0),
-                                          0
-                                        ) /
-                                      exercise.sets.filter((s) => s.weight)
-                                        .length
-                                    : null;
-                                const completedSets = exercise.sets.filter(
-                                  (s) => s.completed
-                                ).length;
-                                const exerciseKey = `${workout.id}-${index}`;
-                                const isExpanded =
-                                  expandedExercises.has(exerciseKey);
 
-                                return (
-                                  <React.Fragment key={index}>
-                                    <TableRow
-                                      className={`cursor-pointer hover:bg-muted/50 ${
-                                        index < workout.exercises.length - 1
-                                          ? 'border-b-2'
-                                          : ''
-                                      }`}
-                                      onClick={() =>
-                                        toggleExerciseExpansion(
-                                          workout.id,
-                                          index
-                                        )
-                                      }
-                                    >
-                                      <TableCell className="font-medium">
-                                        <button
-                                          onClick={(e) =>
-                                            handleExerciseNameClick(
-                                              exercise,
-                                              workout,
-                                              e
-                                            )
-                                          }
-                                          className="text-left hover:underline cursor-pointer"
-                                        >
-                                          {exercise.exerciseName}
-                                        </button>
+                          {/* Mobile: Card Layout */}
+                          <div className="md:hidden space-y-3">
+                            {workout.exercises.map((exercise, index) => {
+                              const totalSets = exercise.sets.length;
+                              const totalReps = exercise.sets.reduce(
+                                (sum, set) => sum + (set.reps || 0),
+                                0
+                              );
+                              const avgWeight =
+                                exercise.sets.filter((s) => s.weight).length > 0
+                                  ? exercise.sets
+                                      .filter((s) => s.weight)
+                                      .reduce(
+                                        (sum, set) => sum + (set.weight || 0),
+                                        0
+                                      ) /
+                                    exercise.sets.filter((s) => s.weight).length
+                                  : null;
+                              const completedSets = exercise.sets.filter(
+                                (s) => s.completed
+                              ).length;
+                              const exerciseKey = `${workout.id}-${index}`;
+                              const isExpanded =
+                                expandedExercises.has(exerciseKey);
+
+                              return (
+                                <Card
+                                  key={index}
+                                  className={`cursor-pointer transition-colors p-1 ${
+                                    isExpanded ? 'border-pop' : ''
+                                  }`}
+                                  onClick={() =>
+                                    toggleExerciseExpansion(workout.id, index)
+                                  }
+                                >
+                                  <CardContent className="p-3">
+                                    <div className="space-y-2">
+                                      <div>
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-semibold">
+                                            {exercise.exerciseName}
+                                          </span>
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleExerciseNameClick(
+                                                exercise,
+                                                workout,
+                                                e
+                                              );
+                                            }}
+                                            className="text-muted-foreground hover:text-foreground transition-colors"
+                                            aria-label={t(
+                                              'workouts.history.viewExerciseDetails'
+                                            )}
+                                          >
+                                            <Info className="h-4 w-4" />
+                                          </button>
+                                        </div>
                                         {exercise.notes && (
                                           <p className="text-xs text-muted-foreground mt-1">
                                             {exercise.notes}
                                           </p>
                                         )}
-                                      </TableCell>
-                                      <TableCell>{totalSets}</TableCell>
-                                      <TableCell className="text-right">
-                                        {totalReps > 0 ? totalReps : '-'}
-                                      </TableCell>
-                                      <TableCell className="text-right">
-                                        {avgWeight
-                                          ? `${avgWeight.toFixed(1)} kg`
-                                          : '-'}
-                                      </TableCell>
-                                      <TableCell className="text-center">
-                                        {completedSets > 0 ? (
-                                          <Badge
-                                            variant="outline"
-                                            className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20"
-                                          >
-                                            {completedSets}/{totalSets}{' '}
-                                            {t('workouts.history.completed')}
-                                          </Badge>
-                                        ) : (
-                                          '-'
-                                        )}
-                                      </TableCell>
-                                    </TableRow>
-                                    {isExpanded &&
-                                      exercise.sets.map((set, setIndex) => (
-                                        <TableRow
-                                          key={`set-${setIndex}`}
-                                          className="bg-muted/30"
-                                        >
-                                          <TableCell className="font-medium">
-                                            {/* Empty for alignment */}
-                                          </TableCell>
-                                          <TableCell>{set.setNumber}</TableCell>
-                                          <TableCell className="text-right">
-                                            {set.reps || '-'}
-                                          </TableCell>
-                                          <TableCell className="text-right">
-                                            {set.weight
-                                              ? `${set.weight} kg`
-                                              : '-'}
-                                          </TableCell>
-                                          <TableCell className="text-center">
-                                            {set.completed ? (
-                                              <Badge
-                                                variant="outline"
-                                                className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20 text-xs"
-                                              >
-                                                {t(
-                                                  'workouts.history.completed'
-                                                )}
-                                              </Badge>
-                                            ) : (
-                                              '-'
+                                      </div>
+
+                                      <div className="grid grid-cols-2 gap-2 text-sm">
+                                        <div>
+                                          <span className="text-muted-foreground">
+                                            {t(
+                                              'workouts.history.tableHeaders.sets'
                                             )}
-                                          </TableCell>
-                                        </TableRow>
-                                      ))}
-                                  </React.Fragment>
-                                );
-                              })}
-                            </TableBody>
-                          </Table>
+                                            :
+                                          </span>{' '}
+                                          <span className="font-medium">
+                                            {totalSets}
+                                          </span>
+                                        </div>
+                                        <div>
+                                          <span className="text-muted-foreground">
+                                            {t(
+                                              'workouts.history.tableHeaders.reps'
+                                            )}
+                                            :
+                                          </span>{' '}
+                                          <span className="font-medium">
+                                            {totalReps > 0 ? totalReps : '-'}
+                                          </span>
+                                        </div>
+                                        <div>
+                                          <span className="text-muted-foreground">
+                                            {t(
+                                              'workouts.history.tableHeaders.weight'
+                                            )}
+                                            :
+                                          </span>{' '}
+                                          <span className="font-medium">
+                                            {avgWeight
+                                              ? `${avgWeight.toFixed(1)} kg`
+                                              : '-'}
+                                          </span>
+                                        </div>
+                                        <div>
+                                          <span className="text-muted-foreground">
+                                            {t(
+                                              'workouts.history.tableHeaders.status'
+                                            )}
+                                            :
+                                          </span>{' '}
+                                          {completedSets > 0 ? (
+                                            <Badge
+                                              variant="outline"
+                                              className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20 text-xs"
+                                            >
+                                              {completedSets}/{totalSets}{' '}
+                                              {t('workouts.history.completed')}
+                                            </Badge>
+                                          ) : (
+                                            <span className="font-medium">
+                                              -
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+
+                                      {isExpanded &&
+                                        exercise.sets.length > 0 && (
+                                          <div className="pt-3 border-t space-y-2">
+                                            <h6 className="font-semibold text-sm">
+                                              {t('workouts.history.sets')}
+                                            </h6>
+                                            <div className="space-y-1">
+                                              {exercise.sets.map(
+                                                (set, setIndex) => (
+                                                  <div
+                                                    key={setIndex}
+                                                    className="flex items-center justify-between text-sm py-1 px-2 bg-muted/30 rounded"
+                                                  >
+                                                    <span className="font-medium">
+                                                      {t(
+                                                        'workouts.history.tableHeaders.sets'
+                                                      )}{' '}
+                                                      {set.setNumber}
+                                                    </span>
+                                                    <div className="flex items-center gap-3">
+                                                      <span>
+                                                        {set.reps || '-'}{' '}
+                                                        {t(
+                                                          'workouts.history.tableHeaders.reps'
+                                                        )}
+                                                      </span>
+                                                      <span>
+                                                        {set.weight
+                                                          ? `${set.weight} kg`
+                                                          : '-'}
+                                                      </span>
+                                                      {set.completed && (
+                                                        <Badge
+                                                          variant="outline"
+                                                          className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20 text-xs"
+                                                        >
+                                                          {t(
+                                                            'workouts.history.completed'
+                                                          )}
+                                                        </Badge>
+                                                      )}
+                                                    </div>
+                                                  </div>
+                                                )
+                                              )}
+                                            </div>
+                                          </div>
+                                        )}
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              );
+                            })}
+                          </div>
+
+                          {/* Desktop: Table Layout */}
+                          <div className="hidden md:block">
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>
+                                    {t(
+                                      'workouts.history.tableHeaders.exercises'
+                                    )}
+                                  </TableHead>
+                                  <TableHead>
+                                    {t('workouts.history.tableHeaders.sets')}
+                                  </TableHead>
+                                  <TableHead className="text-right">
+                                    {t('workouts.history.tableHeaders.reps')}
+                                  </TableHead>
+                                  <TableHead className="text-right">
+                                    {t('workouts.history.tableHeaders.weight')}
+                                  </TableHead>
+                                  <TableHead className="text-center">
+                                    {t('workouts.history.tableHeaders.status')}
+                                  </TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {workout.exercises.map((exercise, index) => {
+                                  const totalSets = exercise.sets.length;
+                                  const totalReps = exercise.sets.reduce(
+                                    (sum, set) => sum + (set.reps || 0),
+                                    0
+                                  );
+                                  const avgWeight =
+                                    exercise.sets.filter((s) => s.weight)
+                                      .length > 0
+                                      ? exercise.sets
+                                          .filter((s) => s.weight)
+                                          .reduce(
+                                            (sum, set) =>
+                                              sum + (set.weight || 0),
+                                            0
+                                          ) /
+                                        exercise.sets.filter((s) => s.weight)
+                                          .length
+                                      : null;
+                                  const completedSets = exercise.sets.filter(
+                                    (s) => s.completed
+                                  ).length;
+                                  const exerciseKey = `${workout.id}-${index}`;
+                                  const isExpanded =
+                                    expandedExercises.has(exerciseKey);
+
+                                  return (
+                                    <React.Fragment key={index}>
+                                      <TableRow
+                                        className={`cursor-pointer hover:bg-muted/50 ${
+                                          index < workout.exercises.length - 1
+                                            ? 'border-b-2'
+                                            : ''
+                                        }`}
+                                        onClick={() =>
+                                          toggleExerciseExpansion(
+                                            workout.id,
+                                            index
+                                          )
+                                        }
+                                      >
+                                        <TableCell className="font-medium">
+                                          <div className="flex items-center gap-2">
+                                            <span>{exercise.exerciseName}</span>
+                                            <button
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleExerciseNameClick(
+                                                  exercise,
+                                                  workout,
+                                                  e
+                                                );
+                                              }}
+                                              className="text-muted-foreground hover:text-foreground transition-colors"
+                                              aria-label={t(
+                                                'workouts.history.viewExerciseDetails'
+                                              )}
+                                            >
+                                              <Info className="h-4 w-4" />
+                                            </button>
+                                          </div>
+                                          {exercise.notes && (
+                                            <p className="text-xs text-muted-foreground mt-1">
+                                              {exercise.notes}
+                                            </p>
+                                          )}
+                                        </TableCell>
+                                        <TableCell>{totalSets}</TableCell>
+                                        <TableCell className="text-right">
+                                          {totalReps > 0 ? totalReps : '-'}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                          {avgWeight
+                                            ? `${avgWeight.toFixed(1)} kg`
+                                            : '-'}
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                          {completedSets > 0 ? (
+                                            <Badge
+                                              variant="outline"
+                                              className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20"
+                                            >
+                                              {completedSets}/{totalSets}{' '}
+                                              {t('workouts.history.completed')}
+                                            </Badge>
+                                          ) : (
+                                            '-'
+                                          )}
+                                        </TableCell>
+                                      </TableRow>
+                                      {isExpanded &&
+                                        exercise.sets.map((set, setIndex) => (
+                                          <TableRow
+                                            key={`set-${setIndex}`}
+                                            className="bg-muted/30"
+                                          >
+                                            <TableCell className="font-medium">
+                                              {/* Empty for alignment */}
+                                            </TableCell>
+                                            <TableCell>
+                                              {set.setNumber}
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                              {set.reps || '-'}
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                              {set.weight
+                                                ? `${set.weight} kg`
+                                                : '-'}
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                              {set.completed ? (
+                                                <Badge
+                                                  variant="outline"
+                                                  className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20 text-xs"
+                                                >
+                                                  {t(
+                                                    'workouts.history.completed'
+                                                  )}
+                                                </Badge>
+                                              ) : (
+                                                '-'
+                                              )}
+                                            </TableCell>
+                                          </TableRow>
+                                        ))}
+                                    </React.Fragment>
+                                  );
+                                })}
+                              </TableBody>
+                            </Table>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -715,144 +1003,152 @@ export default function WorkoutHistory() {
       </Dialog>
 
       {/* Exercise Details Dialog - Show ExerciseDB details if available */}
-      {exerciseDBDetails && selectedExerciseForDetails && user && (
-        <ExerciseDetailsDialog
-          exercise={exerciseDBDetails}
-          open={!!selectedExerciseForDetails}
-          onOpenChange={(open) => {
-            if (!open) {
-              setSelectedExerciseForDetails(null);
-              setExerciseDBDetails(null);
-            }
-          }}
-          userId={user.uid}
-        />
-      )}
+      {selectedExerciseForDetails && user && (
+        <>
+          {exerciseDBDetails ? (
+            <ExerciseDetailsDialog
+              exercise={exerciseDBDetails}
+              open={!!selectedExerciseForDetails}
+              onOpenChange={(open) => {
+                if (!open) {
+                  setSelectedExerciseForDetails(null);
+                  setExerciseDBDetails(null);
+                }
+              }}
+              userId={user.uid}
+            />
+          ) : (
+            <Dialog
+              open={!!selectedExerciseForDetails}
+              onOpenChange={(open) => {
+                if (!open) {
+                  setSelectedExerciseForDetails(null);
+                  setExerciseDBDetails(null);
+                }
+              }}
+            >
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>
+                    {selectedExerciseForDetails.exercise.exerciseName}
+                  </DialogTitle>
+                  <DialogDescription>
+                    {format(
+                      selectedExerciseForDetails.workout.date || new Date(),
+                      i18n.language === 'fr'
+                        ? "d MMMM yyyy 'à' HH:mm"
+                        : "MMMM d, yyyy 'at' h:mm a",
+                      { locale: dateLocale }
+                    )}
+                  </DialogDescription>
+                </DialogHeader>
 
-      {/* Exercise Details Dialog - Fallback to workout-specific details */}
-      {!exerciseDBDetails && selectedExerciseForDetails && (
-        <Dialog
-          open={!!selectedExerciseForDetails}
-          onOpenChange={(open) => {
-            if (!open) {
-              setSelectedExerciseForDetails(null);
-              setExerciseDBDetails(null);
-            }
-          }}
-        >
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                {selectedExerciseForDetails.exercise.exerciseName}
-              </DialogTitle>
-              <DialogDescription>
-                {format(
-                  selectedExerciseForDetails.workout.date || new Date(),
-                  i18n.language === 'fr'
-                    ? "d MMMM yyyy 'à' HH:mm"
-                    : "MMMM d, yyyy 'at' h:mm a",
-                  { locale: dateLocale }
-                )}
-              </DialogDescription>
-            </DialogHeader>
+                {loadingExerciseDetails ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-muted rounded-md">
+                      <p className="text-sm text-muted-foreground">
+                        {t('workouts.history.exerciseDetailsNotAvailable')}
+                      </p>
+                    </div>
 
-            {loadingExerciseDetails ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {selectedExerciseForDetails.exercise.notes && (
-                  <div className="p-4 bg-muted rounded-md">
-                    <h4 className="scroll-m-20 text-xl font-semibold tracking-tight mb-2">
-                      {t('workouts.history.notes')}
-                    </h4>
-                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                      {selectedExerciseForDetails.exercise.notes}
-                    </p>
+                    {selectedExerciseForDetails.exercise.notes && (
+                      <div className="p-4 bg-muted rounded-md">
+                        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight mb-2">
+                          {t('workouts.history.notes')}
+                        </h4>
+                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                          {selectedExerciseForDetails.exercise.notes}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="space-y-3">
+                      <h4 className="scroll-m-20 text-xl font-semibold tracking-tight flex items-center gap-2">
+                        <Dumbbell className="h-4 w-4" />
+                        {t('workouts.history.sets')}
+                      </h4>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>
+                              {t('workouts.history.tableHeaders.sets')}
+                            </TableHead>
+                            <TableHead className="text-right">
+                              {t('workouts.history.tableHeaders.reps')}
+                            </TableHead>
+                            <TableHead className="text-right">
+                              {t('workouts.history.tableHeaders.weight')}
+                            </TableHead>
+                            <TableHead className="text-center">
+                              {t('workouts.history.tableHeaders.status')}
+                            </TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {selectedExerciseForDetails.exercise.sets.length >
+                          0 ? (
+                            selectedExerciseForDetails.exercise.sets.map(
+                              (set, setIndex) => (
+                                <TableRow key={setIndex}>
+                                  <TableCell className="font-medium">
+                                    {set.setNumber}
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    {set.reps || '-'}
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    {set.weight ? `${set.weight} kg` : '-'}
+                                  </TableCell>
+                                  <TableCell className="text-center">
+                                    {set.completed ? (
+                                      <Badge
+                                        variant="outline"
+                                        className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20"
+                                      >
+                                        {t('workouts.history.completed')}
+                                      </Badge>
+                                    ) : (
+                                      '-'
+                                    )}
+                                  </TableCell>
+                                </TableRow>
+                              )
+                            )
+                          ) : (
+                            <TableRow>
+                              <TableCell
+                                colSpan={4}
+                                className="text-center text-muted-foreground"
+                              >
+                                {t('workouts.history.noSets')}
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
                   </div>
                 )}
 
-                <div className="space-y-3">
-                  <h4 className="scroll-m-20 text-xl font-semibold tracking-tight flex items-center gap-2">
-                    <Dumbbell className="h-4 w-4" />
-                    {t('workouts.history.sets')}
-                  </h4>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>
-                          {t('workouts.history.tableHeaders.sets')}
-                        </TableHead>
-                        <TableHead className="text-right">
-                          {t('workouts.history.tableHeaders.reps')}
-                        </TableHead>
-                        <TableHead className="text-right">
-                          {t('workouts.history.tableHeaders.weight')}
-                        </TableHead>
-                        <TableHead className="text-center">
-                          {t('workouts.history.tableHeaders.status')}
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {selectedExerciseForDetails.exercise.sets.length > 0 ? (
-                        selectedExerciseForDetails.exercise.sets.map(
-                          (set, setIndex) => (
-                            <TableRow key={setIndex}>
-                              <TableCell className="font-medium">
-                                {set.setNumber}
-                              </TableCell>
-                              <TableCell className="text-right">
-                                {set.reps || '-'}
-                              </TableCell>
-                              <TableCell className="text-right">
-                                {set.weight ? `${set.weight} kg` : '-'}
-                              </TableCell>
-                              <TableCell className="text-center">
-                                {set.completed ? (
-                                  <Badge
-                                    variant="outline"
-                                    className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20"
-                                  >
-                                    {t('workouts.history.completed')}
-                                  </Badge>
-                                ) : (
-                                  '-'
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          )
-                        )
-                      ) : (
-                        <TableRow>
-                          <TableCell
-                            colSpan={4}
-                            className="text-center text-muted-foreground"
-                          >
-                            {t('workouts.history.noSets')}
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-            )}
-
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSelectedExerciseForDetails(null);
-                  setExerciseDBDetails(null);
-                }}
-              >
-                {t('common.close')}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedExerciseForDetails(null);
+                      setExerciseDBDetails(null);
+                    }}
+                  >
+                    {t('common.close')}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
+        </>
       )}
     </div>
   );
