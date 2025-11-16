@@ -1,0 +1,46 @@
+---
+alwaysApply: true
+---
+
+# Responsive Design Rules
+
+The application **must** be designed and developed to work seamlessly on both desktop and mobile devices.
+
+## Core Requirements
+
+1. **Mobile-First Approach**: Design and develop with mobile devices as the primary consideration, then enhance for larger screens.
+
+2. **Responsive Breakpoints**: Use Tailwind CSS breakpoints consistently:
+   - `sm`: 640px and up (small tablets, large phones)
+   - `md`: 768px and up (tablets)
+   - `lg`: 1024px and up (desktops)
+   - `xl`: 1280px and up (large desktops)
+   - `2xl`: 1536px and up (extra large desktops)
+
+3. **Touch-Friendly Interactions**: 
+   - Minimum touch target size: 44x44px (or `h-11` in Tailwind)
+   - Ensure adequate spacing between interactive elements
+   - Use appropriate padding for mobile interactions
+
+4. **Layout Adaptations**:
+   - Use responsive grid systems (`grid-cols-1 md:grid-cols-2 lg:grid-cols-3`)
+   - Stack elements vertically on mobile, arrange horizontally on desktop
+   - Adjust font sizes for readability across devices
+   - Consider navigation patterns (hamburger menus on mobile, full nav on desktop)
+
+5. **Content Optimization**:
+   - Ensure text is readable without zooming on mobile
+   - Optimize images and media for different screen sizes
+   - Hide or simplify non-essential content on smaller screens when appropriate
+
+6. **Testing Requirements**:
+   - Test all features on both mobile and desktop viewports
+   - Verify touch interactions work correctly
+   - Ensure forms and inputs are usable on mobile keyboards
+
+## Implementation Guidelines
+
+- Always consider mobile constraints when designing new features
+- Use Tailwind's responsive modifiers (`sm:`, `md:`, `lg:`, etc.) for conditional styling
+- Test responsive behavior during development, not as an afterthought
+- Maintain consistent spacing and sizing across breakpoints
