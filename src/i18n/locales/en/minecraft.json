@@ -1,0 +1,29 @@
+{
+  "title": "Minecraft Chest Contents Image Generator",
+  "description": "Create customizable images showing the contents of your Minecraft chest. Perfect for tutorials - displays item names, quantities, and icons. Also generates a formatted text list you can copy.",
+  "pasteJson": "Paste your chest NBT data here...",
+  "itemsRequired": "- Items required -",
+  "headerText": "Header Text",
+  "headerTextPlaceholder": "Enter header text (e.g., 'Items required', 'Chest contents', etc.)",
+  "generate": "Generate",
+  "test": "Test",
+  "preview": "Preview",
+  "settings": "Settings",
+  "font": "Font",
+  "fontSize": "Font Size",
+  "fontColor": "Font Color",
+  "backgroundColor": "Background Color",
+  "transparentBackground": "Set transparent background",
+  "transparentBackgroundDescription": "Click to remove the background color, making it transparent",
+  "columns": "Columns",
+  "rows": "Rows (0 = auto)",
+  "iconSize": "Icon Size",
+  "copyText": "Copy Text",
+  "copied": "Copied!",
+  "downloadPng": "Download PNG",
+  "error": {
+    "invalidJson": "Invalid JSON format",
+    "invalidStructure": "Invalid JSON structure: Missing Items array"
+  }
+}
+

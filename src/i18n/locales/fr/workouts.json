@@ -1,0 +1,126 @@
+{
+  "title": "Entraînements",
+  "description": "Suivez votre parcours fitness avec l'enregistrement d'entraînements et de routines",
+  "tabs": {
+    "log": "Enregistrer un Entraînement",
+    "history": "Historique",
+    "routines": "Routines",
+    "exercises": "Bibliothèque d'Exercices"
+  },
+  "logWorkout": {
+    "title": "Enregistrer un Entraînement",
+    "description": "Enregistrer une nouvelle session d'entraînement",
+    "date": "Date",
+    "duration": "Durée",
+    "overallNotes": "Notes Générales de l'Entraînement",
+    "notesPlaceholder": "Ajoutez des notes sur votre entraînement...",
+    "startFromRoutine": "Commencer depuis une Routine",
+    "selectRoutine": "Sélectionner une routine",
+    "startFromScratch": "Commencer depuis Zéro",
+    "exercises": "Exercices",
+    "addExercise": "Ajouter un Exercice",
+    "addFirstExercise": "Ajouter Votre Premier Exercice",
+    "noExercisesMessage": "Aucun exercice ajouté pour le moment. Ajoutez des exercices pour commencer à enregistrer votre entraînement.",
+    "noExercisesAvailable": "Aucun exercice disponible. Veuillez d'abord ajouter des exercices à votre bibliothèque.",
+    "noExercisesError": "Veuillez ajouter au moins un exercice pour enregistrer un entraînement.",
+    "noSetsError": "Veuillez ajouter au moins une série à au moins un exercice.",
+    "dateRequired": "Veuillez sélectionner une date pour votre entraînement.",
+    "saveWorkout": "Enregistrer l'Entraînement",
+    "saving": "Enregistrement...",
+    "saveSuccess": "Entraînement enregistré avec succès !",
+    "saveError": "Échec de l'enregistrement de l'entraînement. Veuillez réessayer.",
+    "errorLoadingData": "Échec du chargement des exercices et des routines.",
+    "errorLoadingRoutine": "Échec du chargement de la routine."
+  },
+  "exerciseSelector": {
+    "title": "Ajouter un Exercice",
+    "browse": "Parcourir les Exercices",
+    "create": "Créer un Exercice Personnalisé",
+    "customName": "Nom de l'Exercice",
+    "customNamePlaceholder": "Entrez le nom de l'exercice",
+    "customDescription": "Description",
+    "customDescriptionPlaceholder": "Entrez la description de l'exercice (optionnel)",
+    "createExercise": "Créer l'Exercice",
+    "creating": "Création..."
+  },
+  "exerciseGrid": {
+    "columns": "Colonnes",
+    "columnsLabel": "Colonnes",
+    "itemsPerPage": "Éléments Par Page",
+    "showGif": "Afficher le GIF",
+    "addToWorkout": "Ajouter à l'Entraînement"
+  },
+  "history": {
+    "title": "Historique des Entraînements",
+    "description": "Voir tous vos entraînements passés",
+    "comingSoon": "Fonctionnalité d'historique d'entraînements à venir",
+    "noWorkouts": "Aucun entraînement pour le moment. Commencez à enregistrer vos entraînements !",
+    "error": "Échec du chargement de l'historique des entraînements",
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "freeWorkout": "Entraînement Libre",
+    "routine": "Routine",
+    "exercise": "exercice",
+    "exercises": "exercices",
+    "set": "série",
+    "sets": "séries",
+    "reps": "rép",
+    "completed": "Terminé",
+    "notes": "Notes",
+    "editWorkout": "Modifier l'Entraînement",
+    "saveAsRoutine": "Enregistrer comme Routine",
+    "enterRoutineName": "Entrez le nom de la routine :",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet entraînement ?",
+    "deleted": "Entraînement supprimé avec succès",
+    "deleteError": "Échec de la suppression de l'entraînement",
+    "savedAsRoutine": "Entraînement enregistré comme routine avec succès",
+    "saveRoutineError": "Échec de l'enregistrement de la routine",
+    "updated": "Entraînement mis à jour avec succès",
+    "updateError": "Échec de la mise à jour de l'entraînement",
+    "startWorkout": "Démarrer l'Entraînement",
+    "details": "Détails",
+    "deleteFromHistory": "Supprimer de l'Historique",
+    "workoutLoaded": "Entraînement chargé. Prêt à enregistrer !"
+  },
+  "routines": {
+    "comingSoon": "Workout Routines feature coming soon"
+  },
+  "exerciseLibrary": {
+    "title": "Bibliothèque d'Exercices *en cours de développement*",
+    "description": "Parcourir et importer des exercices depuis la base de données",
+    "search": "Rechercher des exercices...",
+    "noResults": "Aucun exercice trouvé",
+    "loading": "Chargement des exercices...",
+    "error": "Échec du chargement des exercices",
+    "filters": {
+      "title": "Filtres",
+      "bodyPart": "Partie du Corps",
+      "equipment": "Équipement",
+      "targetMuscle": "Muscle Cible",
+      "clearFilters": "Effacer les Filtres",
+      "resetFilters": "Réinitialiser les Filtres",
+      "all": "Tous"
+    },
+    "exercise": {
+      "name": "Nom de l'Exercice",
+      "bodyParts": "Parties du Corps",
+      "equipment": "Équipement",
+      "targetMuscles": "Muscles Cibles",
+      "secondaryMuscles": "Muscles Secondaires",
+      "viewDetails": "Voir les Détails",
+      "import": "Importer l'Exercice",
+      "imported": "Importé",
+      "instructions": "Instructions",
+      "tips": "Conseils",
+      "variations": "Variations",
+      "overview": "Aperçu",
+      "relatedExercises": "Exercices Connexes"
+    },
+    "details": {
+      "title": "Détails de l'Exercice",
+      "importSuccess": "Exercice importé avec succès",
+      "importError": "Échec de l'importation de l'exercice"
+    }
+  }
+}
+

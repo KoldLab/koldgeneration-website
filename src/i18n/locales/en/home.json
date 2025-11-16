@@ -1,0 +1,38 @@
+{
+  "welcome": "Welcome to the Kold Generation Hub",
+  "description": "Explore our tools and tournament features to level up your community events.",
+  "cards": {
+    "tools": {
+      "timer": {
+        "title": "Precision Timer",
+        "description": "Track countdowns, stopwatches, and interval workouts with competitive-grade controls."
+      },
+      "minecraftListGenerator": {
+        "title": "Minecraft List Generator",
+        "description": "Generate clean, shareable lists from Minecraft chest data—perfect for resource management."
+      }
+    },
+    "tournaments": {
+      "create": {
+        "title": "Create Tournament",
+        "description": "Design brackets, configure rules, and publish your tournament in minutes."
+      },
+      "my": {
+        "title": "My Tournaments",
+        "description": "Review and manage the tournaments you organize or participate in."
+      },
+      "view": {
+        "title": "Enter Tournament Code",
+        "description": "Open the join page to enter a tournament code and jump into the bracket."
+      }
+    }
+  },
+  "cardBadge": {
+    "authRequired": "Sign-in required"
+  },
+  "cardButton": {
+    "signInRequired": "Sign in to access",
+    "explore": "Explore"
+  }
+}
+

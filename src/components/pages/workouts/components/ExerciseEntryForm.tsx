@@ -94,9 +94,9 @@ export default function ExerciseEntryForm({
     >
       <Card className="p-4">
         <CollapsibleTrigger asChild>
-          <div className="flex items-center justify-between w-full cursor-pointer">
-            <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">{entry.exerciseName}</h3>
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between w-full cursor-pointer gap-2">
+            <h3 className="scroll-m-20 text-xl sm:text-2xl font-semibold tracking-tight break-words flex-1 min-w-0">{entry.exerciseName}</h3>
+            <div className="flex items-center gap-2 shrink-0">
               {onCollapsedChange && (
                 <Button
                   type="button"
@@ -135,14 +135,14 @@ export default function ExerciseEntryForm({
 
         <CollapsibleContent className="space-y-4 mt-4">
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <Label className="text-sm font-medium">Sets</Label>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={handleAddSet}
-                className="gap-2"
+                className="gap-2 w-full sm:w-auto"
               >
                 <Plus className="h-4 w-4" />
                 Add Set

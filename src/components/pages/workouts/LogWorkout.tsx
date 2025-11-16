@@ -427,7 +427,7 @@ export default function LogWorkout() {
 
       {/* Exercises */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
             {t('workouts.logWorkout.exercises')} ({workoutEntries.length})
           </h3>
@@ -435,7 +435,7 @@ export default function LogWorkout() {
             type="button"
             variant="outline"
             onClick={handleAddExercise}
-            className="gap-2"
+            className="gap-2 w-full sm:w-auto"
           >
             <Plus className="h-4 w-4" />
             {t('workouts.logWorkout.addExercise')}
@@ -484,7 +484,7 @@ export default function LogWorkout() {
           <Button
             onClick={handleSaveWorkout}
             disabled={saving}
-            className="gap-2"
+            className="gap-2 w-full sm:w-auto"
             size="lg"
           >
             {saving ? (

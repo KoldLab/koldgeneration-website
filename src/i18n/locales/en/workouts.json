@@ -1,0 +1,126 @@
+{
+  "title": "Workouts",
+  "description": "Track your fitness journey with workout logging and routines",
+  "tabs": {
+    "log": "Log Workout",
+    "history": "History",
+    "routines": "Routines",
+    "exercises": "Exercise Library"
+  },
+  "logWorkout": {
+    "title": "Log Workout",
+    "description": "Record a new workout session",
+    "date": "Date",
+    "duration": "Duration",
+    "overallNotes": "Overall Workout Notes",
+    "notesPlaceholder": "Add any notes about your workout...",
+    "startFromRoutine": "Start from Routine",
+    "selectRoutine": "Select a routine",
+    "startFromScratch": "Start from Scratch",
+    "exercises": "Exercises",
+    "addExercise": "Add Exercise",
+    "addFirstExercise": "Add Your First Exercise",
+    "noExercisesMessage": "No exercises added yet. Add exercises to start logging your workout.",
+    "noExercisesAvailable": "No exercises available. Please add exercises to your library first.",
+    "noExercisesError": "Please add at least one exercise to log a workout.",
+    "noSetsError": "Please add at least one set to at least one exercise.",
+    "dateRequired": "Please select a date for your workout.",
+    "saveWorkout": "Save Workout",
+    "saving": "Saving...",
+    "saveSuccess": "Workout saved successfully!",
+    "saveError": "Failed to save workout. Please try again.",
+    "errorLoadingData": "Failed to load exercises and routines.",
+    "errorLoadingRoutine": "Failed to load routine."
+  },
+  "exerciseSelector": {
+    "title": "Add Exercise",
+    "browse": "Browse Exercises",
+    "create": "Create Custom",
+    "customName": "Exercise Name",
+    "customNamePlaceholder": "Enter exercise name",
+    "customDescription": "Description",
+    "customDescriptionPlaceholder": "Enter exercise description (optional)",
+    "createExercise": "Create Exercise",
+    "creating": "Creating..."
+  },
+  "exerciseGrid": {
+    "columns": "Columns",
+    "columnsLabel": "Columns",
+    "itemsPerPage": "Items Per Page",
+    "showGif": "Show GIF",
+    "addToWorkout": "Add to Workout"
+  },
+  "history": {
+    "title": "Workout History",
+    "description": "View all your past workouts",
+    "comingSoon": "Workout History feature coming soon",
+    "noWorkouts": "No workouts yet. Start logging your workouts!",
+    "error": "Failed to load workout history",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "freeWorkout": "Free Workout",
+    "routine": "Routine",
+    "exercise": "exercise",
+    "exercises": "exercises",
+    "set": "set",
+    "sets": "sets",
+    "reps": "reps",
+    "completed": "Done",
+    "notes": "Notes",
+    "editWorkout": "Edit Workout",
+    "saveAsRoutine": "Save as Routine",
+    "enterRoutineName": "Enter routine name:",
+    "confirmDelete": "Are you sure you want to delete this workout?",
+    "deleted": "Workout deleted successfully",
+    "deleteError": "Failed to delete workout",
+    "savedAsRoutine": "Workout saved as routine successfully",
+    "saveRoutineError": "Failed to save routine",
+    "updated": "Workout updated successfully",
+    "updateError": "Failed to update workout",
+    "startWorkout": "Start Workout",
+    "details": "Details",
+    "deleteFromHistory": "Delete from History",
+    "workoutLoaded": "Workout loaded. Ready to log!"
+  },
+  "routines": {
+    "comingSoon": "Workout Routines feature coming soon"
+  },
+  "exerciseLibrary": {
+    "title": "Exercise Library *work in progress*",
+    "description": "Browse and import exercises from the database",
+    "search": "Search exercises...",
+    "noResults": "No exercises found",
+    "loading": "Loading exercises...",
+    "error": "Failed to load exercises",
+    "filters": {
+      "title": "Filters",
+      "bodyPart": "Body Part",
+      "equipment": "Equipment",
+      "targetMuscle": "Target Muscle",
+      "clearFilters": "Clear Filters",
+      "resetFilters": "Reset Filters",
+      "all": "All"
+    },
+    "exercise": {
+      "name": "Exercise Name",
+      "bodyParts": "Body Parts",
+      "equipment": "Equipment",
+      "targetMuscles": "Target Muscles",
+      "secondaryMuscles": "Secondary Muscles",
+      "viewDetails": "View Details",
+      "import": "Import Exercise",
+      "imported": "Imported",
+      "instructions": "Instructions",
+      "tips": "Tips",
+      "variations": "Variations",
+      "overview": "Overview",
+      "relatedExercises": "Related Exercises"
+    },
+    "details": {
+      "title": "Exercise Details",
+      "importSuccess": "Exercise imported successfully",
+      "importError": "Failed to import exercise"
+    }
+  }
+}
+

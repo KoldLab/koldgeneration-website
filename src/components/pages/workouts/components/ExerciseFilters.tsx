@@ -136,7 +136,7 @@ export default function ExerciseFilters({
       </div>
 
       {/* Filter Dropdowns */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
         <div className="space-y-2">
           <Label>{t('workouts.exerciseLibrary.filters.bodyPart')}</Label>
           <Select value={selectedBodyPart} onValueChange={setSelectedBodyPart}>

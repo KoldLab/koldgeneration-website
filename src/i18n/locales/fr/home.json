@@ -1,0 +1,38 @@
+{
+  "welcome": "Bienvenue sur le Hub Kold Generation",
+  "description": "Explorez nos outils et fonctionnalités de tournois pour dynamiser vos événements communautaires.",
+  "cards": {
+    "tools": {
+      "timer": {
+        "title": "Minuteur de précision",
+        "description": "Chronométrez comptes à rebours, chronomètres et intervalles avec une précision professionnelle."
+      },
+      "minecraftListGenerator": {
+        "title": "Générateur de listes Minecraft",
+        "description": "Générez des listes partageables à partir de coffres Minecraft : parfait pour gérer vos ressources."
+      }
+    },
+    "tournaments": {
+      "create": {
+        "title": "Créer un tournoi",
+        "description": "Concevez des brackets, définissez les règles et publiez un tournoi en quelques clics."
+      },
+      "my": {
+        "title": "Mes tournois",
+        "description": "Consultez et gérez les tournois que vous organisez ou auxquels vous participez."
+      },
+      "view": {
+        "title": "Entrer un code de tournoi",
+        "description": "Accédez à la page de saisie pour entrer un code et rejoindre le bracket."
+      }
+    }
+  },
+  "cardBadge": {
+    "authRequired": "Connexion requise"
+  },
+  "cardButton": {
+    "signInRequired": "Connectez-vous pour y accéder",
+    "explore": "Explorer"
+  }
+}
+

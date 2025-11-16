@@ -1,0 +1,51 @@
+{
+  "home": {
+    "title": "Accueil",
+    "description": "Page d'accueil principale"
+  },
+  "tools": {
+    "title": "Outils",
+    "description": "Toutes les utilitaires et scripts personnels",
+    "timer": {
+      "title": "Minuteur",
+      "description": "Chronomètre et compte à rebours avec minutage précis"
+    }
+  },
+  "minecraftTools": {
+    "title": "Outils Minecraft",
+    "description": "Outils pour la création de contenu Minecraft",
+    "listGenerator": {
+      "title": "Générateur d'Image de Contenu de Coffre",
+      "description": "Créez des images personnalisables montrant le contenu de votre coffre Minecraft"
+    }
+  },
+  "workouts": {
+    "title": "Entraînements",
+    "description": "Suivez votre parcours fitness avec l'enregistrement d'entraînements et de routines",
+    "dashboard": {
+      "title": "Tableau de Bord",
+      "description": "Voir et gérer vos entraînements"
+    },
+    "exercises": {
+      "title": "Bibliothèque d'Exercices",
+      "description": "Parcourir et importer des exercices depuis la base de données"
+    }
+  },
+  "tournaments": {
+    "title": "Tournois",
+    "description": "Créer et gérer des tournois",
+    "create": {
+      "title": "Créer un Tournoi",
+      "description": "Créer un nouveau tournoi"
+    },
+    "my": {
+      "title": "Mes Tournois",
+      "description": "Voir tous les tournois auxquels vous avez participé"
+    },
+    "enter": {
+      "title": "Entrer un code de tournoi",
+      "description": "Accéder à la page de saisie d'un code pour rejoindre un tournoi"
+    }
+  }
+}
+

@@ -36,12 +36,12 @@ export default function SetInput({
   };
 
   return (
-    <div className="flex items-center gap-3 p-3 border rounded-md">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 border rounded-md">
       <div className="flex-shrink-0 w-8 text-sm font-medium text-muted-foreground">
         {setNumber}
       </div>
 
-      <div className="flex-1 grid grid-cols-2 gap-3">
+      <div className="flex-1 grid grid-cols-2 gap-2 sm:gap-3">
         <Input
           id={`reps-${setNumber}`}
           type="number"
@@ -64,7 +64,7 @@ export default function SetInput({
         />
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         <div className="flex items-center gap-2">
           <Checkbox
             id={`completed-${setNumber}`}

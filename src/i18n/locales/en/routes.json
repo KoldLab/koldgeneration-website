@@ -1,0 +1,51 @@
+{
+  "home": {
+    "title": "Home",
+    "description": "Main landing page"
+  },
+  "tools": {
+    "title": "Tools",
+    "description": "All personal utilities and scripts",
+    "timer": {
+      "title": "Timer",
+      "description": "Stopwatch and countdown timer with precision timing"
+    }
+  },
+  "minecraftTools": {
+    "title": "Minecraft Tools",
+    "description": "Tools for Minecraft content creation",
+    "listGenerator": {
+      "title": "Chest Contents Image Generator",
+      "description": "Create customizable images showing the contents of your Minecraft chest"
+    }
+  },
+  "workouts": {
+    "title": "Workouts",
+    "description": "Track your fitness journey with workout logging and routines",
+    "dashboard": {
+      "title": "Dashboard",
+      "description": "View and manage your workouts"
+    },
+    "exercises": {
+      "title": "Exercise Library",
+      "description": "Browse and import exercises from the database"
+    }
+  },
+  "tournaments": {
+    "title": "Tournaments",
+    "description": "Create and manage tournaments",
+    "create": {
+      "title": "Create Tournament",
+      "description": "Create a new tournament"
+    },
+    "my": {
+      "title": "My Tournaments",
+      "description": "View all tournaments you have participated in"
+    },
+    "enter": {
+      "title": "Enter Tournament Code",
+      "description": "Open the join page to enter a tournament code"
+    }
+  }
+}
+

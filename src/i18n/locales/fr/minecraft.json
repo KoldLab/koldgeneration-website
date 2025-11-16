@@ -1,0 +1,29 @@
+{
+  "title": "Générateur d'Image de Contenu de Coffre Minecraft",
+  "description": "Créez des images personnalisables montrant le contenu de votre coffre Minecraft. Parfait pour les tutoriels - affiche les noms d'objets, les quantités et les icônes. Génère également une liste de texte formatée que vous pouvez copier.",
+  "pasteJson": "Collez vos données NBT de coffre ici...",
+  "itemsRequired": "- Items requis -",
+  "headerText": "Texte d'En-tête",
+  "headerTextPlaceholder": "Entrez le texte d'en-tête (ex. 'Items requis', 'Contenu du coffre', etc.)",
+  "generate": "Générer",
+  "test": "Test",
+  "preview": "Aperçu",
+  "settings": "Paramètres",
+  "font": "Police",
+  "fontSize": "Taille de Police",
+  "fontColor": "Couleur du Texte",
+  "backgroundColor": "Couleur de Fond",
+  "transparentBackground": "Définir le fond transparent",
+  "transparentBackgroundDescription": "Cliquez pour supprimer la couleur de fond, la rendant transparente",
+  "columns": "Colonnes",
+  "rows": "Lignes (0 = auto)",
+  "iconSize": "Taille des Icônes",
+  "copyText": "Copier le Texte",
+  "copied": "Copié !",
+  "downloadPng": "Télécharger PNG",
+  "error": {
+    "invalidJson": "Format JSON invalide",
+    "invalidStructure": "Structure JSON invalide : Tableau Items manquant"
+  }
+}
+

@@ -1,0 +1,106 @@
+---
+alwaysApply: true
+---
+
+# Translation Rules
+
+## Core Requirements
+
+1. **Always Create Translations**: When creating a new page or component that displays user-facing text, you MUST create translation entries for all text strings.
+
+2. **Use Translation Keys**: Never hardcode user-facing text. Always use the `useTranslation` hook and translation keys:
+   ```tsx
+   const { t } = useTranslation();
+   return <h1>{t('myPage.title')}</h1>;
+   ```
+
+3. **Translation Key Structure**: Follow the existing pattern:
+   - Use dot notation for nested keys: `feature.section.item`
+   - Group by feature/page: `workouts.logWorkout.title`
+   - Use descriptive, hierarchical names
+
+4. **Both Languages Required**: Always add translations for both English (`en.json`) and French (`fr.json`).
+
+5. **Translation Key Naming**:
+   - Use camelCase for keys: `addExercise`, `saveWorkout`
+   - Use descriptive names that indicate context
+   - Group related translations together
+
+## File Organization
+
+Currently, translations are in single files (`en.json`, `fr.json`). For better maintainability, consider splitting by feature:
+
+- `locales/en/workouts.json`
+- `locales/en/tournaments.json`
+- `locales/en/common.json`
+- `locales/fr/workouts.json`
+- `locales/fr/tournaments.json`
+- `locales/fr/common.json`
+
+## Implementation Checklist
+
+When creating a new page/component:
+
+- [ ] Identify all user-facing text strings
+- [ ] Create translation keys following the naming convention
+- [ ] Add translations to `en.json`
+- [ ] Add translations to `fr.json`
+- [ ] Use `useTranslation()` hook in the component
+- [ ] Replace all hardcoded strings with `t('key')` calls
+- [ ] Test that translations work in both languages
+
+## Common Patterns
+
+### Page Title and Description
+```json
+{
+  "myPage": {
+    "title": "My Page",
+    "description": "Description of my page"
+  }
+}
+```
+
+### Form Labels and Placeholders
+```json
+{
+  "myForm": {
+    "nameLabel": "Name",
+    "namePlaceholder": "Enter your name",
+    "submitButton": "Submit"
+  }
+}
+```
+
+### Error Messages
+```json
+{
+  "myFeature": {
+    "errors": {
+      "required": "This field is required",
+      "invalid": "Invalid input"
+    }
+  }
+}
+```
+
+### Action Buttons
+```json
+{
+  "myFeature": {
+    "actions": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    }
+  }
+}
+```
+
+## Best Practices
+
+1. **Reuse Common Translations**: Use `common.*` keys for shared text (buttons, labels, etc.)
+2. **Keep Keys Descriptive**: `workouts.logWorkout.addExercise` is better than `add`
+3. **Group Related Content**: Keep all translations for a feature together
+4. **Use Interpolation**: For dynamic content, use `{{variable}}` syntax
+5. **Test Both Languages**: Always verify translations work in both English and French

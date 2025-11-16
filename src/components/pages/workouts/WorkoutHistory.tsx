@@ -222,15 +222,13 @@ export default function WorkoutHistory() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0">
-            {t('workouts.history.title')}
-          </h2>
-          <p className="leading-7 [&:not(:first-child)]:mt-6">
-            {t('workouts.history.description')} ({workouts.length})
-          </p>
-        </div>
+      <div>
+        <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0">
+          {t('workouts.history.title')}
+        </h2>
+        <p className="leading-7 [&:not(:first-child)]:mt-6">
+          {t('workouts.history.description')} ({workouts.length})
+        </p>
       </div>
 
       <div className="space-y-12">
@@ -268,13 +266,13 @@ export default function WorkoutHistory() {
                   {monthGroup.workouts.map((workout) => (
                     <Card key={workout.id} className="overflow-hidden">
                       <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <CardTitle>
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <CardTitle className="break-words">
                               {workout.routineName ||
                                 t('workouts.history.freeWorkout')}
                             </CardTitle>
-                            <CardDescription className="mt-2">
+                            <CardDescription className="mt-2 break-words">
                               {format(
                                 workout.date,
                                 i18n.language === 'fr'
@@ -295,7 +293,7 @@ export default function WorkoutHistory() {
                             variant="ghost"
                             size="icon"
                             onClick={() => handleOpenActions(workout)}
-                            className="h-8 w-8"
+                            className="h-8 w-8 shrink-0"
                           >
                             <MoreHorizontal className="h-4 w-4" />
                             <span className="sr-only">Open menu</span>

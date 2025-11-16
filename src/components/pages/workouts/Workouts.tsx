@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
 import ExerciseLibrary from './ExerciseLibrary';
 import LogWorkout from './LogWorkout';
@@ -57,7 +64,38 @@ export default function Workouts() {
         </p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      {/* Mobile: Dropdown Selector */}
+      <div className="md:hidden">
+        <Select value={activeTab} onValueChange={setActiveTab}>
+          <SelectTrigger className="w-full">
+            <SelectValue>
+              {activeTab === 'log' && t('workouts.tabs.log')}
+              {activeTab === 'history' && t('workouts.tabs.history')}
+              {activeTab === 'routines' && t('workouts.tabs.routines')}
+              {activeTab === 'exercises' && t('workouts.tabs.exercises')}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="log">{t('workouts.tabs.log')}</SelectItem>
+            <SelectItem value="history">
+              {t('workouts.tabs.history')}
+            </SelectItem>
+            <SelectItem value="routines">
+              {t('workouts.tabs.routines')}
+            </SelectItem>
+            <SelectItem value="exercises">
+              {t('workouts.tabs.exercises')}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Desktop: Tabs */}
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="w-full hidden md:block"
+      >
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="log">{t('workouts.tabs.log')}</TabsTrigger>
           <TabsTrigger value="history">
@@ -70,16 +108,13 @@ export default function Workouts() {
             {t('workouts.tabs.exercises')}
           </TabsTrigger>
         </TabsList>
+      </Tabs>
 
-        <TabsContent value="log" className="mt-6">
-          <LogWorkout />
-        </TabsContent>
-
-        <TabsContent value="history" className="mt-6">
-          <WorkoutHistory />
-        </TabsContent>
-
-        <TabsContent value="routines" className="mt-6">
+      {/* Content - Shared for both mobile and desktop */}
+      <div className="mt-6">
+        {activeTab === 'log' && <LogWorkout />}
+        {activeTab === 'history' && <WorkoutHistory />}
+        {activeTab === 'routines' && (
           <Card className="p-6">
             <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
               <p className="text-muted-foreground text-center">
@@ -87,12 +122,9 @@ export default function Workouts() {
               </p>
             </div>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="exercises" className="mt-6">
-          <ExerciseLibrary />
-        </TabsContent>
-      </Tabs>
+        )}
+        {activeTab === 'exercises' && <ExerciseLibrary />}
+      </div>
     </div>
   );
 }

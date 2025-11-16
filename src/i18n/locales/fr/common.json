@@ -1,0 +1,22 @@
+{
+  "loading": "Chargement...",
+  "error": "Erreur",
+  "signIn": "Se connecter",
+  "signingIn": "Connexion en cours...",
+  "signOut": "Se déconnecter",
+  "menu": "Menu",
+  "openMenu": "Ouvrir le menu",
+  "goHome": "Retour à l'accueil",
+  "user": "Utilisateur",
+  "cancel": "Annuler",
+  "retry": "Réessayer",
+  "yes": "Oui",
+  "no": "Non",
+  "previous": "Précédent",
+  "next": "Suivant",
+  "edit": "Modifier",
+  "delete": "Supprimer",
+  "save": "Enregistrer",
+  "close": "Fermer"
+}
+

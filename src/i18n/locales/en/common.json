@@ -1,0 +1,22 @@
+{
+  "loading": "Loading...",
+  "error": "Error",
+  "signIn": "Sign in",
+  "signingIn": "Signing in...",
+  "signOut": "Sign out",
+  "menu": "Menu",
+  "openMenu": "Open menu",
+  "goHome": "Go Home",
+  "user": "User",
+  "cancel": "Cancel",
+  "retry": "Retry",
+  "yes": "Yes",
+  "no": "No",
+  "previous": "Previous",
+  "next": "Next",
+  "edit": "Edit",
+  "delete": "Delete",
+  "save": "Save",
+  "close": "Close"
+}
+

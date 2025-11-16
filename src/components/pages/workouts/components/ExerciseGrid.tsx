@@ -132,7 +132,7 @@ export default function ExerciseGrid({
       {/* Display Controls */}
       {showDisplayControls && (
         <Card className="p-4">
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
             <div className="space-y-2">
               <Label>{t('workouts.exerciseGrid.columns')}</Label>
               <Select

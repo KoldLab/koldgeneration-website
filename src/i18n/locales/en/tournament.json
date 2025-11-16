@@ -1,0 +1,160 @@
+{
+  "types": {
+    "singleElimination": "Single Elimination",
+    "singleEliminationDescription": "Players are eliminated after one loss. Simple and fast format.",
+    "doubleElimination": "Double Elimination",
+    "doubleEliminationDescription": "Players need two losses to be eliminated. More competitive format.",
+    "roundRobin": "Round Robin",
+    "roundRobinDescription": "Every player plays against every other player. Most matches, fair ranking.",
+    "swiss": "Swiss",
+    "swissDescription": "Players with similar records face each other. Balanced tournament format."
+  },
+  "status": {
+    "pending": "Pending",
+    "open": "Open",
+    "inProgress": "In Progress",
+    "paused": "Paused",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "create": {
+    "title": "Create Tournament",
+    "description": "Set up a new tournament and invite participants to join",
+    "name": "Tournament Name",
+    "namePlaceholder": "Enter tournament name",
+    "descriptionLabel": "Description (optional)",
+    "descriptionPlaceholder": "Enter tournament description",
+    "type": "Tournament Type",
+    "maxPlayers": "Maximum Participants",
+    "maxPlayersHint": "Minimum 2, maximum 128 participants",
+    "requireScores": {
+      "title": "Require score entry",
+      "description": "When disabled, organizers only select a winner for each match."
+    },
+    "createButton": "Create Tournament",
+    "creating": "Creating...",
+    "error": "Failed to create tournament",
+    "loginRequired": "You must be logged in to create a tournament",
+    "blockedByExtension": "Your browser extension (ad blocker/privacy tool) is blocking Firestore requests. Please disable it for this site or allow requests to firestore.googleapis.com"
+  },
+  "view": {
+    "notFound": "Tournament not found",
+    "error": "Error loading tournament",
+    "code": "Code",
+    "type": "Type",
+    "players": "Participants",
+    "participants": "Participants",
+    "register": "Register",
+    "registering": "Registering...",
+    "registerError": "Failed to register",
+    "unregister": "Unregister",
+    "unregistering": "Unregistering...",
+    "unregisterError": "Failed to unregister",
+    "loginToManage": "Sign in to save your registrations",
+    "noPlayers": "No participants registered yet",
+    "createdBy": "Created By",
+    "createdAt": "Created At",
+    "startedAt": "Started At",
+    "completedAt": "Completed At",
+    "openTournament": "Open Tournament",
+    "startTournament": "Start Tournament",
+    "pauseTournament": "Pause Tournament",
+    "resumeTournament": "Resume Tournament",
+    "completeTournament": "Complete Tournament",
+    "cancelTournament": "Cancel Tournament",
+    "statusError": "Failed to update tournament status",
+    "copyLink": "Copy Link",
+    "copied": "Copied!",
+    "copyCode": "Copy tournament code",
+    "enterPseudonym": "Enter Your Pseudonym",
+    "pseudonymPlaceholder": "Choose a name to play as",
+    "pseudonymHint": "You can join without signing in! Just choose a name and start playing.",
+    "you": "You",
+    "ownerAddParticipant": {
+      "title": "Add Participant",
+      "description": "Manually add a participant to the tournament. They will appear as a guest participant.",
+      "nameLabel": "Participant name",
+      "namePlaceholder": "Enter participant name",
+      "addButton": "Add participant",
+      "helper": "Use this when someone can't sign in but should still be included.",
+      "errors": {
+        "nameRequired": "Enter a participant name before adding.",
+        "nameTooLong": "Please keep the name under 50 characters."
+      }
+    },
+    "removeParticipant": "Remove"
+  },
+  "enter": {
+    "title": "Enter a tournament code",
+    "subtitle": "Paste the code you received from an organiser to jump straight into the bracket.",
+    "section": {
+      "title": "Have a code?",
+      "helper": "Codes are usually 6 characters made of letters and numbers."
+    },
+    "label": "Tournament code",
+    "placeholder": "e.g. ABC123",
+    "cta": "Open tournament",
+    "helper": "You'll be redirected straight to the tournament page if the code is valid.",
+    "errors": {
+      "invalid": "Please enter a valid tournament code.",
+      "notFound": "We couldn't find a tournament with that code. Check the code and try again.",
+      "generic": "Something went wrong while opening the tournament. Please try again."
+    }
+  },
+  "myTournaments": {
+    "title": "My Tournaments",
+    "description": "View all tournaments you have participated in",
+    "noTournaments": "You haven't participated in any tournaments yet.",
+    "view": "View",
+    "ownerBadge": "Owner"
+  },
+  "bracket": {
+    "singleElimination": {
+      "title": "Single Elimination Bracket"
+    },
+    "roundStatus": {
+      "pending": "Pending",
+      "active": "In Progress",
+      "completed": "Completed"
+    },
+    "matchLabel": "Match {{number}}",
+    "matchStatus": {
+      "pending": "Pending",
+      "in-progress": "In Progress",
+      "completed": "Completed"
+    },
+    "noMatches": "No matches yet",
+    "reportResult": "Report Result",
+    "updateResult": "Update Result",
+    "lastReported": "Last update: {{date}}",
+    "reportedBy": "Reported by {{name}}",
+    "tbd": "TBD",
+    "awaitingStart": "The bracket will generate once the tournament starts.",
+    "reportDialog": {
+      "title": "Report Match Result",
+      "description": "Enter the final scores and select the winner to advance in the bracket.",
+      "scoresLabel": "Scores",
+      "winnerLabel": "Winner",
+      "scoresOptional": "Scores are disabled for this tournament. Select a winner to continue.",
+      "submit": "Submit Result",
+      "cancel": "Cancel",
+      "errors": {
+        "winnerRequired": "Select a winner for the match.",
+        "scoreRequired": "Enter a score for each participant."
+      }
+    }
+  },
+  "ownerAddParticipant": {
+    "title": "Add Participant",
+    "description": "Manually add a participant to the tournament. They will appear as a guest participant.",
+    "nameLabel": "Participant name",
+    "namePlaceholder": "Enter participant name",
+    "addButton": "Add participant",
+    "helper": "Use this when someone can't sign in but should still be included.",
+    "errors": {
+      "nameRequired": "Enter a participant name before adding.",
+      "nameTooLong": "Please keep the name under 50 characters."
+    }
+  }
+}
+

@@ -69,8 +69,8 @@ export default function ExerciseDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 gap-0">
-        <DialogHeader className="px-6 pt-6 pb-4 shrink-0">
+      <DialogContent className="max-w-4xl h-[90vh] sm:h-[85vh] flex flex-col p-0 gap-0 w-[calc(100vw-2rem)] sm:w-full">
+        <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-4 shrink-0">
           <DialogTitle className="text-2xl">{exercise.name}</DialogTitle>
           <DialogDescription>
             {exercise.overview ||
@@ -78,7 +78,7 @@ export default function ExerciseDetailsDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 min-h-0 px-6">
+        <ScrollArea className="flex-1 min-h-0 px-4 sm:px-6">
           <div className="space-y-6">
             {/* Exercise GIF/Image/Video */}
             {(exercise.gifUrl || exercise.imageUrl || exercise.videoUrl) && (
@@ -300,11 +300,11 @@ export default function ExerciseDetailsDialog({
 
         {/* Actions */}
         {userId && (
-          <div className="flex gap-3 p-6 pt-4 border-t shrink-0">
+          <div className="flex gap-3 p-4 sm:p-6 pt-4 border-t shrink-0">
             <Button
               onClick={handleImport}
               disabled={importing || imported}
-              className="flex-1"
+              className="flex-1 w-full"
             >
               {importing ? (
                 <>

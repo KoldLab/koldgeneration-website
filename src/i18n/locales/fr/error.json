@@ -1,0 +1,13 @@
+{
+  "notFound": {
+    "title": "404",
+    "heading": "Page Non Trouvée",
+    "message": "La page que vous recherchez n'existe pas.",
+    "goHome": "Retour à l'accueil"
+  },
+  "generic": {
+    "heading": "Non Trouvé",
+    "message": "La page que vous recherchez n'existe pas."
+  }
+}
+
