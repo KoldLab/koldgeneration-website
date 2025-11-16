@@ -202,6 +202,29 @@ export default function LogWorkout() {
     removeWorkoutEntry(index);
   };
 
+  // Helper function to recursively remove undefined values from objects
+  const removeUndefinedValues = (obj: any): any => {
+    if (obj === null || obj === undefined) {
+      return obj;
+    }
+    if (Array.isArray(obj)) {
+      // For arrays, clean each item but keep all items (don't filter)
+      return obj.map(removeUndefinedValues);
+    }
+    if (typeof obj === 'object') {
+      // For objects, remove properties with undefined values
+      const cleaned: any = {};
+      for (const key in obj) {
+        const value = removeUndefinedValues(obj[key]);
+        if (value !== undefined) {
+          cleaned[key] = value;
+        }
+      }
+      return cleaned;
+    }
+    return obj;
+  };
+
   const handleSaveWorkout = async () => {
     if (!user) return;
 
@@ -229,6 +252,9 @@ export default function LogWorkout() {
         return;
       }
 
+      // Clean workoutEntries to remove undefined values
+      const cleanedExercises = removeUndefinedValues(workoutEntries);
+
       const workoutLog: Omit<
         WorkoutLog,
         'id' | 'userId' | 'createdAt' | 'updatedAt'
@@ -236,7 +262,7 @@ export default function LogWorkout() {
         ...(selectedRoutine?.id && { routineId: selectedRoutine.id }),
         ...(selectedRoutine?.name && { routineName: selectedRoutine.name }),
         date: workoutDate,
-        exercises: workoutEntries,
+        exercises: cleanedExercises,
         ...(workoutNotes && { notes: workoutNotes }),
         ...(workoutDuration && {
           duration: parseInt(workoutDuration, 10),

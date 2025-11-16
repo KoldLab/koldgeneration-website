@@ -12,6 +12,7 @@ import enTimer from './locales/en/timer.json';
 import enTournament from './locales/en/tournament.json';
 import enWorkouts from './locales/en/workouts.json';
 import enRoutes from './locales/en/routes.json';
+import enDates from './locales/en/dates.json';
 
 import frCommon from './locales/fr/common.json';
 import frNav from './locales/fr/nav.json';
@@ -22,6 +23,7 @@ import frTimer from './locales/fr/timer.json';
 import frTournament from './locales/fr/tournament.json';
 import frWorkouts from './locales/fr/workouts.json';
 import frRoutes from './locales/fr/routes.json';
+import frDates from './locales/fr/dates.json';
 
 // Merge all translations into a single namespace to maintain backward compatibility
 const enTranslations = {
@@ -34,6 +36,7 @@ const enTranslations = {
   tournament: enTournament,
   workouts: enWorkouts,
   routes: enRoutes,
+  dates: enDates,
 };
 
 const frTranslations = {
@@ -46,6 +49,7 @@ const frTranslations = {
   tournament: frTournament,
   workouts: frWorkouts,
   routes: frRoutes,
+  dates: frDates,
 };
 
 i18n

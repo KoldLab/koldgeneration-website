@@ -61,7 +61,7 @@
     "freeWorkout": "Free Workout",
     "routine": "Routine",
     "exercise": "exercise",
-    "exercises": "exercises",
+    "exercises": "Exercises",
     "set": "set",
     "sets": "sets",
     "reps": "reps",
@@ -80,7 +80,15 @@
     "startWorkout": "Start Workout",
     "details": "Details",
     "deleteFromHistory": "Delete from History",
-    "workoutLoaded": "Workout loaded. Ready to log!"
+    "workoutLoaded": "Workout loaded. Ready to log!",
+    "tableHeaders": {
+      "exercises": "Exercises",
+      "sets": "Sets",
+      "reps": "Reps",
+      "weight": "Weight",
+      "status": "Status"
+    },
+    "noSets": "No sets recorded"
   },
   "routines": {
     "comingSoon": "Workout Routines feature coming soon"

@@ -61,7 +61,7 @@
     "freeWorkout": "Entraînement Libre",
     "routine": "Routine",
     "exercise": "exercice",
-    "exercises": "exercices",
+    "exercises": "Exercices",
     "set": "série",
     "sets": "séries",
     "reps": "rép",
@@ -80,7 +80,15 @@
     "startWorkout": "Démarrer l'Entraînement",
     "details": "Détails",
     "deleteFromHistory": "Supprimer de l'Historique",
-    "workoutLoaded": "Entraînement chargé. Prêt à enregistrer !"
+    "workoutLoaded": "Entraînement chargé. Prêt à enregistrer !",
+    "tableHeaders": {
+      "exercises": "Exercices",
+      "sets": "Séries",
+      "reps": "Rép",
+      "weight": "Poids",
+      "status": "Statut"
+    },
+    "noSets": "Aucune série enregistrée"
   },
   "routines": {
     "comingSoon": "Workout Routines feature coming soon"
@@ -123,4 +131,3 @@
     }
   }
 }
-

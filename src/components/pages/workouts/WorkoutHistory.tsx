@@ -9,8 +9,14 @@ import {
   getWorkoutLogsByUserId,
   deleteWorkoutLog,
   createRoutine,
+  getExerciseById,
 } from '@/services/workoutService';
-import type { WorkoutLog, WorkoutRoutine } from '@/types/workout';
+import { getExerciseById as getExerciseDBById } from '@/services/exerciseDBService';
+import type {
+  WorkoutLog,
+  WorkoutRoutine,
+  ExerciseDBExercise,
+} from '@/types/workout';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -28,6 +34,14 @@ import {
   CardDescription,
   CardContent,
 } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import {
   MoreHorizontal,
@@ -38,6 +52,7 @@ import {
   Info,
   Trash2,
 } from 'lucide-react';
+import ExerciseDetailsDialog from './components/ExerciseDetailsDialog';
 
 type WorkoutByMonth = {
   year: number;
@@ -62,6 +77,18 @@ export default function WorkoutHistory() {
     React.useState<WorkoutLog | null>(null);
   const [isActionDialogOpen, setIsActionDialogOpen] = React.useState(false);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = React.useState(false);
+  const [selectedExerciseForDetails, setSelectedExerciseForDetails] =
+    React.useState<{
+      exercise: WorkoutLog['exercises'][0];
+      workout: WorkoutLog;
+    } | null>(null);
+  const [exerciseDBDetails, setExerciseDBDetails] =
+    React.useState<ExerciseDBExercise | null>(null);
+  const [loadingExerciseDetails, setLoadingExerciseDetails] =
+    React.useState(false);
+  const [expandedExercises, setExpandedExercises] = React.useState<Set<string>>(
+    new Set()
+  );
 
   React.useEffect(() => {
     if (!user) return;
@@ -89,9 +116,12 @@ export default function WorkoutHistory() {
       const year = getYear(workout.date);
       const month = startOfMonth(workout.date).getMonth();
       const key = `${year}-${month}`;
-      const monthName = format(workout.date, 'MMMM', {
+      const monthNameRaw = format(workout.date, 'MMMM', {
         locale: i18n.language === 'fr' ? fr : enUS,
       });
+      // Capitalize first letter
+      const monthName =
+        monthNameRaw.charAt(0).toUpperCase() + monthNameRaw.slice(1);
 
       if (!grouped[key]) {
         grouped[key] = {
@@ -199,6 +229,56 @@ export default function WorkoutHistory() {
     setIsDetailsDialogOpen(true);
   };
 
+  const handleExerciseNameClick = async (
+    exercise: WorkoutLog['exercises'][0],
+    workout: WorkoutLog,
+    event: React.MouseEvent
+  ) => {
+    event.stopPropagation();
+    setSelectedExerciseForDetails({ exercise, workout });
+    setExerciseDBDetails(null);
+    setLoadingExerciseDetails(true);
+
+    try {
+      // Try to get the exercise from Firestore
+      const firestoreExercise = await getExerciseById(exercise.exerciseId);
+
+      // If it has an exerciseDBId, fetch full details from ExerciseDB API
+      if (firestoreExercise?.exerciseDBId) {
+        try {
+          const exerciseDBData = await getExerciseDBById(
+            firestoreExercise.exerciseDBId
+          );
+          setExerciseDBDetails(exerciseDBData);
+        } catch (err) {
+          console.error('Failed to fetch ExerciseDB details:', err);
+          // Continue without ExerciseDB details
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch exercise:', err);
+      // Continue without exercise details
+    } finally {
+      setLoadingExerciseDetails(false);
+    }
+  };
+
+  const toggleExerciseExpansion = (
+    workoutId: string,
+    exerciseIndex: number
+  ) => {
+    const key = `${workoutId}-${exerciseIndex}`;
+    setExpandedExercises((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(key)) {
+        newSet.delete(key);
+      } else {
+        newSet.add(key);
+      }
+      return newSet;
+    });
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -254,7 +334,7 @@ export default function WorkoutHistory() {
                 </span>
                 <h3
                   className={`scroll-m-20 text-2xl font-semibold tracking-tight ${
-                    isCurrentMonth ? 'underline' : ''
+                    isCurrentMonth ? 'border-b-2 border-pop' : ''
                   }`}
                 >
                   {monthGroup.monthName}
@@ -307,55 +387,148 @@ export default function WorkoutHistory() {
                             <Dumbbell className="h-4 w-4" />
                             {t('workouts.history.exercises')}
                           </h5>
-                          <div className="space-y-3">
-                            {workout.exercises.map((exercise, index) => (
-                              <div
-                                key={index}
-                                className="p-3 border rounded-md space-y-2"
-                              >
-                                <div className="font-medium">
-                                  {exercise.exerciseName}
-                                </div>
-                                {exercise.notes && (
-                                  <p className="text-sm text-muted-foreground">
-                                    {exercise.notes}
-                                  </p>
-                                )}
-                                <div className="space-y-1">
-                                  {exercise.sets.map((set, setIndex) => (
-                                    <div
-                                      key={setIndex}
-                                      className="flex items-center gap-3 text-sm"
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>
+                                  {t('workouts.history.tableHeaders.exercises')}
+                                </TableHead>
+                                <TableHead>
+                                  {t('workouts.history.tableHeaders.sets')}
+                                </TableHead>
+                                <TableHead className="text-right">
+                                  {t('workouts.history.tableHeaders.reps')}
+                                </TableHead>
+                                <TableHead className="text-right">
+                                  {t('workouts.history.tableHeaders.weight')}
+                                </TableHead>
+                                <TableHead className="text-center">
+                                  {t('workouts.history.tableHeaders.status')}
+                                </TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {workout.exercises.map((exercise, index) => {
+                                const totalSets = exercise.sets.length;
+                                const totalReps = exercise.sets.reduce(
+                                  (sum, set) => sum + (set.reps || 0),
+                                  0
+                                );
+                                const avgWeight =
+                                  exercise.sets.filter((s) => s.weight).length >
+                                  0
+                                    ? exercise.sets
+                                        .filter((s) => s.weight)
+                                        .reduce(
+                                          (sum, set) => sum + (set.weight || 0),
+                                          0
+                                        ) /
+                                      exercise.sets.filter((s) => s.weight)
+                                        .length
+                                    : null;
+                                const completedSets = exercise.sets.filter(
+                                  (s) => s.completed
+                                ).length;
+                                const exerciseKey = `${workout.id}-${index}`;
+                                const isExpanded =
+                                  expandedExercises.has(exerciseKey);
+
+                                return (
+                                  <React.Fragment key={index}>
+                                    <TableRow
+                                      className={`cursor-pointer hover:bg-muted/50 ${
+                                        index < workout.exercises.length - 1
+                                          ? 'border-b-2'
+                                          : ''
+                                      }`}
+                                      onClick={() =>
+                                        toggleExerciseExpansion(
+                                          workout.id,
+                                          index
+                                        )
+                                      }
                                     >
-                                      <span className="text-muted-foreground w-8">
-                                        {set.setNumber}
-                                      </span>
-                                      <span className="flex-1">
-                                        {set.reps && (
-                                          <span>
-                                            {set.reps}{' '}
-                                            {t('workouts.history.reps')}
-                                          </span>
-                                        )}
-                                        {set.reps && set.weight && ' × '}
-                                        {set.weight && (
-                                          <span>{set.weight} kg</span>
-                                        )}
-                                      </span>
-                                      {set.completed && (
-                                        <Badge
-                                          variant="outline"
-                                          className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20"
+                                      <TableCell className="font-medium">
+                                        <button
+                                          onClick={(e) =>
+                                            handleExerciseNameClick(
+                                              exercise,
+                                              workout,
+                                              e
+                                            )
+                                          }
+                                          className="text-left hover:underline cursor-pointer"
                                         >
-                                          {t('workouts.history.completed')}
-                                        </Badge>
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
+                                          {exercise.exerciseName}
+                                        </button>
+                                        {exercise.notes && (
+                                          <p className="text-xs text-muted-foreground mt-1">
+                                            {exercise.notes}
+                                          </p>
+                                        )}
+                                      </TableCell>
+                                      <TableCell>{totalSets}</TableCell>
+                                      <TableCell className="text-right">
+                                        {totalReps > 0 ? totalReps : '-'}
+                                      </TableCell>
+                                      <TableCell className="text-right">
+                                        {avgWeight
+                                          ? `${avgWeight.toFixed(1)} kg`
+                                          : '-'}
+                                      </TableCell>
+                                      <TableCell className="text-center">
+                                        {completedSets > 0 ? (
+                                          <Badge
+                                            variant="outline"
+                                            className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20"
+                                          >
+                                            {completedSets}/{totalSets}{' '}
+                                            {t('workouts.history.completed')}
+                                          </Badge>
+                                        ) : (
+                                          '-'
+                                        )}
+                                      </TableCell>
+                                    </TableRow>
+                                    {isExpanded &&
+                                      exercise.sets.map((set, setIndex) => (
+                                        <TableRow
+                                          key={`set-${setIndex}`}
+                                          className="bg-muted/30"
+                                        >
+                                          <TableCell className="font-medium">
+                                            {/* Empty for alignment */}
+                                          </TableCell>
+                                          <TableCell>{set.setNumber}</TableCell>
+                                          <TableCell className="text-right">
+                                            {set.reps || '-'}
+                                          </TableCell>
+                                          <TableCell className="text-right">
+                                            {set.weight
+                                              ? `${set.weight} kg`
+                                              : '-'}
+                                          </TableCell>
+                                          <TableCell className="text-center">
+                                            {set.completed ? (
+                                              <Badge
+                                                variant="outline"
+                                                className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20 text-xs"
+                                              >
+                                                {t(
+                                                  'workouts.history.completed'
+                                                )}
+                                              </Badge>
+                                            ) : (
+                                              '-'
+                                            )}
+                                          </TableCell>
+                                        </TableRow>
+                                      ))}
+                                  </React.Fragment>
+                                );
+                              })}
+                            </TableBody>
+                          </Table>
                         </div>
                       </CardContent>
                     </Card>
@@ -540,6 +713,147 @@ export default function WorkoutHistory() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Exercise Details Dialog - Show ExerciseDB details if available */}
+      {exerciseDBDetails && selectedExerciseForDetails && user && (
+        <ExerciseDetailsDialog
+          exercise={exerciseDBDetails}
+          open={!!selectedExerciseForDetails}
+          onOpenChange={(open) => {
+            if (!open) {
+              setSelectedExerciseForDetails(null);
+              setExerciseDBDetails(null);
+            }
+          }}
+          userId={user.uid}
+        />
+      )}
+
+      {/* Exercise Details Dialog - Fallback to workout-specific details */}
+      {!exerciseDBDetails && selectedExerciseForDetails && (
+        <Dialog
+          open={!!selectedExerciseForDetails}
+          onOpenChange={(open) => {
+            if (!open) {
+              setSelectedExerciseForDetails(null);
+              setExerciseDBDetails(null);
+            }
+          }}
+        >
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {selectedExerciseForDetails.exercise.exerciseName}
+              </DialogTitle>
+              <DialogDescription>
+                {format(
+                  selectedExerciseForDetails.workout.date || new Date(),
+                  i18n.language === 'fr'
+                    ? "d MMMM yyyy 'à' HH:mm"
+                    : "MMMM d, yyyy 'at' h:mm a",
+                  { locale: dateLocale }
+                )}
+              </DialogDescription>
+            </DialogHeader>
+
+            {loadingExerciseDetails ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {selectedExerciseForDetails.exercise.notes && (
+                  <div className="p-4 bg-muted rounded-md">
+                    <h4 className="scroll-m-20 text-xl font-semibold tracking-tight mb-2">
+                      {t('workouts.history.notes')}
+                    </h4>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                      {selectedExerciseForDetails.exercise.notes}
+                    </p>
+                  </div>
+                )}
+
+                <div className="space-y-3">
+                  <h4 className="scroll-m-20 text-xl font-semibold tracking-tight flex items-center gap-2">
+                    <Dumbbell className="h-4 w-4" />
+                    {t('workouts.history.sets')}
+                  </h4>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>
+                          {t('workouts.history.tableHeaders.sets')}
+                        </TableHead>
+                        <TableHead className="text-right">
+                          {t('workouts.history.tableHeaders.reps')}
+                        </TableHead>
+                        <TableHead className="text-right">
+                          {t('workouts.history.tableHeaders.weight')}
+                        </TableHead>
+                        <TableHead className="text-center">
+                          {t('workouts.history.tableHeaders.status')}
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {selectedExerciseForDetails.exercise.sets.length > 0 ? (
+                        selectedExerciseForDetails.exercise.sets.map(
+                          (set, setIndex) => (
+                            <TableRow key={setIndex}>
+                              <TableCell className="font-medium">
+                                {set.setNumber}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {set.reps || '-'}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {set.weight ? `${set.weight} kg` : '-'}
+                              </TableCell>
+                              <TableCell className="text-center">
+                                {set.completed ? (
+                                  <Badge
+                                    variant="outline"
+                                    className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20"
+                                  >
+                                    {t('workouts.history.completed')}
+                                  </Badge>
+                                ) : (
+                                  '-'
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          )
+                        )
+                      ) : (
+                        <TableRow>
+                          <TableCell
+                            colSpan={4}
+                            className="text-center text-muted-foreground"
+                          >
+                            {t('workouts.history.noSets')}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSelectedExerciseForDetails(null);
+                  setExerciseDBDetails(null);
+                }}
+              >
+                {t('common.close')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
