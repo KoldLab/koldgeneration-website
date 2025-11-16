@@ -167,14 +167,14 @@ export default function ExerciseSelectorDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="mb-8 flex h-[calc(100vh-2rem)] sm:h-[calc(100vh-4rem)] min-w-[calc(100vw-2rem)] sm:min-w-[600px] max-w-[calc(100vw-2rem)] sm:max-w-4xl flex-col justify-between gap-0 p-0">
+      <DialogContent className="mb-8 flex h-[calc(100vh-2rem)] sm:h-[calc(100vh-4rem)] min-w-[calc(100vw-2rem)] sm:min-w-[600px] max-w-[calc(100vw-2rem)] sm:max-w-7xl flex-col justify-between gap-0 p-0">
         <ScrollArea className="flex flex-col justify-between overflow-hidden">
           <DialogHeader className="contents space-y-0 text-left">
             <DialogTitle className="px-4 sm:px-6 pt-4 sm:pt-6">
               {t('workouts.exerciseSelector.title')}
             </DialogTitle>
 
-            <div className="px-4 sm:px-6 pt-4 pb-4">
+            <div className="px-4 sm:px-6 py-4 ">
               <Tabs
                 value={activeTab}
                 onValueChange={(v) => setActiveTab(v as 'browse' | 'create')}
@@ -278,7 +278,7 @@ export default function ExerciseSelectorDialog({
           </DialogHeader>
         </ScrollArea>
 
-        <DialogFooter className="px-4 sm:px-6 pb-4 sm:pb-6 sm:justify-end">
+        <DialogFooter className="p-3 sm:px-6 sm:pb-2 sm:justify-end">
           <DialogClose asChild>
             <Button variant="outline">{t('common.cancel')}</Button>
           </DialogClose>

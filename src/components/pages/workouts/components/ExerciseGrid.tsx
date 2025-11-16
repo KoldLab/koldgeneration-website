@@ -336,6 +336,7 @@ function ExerciseCard({
           <Button
             variant="default"
             className="w-full text-sm"
+            size="sm"
             onClick={(e) => {
               e.stopPropagation();
               handleSelect();
@@ -352,6 +353,7 @@ function ExerciseCard({
           <Button
             variant={mode === 'select' ? 'outline' : 'default'}
             className="w-full text-sm"
+            size="sm"
             onClick={handleViewDetails}
           >
             <Info className="h-4 w-4 mr-1.5 shrink-0" />
