@@ -20,7 +20,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Loader2, Plus, Save, CalendarIcon } from 'lucide-react';
+import { Loader2, Plus, Save, CalendarIcon, FileDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { parseDate } from 'chrono-node';
 import ExerciseEntryForm from './components/ExerciseEntryForm';
@@ -150,6 +150,32 @@ export default function LogWorkout() {
     loadData();
   }, [user, t]);
 
+  // Listen for routine selection from Routines page
+  useEffect(() => {
+    const handleSelectRoutine = (event: Event) => {
+      const customEvent = event as CustomEvent<string>;
+      if (customEvent.detail) {
+        setSelectedRoutineIdState(customEvent.detail);
+        setSelectedRoutineId(customEvent.detail);
+      }
+    };
+
+    window.addEventListener('select-routine', handleSelectRoutine);
+    return () => {
+      window.removeEventListener('select-routine', handleSelectRoutine);
+    };
+  }, [setSelectedRoutineId]);
+
+  // Check sessionStorage for routine ID on mount
+  useEffect(() => {
+    const storedRoutineId = sessionStorage.getItem('selectedRoutineId');
+    if (storedRoutineId && storedRoutineId !== 'none') {
+      setSelectedRoutineIdState(storedRoutineId);
+      setSelectedRoutineId(storedRoutineId);
+      sessionStorage.removeItem('selectedRoutineId'); // Clear after use
+    }
+  }, [setSelectedRoutineId]);
+
   // Load routine when selected
   useEffect(() => {
     if (selectedRoutineId === 'none' || !selectedRoutineId) {
@@ -160,10 +186,13 @@ export default function LogWorkout() {
       try {
         const routine = await getRoutineById(selectedRoutineId);
         if (routine) {
-          // Convert routine exercises to workout entries (without set data)
+          // Convert routine exercises to workout entries with set data as defaults
           const entries: ExerciseEntry[] = routine.exercises.map((ex) => ({
             ...ex,
-            sets: [], // Start with empty sets
+            sets: ex.sets.map((set) => ({
+              ...set,
+              completed: false, // Reset completion status
+            })),
           }));
           setWorkoutEntries(entries);
         }
@@ -174,7 +203,7 @@ export default function LogWorkout() {
     };
 
     loadRoutine();
-  }, [selectedRoutineId, t]);
+  }, [selectedRoutineId, t, setWorkoutEntries]);
 
   const handleAddExercise = () => {
     setExerciseSelectorOpen(true);
@@ -457,15 +486,42 @@ export default function LogWorkout() {
           <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
             {t('workouts.logWorkout.exercises')} ({workoutEntries.length})
           </h3>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleAddExercise}
-            className="gap-2 w-full sm:w-auto"
-          >
-            <Plus className="h-4 w-4" />
-            {t('workouts.logWorkout.addExercise')}
-          </Button>
+          <div className="flex gap-2 w-full sm:w-auto">
+            {routines.length > 0 && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  // Scroll to routine selector and focus it
+                  const routineSelect =
+                    document.getElementById('routine-select');
+                  if (routineSelect) {
+                    routineSelect.scrollIntoView({
+                      behavior: 'smooth',
+                      block: 'center',
+                    });
+                    setTimeout(() => {
+                      routineSelect.focus();
+                      routineSelect.click();
+                    }, 300);
+                  }
+                }}
+                className="gap-2 flex-1 sm:flex-none"
+              >
+                <FileDown className="h-4 w-4" />
+                {t('workouts.logWorkout.startFromRoutine')}
+              </Button>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleAddExercise}
+              className="gap-2 flex-1 sm:flex-none"
+            >
+              <Plus className="h-4 w-4" />
+              {t('workouts.logWorkout.addExercise')}
+            </Button>
+          </div>
         </div>
 
         {workoutEntries.length === 0 ? (
@@ -494,9 +550,20 @@ export default function LogWorkout() {
                 }
                 onRemove={() => handleRemoveEntry(index)}
                 showRemove={true}
-                isCollapsed={collapsedExercises[entry.exerciseId] || false}
+                isCollapsed={
+                  collapsedExercises[
+                    entry.exerciseId ||
+                      entry.exerciseDBId ||
+                      `exercise-${index}`
+                  ] || false
+                }
                 onCollapsedChange={(collapsed) =>
-                  setExerciseCollapsed(entry.exerciseId, collapsed)
+                  setExerciseCollapsed(
+                    entry.exerciseId ||
+                      entry.exerciseDBId ||
+                      `exercise-${index}`,
+                    collapsed
+                  )
                 }
               />
             ))}

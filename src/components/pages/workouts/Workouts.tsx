@@ -12,6 +12,7 @@ import { Card } from '@/components/ui/card';
 import ExerciseLibrary from './ExerciseLibrary';
 import LogWorkout from './LogWorkout';
 import WorkoutHistory from './WorkoutHistory';
+import Routines from './Routines';
 
 const WORKOUTS_TAB_STORAGE_KEY = 'workouts-active-tab';
 
@@ -114,15 +115,7 @@ export default function Workouts() {
       <div className="mt-6">
         {activeTab === 'log' && <LogWorkout />}
         {activeTab === 'history' && <WorkoutHistory />}
-        {activeTab === 'routines' && (
-          <Card className="p-6">
-            <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-              <p className="text-muted-foreground text-center">
-                {t('workouts.routines.comingSoon')}
-              </p>
-            </div>
-          </Card>
-        )}
+        {activeTab === 'routines' && <Routines />}
         {activeTab === 'exercises' && <ExerciseLibrary />}
       </div>
     </div>

@@ -218,10 +218,15 @@ export default function ExerciseGrid({
               </span>
             ) : (
               <>
-                {t('workouts.exerciseLibrary.showing', {
-                  count: filteredCount || exercises.length,
-                  total: totalCount || exercises.length,
-                })}
+                {t(
+                  (filteredCount || exercises.length) === 1
+                    ? 'workouts.exerciseLibrary.showing_one'
+                    : 'workouts.exerciseLibrary.showing_other',
+                  {
+                    count: filteredCount || exercises.length,
+                    total: totalCount || exercises.length,
+                  }
+                )}
                 {totalPages > 1 && (
                   <span className="ml-2">
                     (

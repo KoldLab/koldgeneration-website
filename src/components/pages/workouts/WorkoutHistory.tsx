@@ -30,6 +30,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import {
   Card,
@@ -93,6 +95,10 @@ export default function WorkoutHistory() {
   const [expandedExercises, setExpandedExercises] = React.useState<Set<string>>(
     new Set()
   );
+  const [isSaveRoutineDialogOpen, setIsSaveRoutineDialogOpen] =
+    React.useState(false);
+  const [routineNameInput, setRoutineNameInput] = React.useState('');
+  const [savingRoutine, setSavingRoutine] = React.useState(false);
   const { getExercise: getCachedExercise, setExercise: cacheExercise } =
     useExerciseCacheStore();
 
@@ -181,35 +187,52 @@ export default function WorkoutHistory() {
     toast.success(t('workouts.history.workoutLoaded'));
   };
 
-  const handleSaveAsRoutine = async (workout: WorkoutLog) => {
-    if (!user) return;
-
-    const routineName = prompt(
-      t('workouts.history.enterRoutineName') || 'Enter routine name:'
+  const handleSaveAsRoutineClick = (workout: WorkoutLog) => {
+    setSelectedWorkout(workout);
+    setRoutineNameInput(
+      workout.routineName || workout.date.toLocaleDateString()
     );
-    if (!routineName) return;
+    setIsSaveRoutineDialogOpen(true);
+  };
 
+  const handleSaveAsRoutine = async () => {
+    if (!user || !selectedWorkout) return;
+
+    const routineName = routineNameInput.trim();
+    if (!routineName) {
+      toast.error(t('workouts.routines.nameRequired'));
+      return;
+    }
+
+    setSavingRoutine(true);
     try {
       const routineData: Omit<
         WorkoutRoutine,
         'id' | 'userId' | 'createdAt' | 'updatedAt'
       > = {
         name: routineName,
-        description: workout.notes || '',
-        exercises: workout.exercises.map((ex) => ({
+        description: selectedWorkout.notes || '',
+        exercises: selectedWorkout.exercises.map((ex) => ({
           ...(ex.exerciseId && { exerciseId: ex.exerciseId }),
           ...(ex.exerciseDBId && { exerciseDBId: ex.exerciseDBId }),
           exerciseName: ex.exerciseName,
-          sets: [],
+          sets: ex.sets.map((set) => ({
+            ...set,
+            completed: false, // Reset completion status for routine
+          })),
           notes: ex.notes,
         })),
       };
 
       await createRoutine(user.uid, routineData);
       toast.success(t('workouts.history.savedAsRoutine'));
+      setIsSaveRoutineDialogOpen(false);
       setIsActionDialogOpen(false);
+      setRoutineNameInput('');
     } catch (err: any) {
       toast.error(err.message || t('workouts.history.saveRoutineError'));
+    } finally {
+      setSavingRoutine(false);
     }
   };
 
@@ -626,15 +649,18 @@ export default function WorkoutHistory() {
                                                     </span>
                                                     <div className="flex items-center gap-3">
                                                       <span>
-                                                        {set.reps || '-'}{' '}
-                                                        {t(
-                                                          'workouts.history.tableHeaders.reps'
-                                                        )}
+                                                        {set.reps
+                                                          ? `${set.reps} ${t('workouts.history.tableHeaders.reps')}`
+                                                          : t(
+                                                              'workouts.history.noReps'
+                                                            )}
                                                       </span>
                                                       <span>
                                                         {set.weight
                                                           ? `${set.weight} kg`
-                                                          : '-'}
+                                                          : t(
+                                                              'workouts.history.noWeight'
+                                                            )}
                                                       </span>
                                                       {set.completed && (
                                                         <Badge
@@ -788,12 +814,16 @@ export default function WorkoutHistory() {
                                               {set.setNumber}
                                             </TableCell>
                                             <TableCell className="text-right">
-                                              {set.reps || '-'}
+                                              {set.reps
+                                                ? set.reps
+                                                : t('workouts.history.noReps')}
                                             </TableCell>
                                             <TableCell className="text-right">
                                               {set.weight
                                                 ? `${set.weight} kg`
-                                                : '-'}
+                                                : t(
+                                                    'workouts.history.noWeight'
+                                                  )}
                                             </TableCell>
                                             <TableCell className="text-center">
                                               {set.completed ? (
@@ -864,7 +894,7 @@ export default function WorkoutHistory() {
               variant="outline"
               className="w-full justify-start"
               onClick={() =>
-                selectedWorkout && handleSaveAsRoutine(selectedWorkout)
+                selectedWorkout && handleSaveAsRoutineClick(selectedWorkout)
               }
             >
               <Save className="h-4 w-4 mr-2" />
@@ -1098,10 +1128,14 @@ export default function WorkoutHistory() {
                                     {set.setNumber}
                                   </TableCell>
                                   <TableCell className="text-right">
-                                    {set.reps || '-'}
+                                    {set.reps
+                                      ? set.reps
+                                      : t('workouts.history.noReps')}
                                   </TableCell>
                                   <TableCell className="text-right">
-                                    {set.weight ? `${set.weight} kg` : '-'}
+                                    {set.weight
+                                      ? `${set.weight} kg`
+                                      : t('workouts.history.noWeight')}
                                   </TableCell>
                                   <TableCell className="text-center">
                                     {set.completed ? (
@@ -1150,6 +1184,80 @@ export default function WorkoutHistory() {
           )}
         </>
       )}
+
+      {/* Save as Routine Dialog */}
+      <Dialog
+        open={isSaveRoutineDialogOpen}
+        onOpenChange={(open) => {
+          setIsSaveRoutineDialogOpen(open);
+          if (!open) {
+            setRoutineNameInput('');
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('workouts.history.saveAsRoutine')}</DialogTitle>
+            <DialogDescription>
+              {t('workouts.history.saveAsRoutineDescription')}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="routine-name">
+                {t('workouts.routines.name')} *
+              </Label>
+              <Input
+                id="routine-name"
+                value={routineNameInput}
+                onChange={(e) => setRoutineNameInput(e.target.value)}
+                placeholder={t('workouts.routines.namePlaceholder')}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && routineNameInput.trim()) {
+                    handleSaveAsRoutine();
+                  }
+                }}
+                autoFocus
+              />
+            </div>
+            {selectedWorkout && (
+              <div className="text-sm text-muted-foreground">
+                <p>
+                  {t(
+                    selectedWorkout.exercises.length === 1
+                      ? 'workouts.history.routineWillContain_one'
+                      : 'workouts.history.routineWillContain_other',
+                    {
+                      count: selectedWorkout.exercises.length,
+                    }
+                  )}
+                </p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsSaveRoutineDialogOpen(false);
+                setRoutineNameInput('');
+              }}
+              disabled={savingRoutine}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button
+              onClick={handleSaveAsRoutine}
+              disabled={savingRoutine || !routineNameInput.trim()}
+            >
+              {savingRoutine && (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              )}
+              {t('workouts.routines.create')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

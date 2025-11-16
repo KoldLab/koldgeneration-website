@@ -69,7 +69,7 @@ export interface WorkoutRoutine {
   userId: string;
   name: string;
   description?: string;
-  exercises: ExerciseEntry[]; // Without set data (template)
+  exercises: ExerciseEntry[]; // With set data as defaults
   createdAt: Date;
   updatedAt: Date;
 }
