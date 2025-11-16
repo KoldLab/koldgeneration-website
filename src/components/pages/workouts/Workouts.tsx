@@ -8,7 +8,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card } from '@/components/ui/card';
 import ExerciseLibrary from './ExerciseLibrary';
 import LogWorkout from './LogWorkout';
 import WorkoutHistory from './WorkoutHistory';
