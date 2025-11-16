@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "preview": "vite preview",
     "deploy": "npm run build && git add dist && (git diff --staged --quiet || git commit -m \"Deploy to production\") && git pull --rebase origin main && git push origin main",
     "deploy:firebase": "npm run build && firebase deploy --only hosting",

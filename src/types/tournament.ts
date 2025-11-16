@@ -1,6 +1,16 @@
-export type TournamentType = 'single-elimination' | 'double-elimination' | 'round-robin' | 'swiss';
+export type TournamentType =
+  | 'single-elimination'
+  | 'double-elimination'
+  | 'round-robin'
+  | 'swiss';
 
-export type TournamentStatus = 'pending' | 'open' | 'in-progress' | 'paused' | 'completed' | 'cancelled';
+export type TournamentStatus =
+  | 'pending'
+  | 'open'
+  | 'in-progress'
+  | 'paused'
+  | 'completed'
+  | 'cancelled';
 
 export type TournamentRoundStatus = 'pending' | 'active' | 'completed';
 
@@ -99,4 +109,3 @@ export interface CreateTournamentData {
   maxPlayers: number;
   requireScores?: boolean;
 }
-

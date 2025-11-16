@@ -101,12 +101,13 @@ export default function ExerciseGrid({
   };
 
   // Grid column classes based on columns prop
-  const gridColsClass = {
-    2: 'sm:grid-cols-2',
-    3: 'sm:grid-cols-2 lg:grid-cols-3',
-    4: 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
-    5: 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5',
-  }[columns] || 'sm:grid-cols-2 lg:grid-cols-3';
+  const gridColsClass =
+    {
+      2: 'sm:grid-cols-2',
+      3: 'sm:grid-cols-2 lg:grid-cols-3',
+      4: 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
+      5: 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5',
+    }[columns] || 'sm:grid-cols-2 lg:grid-cols-3';
 
   if (loading && exercises.length === 0) {
     return (
@@ -142,10 +143,18 @@ export default function ExerciseGrid({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="2">2 {t('workouts.exerciseGrid.columnsLabel')}</SelectItem>
-                  <SelectItem value="3">3 {t('workouts.exerciseGrid.columnsLabel')}</SelectItem>
-                  <SelectItem value="4">4 {t('workouts.exerciseGrid.columnsLabel')}</SelectItem>
-                  <SelectItem value="5">5 {t('workouts.exerciseGrid.columnsLabel')}</SelectItem>
+                  <SelectItem value="2">
+                    2 {t('workouts.exerciseGrid.columnsLabel')}
+                  </SelectItem>
+                  <SelectItem value="3">
+                    3 {t('workouts.exerciseGrid.columnsLabel')}
+                  </SelectItem>
+                  <SelectItem value="4">
+                    4 {t('workouts.exerciseGrid.columnsLabel')}
+                  </SelectItem>
+                  <SelectItem value="5">
+                    5 {t('workouts.exerciseGrid.columnsLabel')}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -269,8 +278,10 @@ function ExerciseCard({
 
   // Get description from body parts or equipment
   const getDescription = () => {
-    const parts = exercise.bodyParts?.slice(0, 2).map(getStringValue).join(', ') || '';
-    const equipment = exercise.equipments?.slice(0, 1).map(getStringValue).join(', ') || '';
+    const parts =
+      exercise.bodyParts?.slice(0, 2).map(getStringValue).join(', ') || '';
+    const equipment =
+      exercise.equipments?.slice(0, 1).map(getStringValue).join(', ') || '';
     if (parts && equipment) {
       return `${parts} • ${equipment}`;
     }
@@ -278,7 +289,9 @@ function ExerciseCard({
   };
 
   return (
-    <Card className={`${showGif ? 'pt-0' : ''} hover:shadow-lg transition-shadow overflow-hidden`}>
+    <Card
+      className={`${showGif ? 'pt-0' : ''} hover:shadow-lg transition-shadow overflow-hidden`}
+    >
       {/* Exercise GIF/Image/Placeholder */}
       {showGif && (
         <CardContent className="px-0">
@@ -329,10 +342,12 @@ function ExerciseCard({
             }}
           >
             <Plus className="h-4 w-4 mr-1.5 shrink-0" />
-            <span className="truncate">{t('workouts.exerciseGrid.addToWorkout')}</span>
+            <span className="truncate">
+              {t('workouts.exerciseGrid.addToWorkout')}
+            </span>
           </Button>
         )}
-        
+
         {onViewDetails && (
           <Button
             variant={mode === 'select' ? 'outline' : 'default'}
@@ -340,11 +355,12 @@ function ExerciseCard({
             onClick={handleViewDetails}
           >
             <Info className="h-4 w-4 mr-1.5 shrink-0" />
-            <span className="truncate">{t('workouts.exerciseLibrary.exercise.viewDetails')}</span>
+            <span className="truncate">
+              {t('workouts.exerciseLibrary.exercise.viewDetails')}
+            </span>
           </Button>
         )}
       </CardFooter>
     </Card>
   );
 }
-

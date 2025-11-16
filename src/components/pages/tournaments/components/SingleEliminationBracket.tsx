@@ -56,7 +56,9 @@ export function SingleEliminationBracket({
                   <Card key={match.id} className="p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-xs uppercase tracking-wide text-muted-foreground">
-                        {t('tournament.bracket.matchLabel', { number: match.order + 1 })}
+                        {t('tournament.bracket.matchLabel', {
+                          number: match.order + 1,
+                        })}
                       </span>
                       <span
                         className={cn(
@@ -64,8 +66,8 @@ export function SingleEliminationBracket({
                           match.status === 'completed'
                             ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
                             : match.status === 'in-progress'
-                            ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                            : 'bg-muted text-muted-foreground'
+                              ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                              : 'bg-muted text-muted-foreground'
                         )}
                       >
                         {t(`tournament.bracket.matchStatus.${match.status}`)}
@@ -73,11 +75,16 @@ export function SingleEliminationBracket({
                     </div>
                     <div className="space-y-2">
                       {[0, 1].map((slot) => {
-                        const participant = getParticipantForSlot(match.participants, slot);
-                        const isWinner = participant && match.winnerKey === participant.key;
+                        const participant = getParticipantForSlot(
+                          match.participants,
+                          slot
+                        );
+                        const isWinner =
+                          participant && match.winnerKey === participant.key;
                         const scoreEntry = participant
                           ? match.scores.find(
-                              (score) => score.participantKey === participant.key
+                              (score) =>
+                                score.participantKey === participant.key
                             )
                           : undefined;
 
@@ -93,10 +100,15 @@ export function SingleEliminationBracket({
                             )}
                           >
                             <span className="truncate">
-                              {participant?.displayName || t('tournament.bracket.tbd')}
+                              {participant?.displayName ||
+                                t('tournament.bracket.tbd')}
                             </span>
                             <span className="font-mono text-sm">
-                              {scoreEntry ? scoreEntry.score : participant ? '-' : ''}
+                              {scoreEntry
+                                ? scoreEntry.score
+                                : participant
+                                  ? '-'
+                                  : ''}
                             </span>
                           </div>
                         );
@@ -111,7 +123,8 @@ export function SingleEliminationBracket({
                             ).toLocaleString(),
                           })}
                         </p>
-                        {match.history[match.history.length - 1].reporterDisplayName && (
+                        {match.history[match.history.length - 1]
+                          .reporterDisplayName && (
                           <p>
                             {t('tournament.bracket.reportedBy', {
                               name: match.history[match.history.length - 1]
@@ -148,6 +161,7 @@ function getParticipantForSlot(
   participants: TournamentMatchParticipant[],
   slot: number
 ): TournamentMatchParticipant | undefined {
-  return participants.find((participant) => (participant.slot ?? slot) === slot);
+  return participants.find(
+    (participant) => (participant.slot ?? slot) === slot
+  );
 }
-

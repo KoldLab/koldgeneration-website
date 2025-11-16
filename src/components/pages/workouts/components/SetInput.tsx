@@ -12,7 +12,6 @@ interface SetInputProps {
   onUpdate: (set: ExerciseSet) => void;
   onRemove?: () => void;
   onDuplicate?: () => void;
-  showRemove?: boolean;
 }
 
 export default function SetInput({
@@ -21,7 +20,6 @@ export default function SetInput({
   onUpdate,
   onRemove,
   onDuplicate,
-  showRemove = false,
 }: SetInputProps) {
   const handleRepsChange = (value: string) => {
     const reps = value === '' ? undefined : parseInt(value, 10);
@@ -76,7 +74,10 @@ export default function SetInput({
               'data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 data-[state=checked]:text-white'
             )}
           />
-          <Label htmlFor={`completed-${setNumber}`} className="text-xs cursor-pointer">
+          <Label
+            htmlFor={`completed-${setNumber}`}
+            className="text-xs cursor-pointer"
+          >
             Done
           </Label>
         </div>
@@ -110,4 +111,3 @@ export default function SetInput({
     </div>
   );
 }
-

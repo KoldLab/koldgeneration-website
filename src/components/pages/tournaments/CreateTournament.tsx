@@ -30,15 +30,16 @@ import {
   FormDescription,
 } from '@/components/ui/form';
 
-const tournamentTypeValues = ['single-elimination', 'double-elimination', 'round-robin', 'swiss'] as const;
+const tournamentTypeValues = [
+  'single-elimination',
+  'double-elimination',
+  'round-robin',
+  'swiss',
+] as const;
 
 const formSchema = z.object({
   name: z.string().min(3).max(100),
-  description: z
-    .string()
-    .max(500)
-    .optional()
-    .or(z.literal('')),
+  description: z.string().max(500).optional().or(z.literal('')),
   type: z.enum(tournamentTypeValues),
   maxPlayers: z.coerce.number().int().min(2).max(128),
   requireScores: z.boolean(),
@@ -63,20 +64,43 @@ export default function CreateTournament() {
     },
   });
 
-  const tournamentTypes: { value: TournamentType; label: string; descriptionKey: string }[] = [
-    { value: 'single-elimination', label: t('tournament.types.singleElimination'), descriptionKey: 'tournament.types.singleEliminationDescription' },
-    { value: 'double-elimination', label: t('tournament.types.doubleElimination'), descriptionKey: 'tournament.types.doubleEliminationDescription' },
-    { value: 'round-robin', label: t('tournament.types.roundRobin'), descriptionKey: 'tournament.types.roundRobinDescription' },
-    { value: 'swiss', label: t('tournament.types.swiss'), descriptionKey: 'tournament.types.swissDescription' },
+  const tournamentTypes: {
+    value: TournamentType;
+    label: string;
+    descriptionKey: string;
+  }[] = [
+    {
+      value: 'single-elimination',
+      label: t('tournament.types.singleElimination'),
+      descriptionKey: 'tournament.types.singleEliminationDescription',
+    },
+    {
+      value: 'double-elimination',
+      label: t('tournament.types.doubleElimination'),
+      descriptionKey: 'tournament.types.doubleEliminationDescription',
+    },
+    {
+      value: 'round-robin',
+      label: t('tournament.types.roundRobin'),
+      descriptionKey: 'tournament.types.roundRobinDescription',
+    },
+    {
+      value: 'swiss',
+      label: t('tournament.types.swiss'),
+      descriptionKey: 'tournament.types.swissDescription',
+    },
   ];
 
   const selectedTypeDescription =
-    tournamentTypes.find((type) => type.value === form.watch('type'))?.descriptionKey || '';
+    tournamentTypes.find((type) => type.value === form.watch('type'))
+      ?.descriptionKey || '';
 
   if (!user) {
     return (
       <div className="w-full flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <p className="text-muted-foreground">{t('tournament.create.loginRequired')}</p>
+        <p className="text-muted-foreground">
+          {t('tournament.create.loginRequired')}
+        </p>
       </div>
     );
   }
@@ -91,7 +115,9 @@ export default function CreateTournament() {
 
       const payload: CreateTournamentData = {
         name: values.name.trim(),
-        description: values.description?.trim() ? values.description.trim() : undefined,
+        description: values.description?.trim()
+          ? values.description.trim()
+          : undefined,
         type: values.type,
         maxPlayers: values.maxPlayers,
         requireScores: values.requireScores,
@@ -149,7 +175,9 @@ export default function CreateTournament() {
                     <Textarea
                       {...field}
                       value={field.value || ''}
-                      placeholder={t('tournament.create.descriptionPlaceholder')}
+                      placeholder={t(
+                        'tournament.create.descriptionPlaceholder'
+                      )}
                       rows={4}
                       maxLength={500}
                     />
@@ -180,7 +208,9 @@ export default function CreateTournament() {
                     </Select>
                   </FormControl>
                   {selectedTypeDescription && (
-                    <FormDescription>{t(selectedTypeDescription)}</FormDescription>
+                    <FormDescription>
+                      {t(selectedTypeDescription)}
+                    </FormDescription>
                   )}
                   <FormMessage />
                 </FormItem>
@@ -202,7 +232,9 @@ export default function CreateTournament() {
                       onChange={(event) => field.onChange(event.target.value)}
                     />
                   </FormControl>
-                  <FormDescription>{t('tournament.create.maxPlayersHint')}</FormDescription>
+                  <FormDescription>
+                    {t('tournament.create.maxPlayersHint')}
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -214,7 +246,9 @@ export default function CreateTournament() {
               render={({ field }) => (
                 <FormItem className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                   <div>
-                    <FormLabel>{t('tournament.create.requireScores.title')}</FormLabel>
+                    <FormLabel>
+                      {t('tournament.create.requireScores.title')}
+                    </FormLabel>
                     <FormDescription>
                       {t('tournament.create.requireScores.description')}
                     </FormDescription>
@@ -236,7 +270,11 @@ export default function CreateTournament() {
               </div>
             )}
 
-            <Button type="submit" disabled={form.formState.isSubmitting} className="w-full">
+            <Button
+              type="submit"
+              disabled={form.formState.isSubmitting}
+              className="w-full"
+            >
               {form.formState.isSubmitting ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />

@@ -18,16 +18,23 @@ export interface SingleEliminationResultPayload {
   timestamp?: Date;
 }
 
-export function generateSingleEliminationProgress(tournament: Tournament): TournamentProgress {
+export function generateSingleEliminationProgress(
+  tournament: Tournament
+): TournamentProgress {
   const now = new Date();
   const players = tournament.players ?? [];
-  const participants: Array<TournamentMatchParticipant | null> = players.map((player, index) => ({
-    key: getParticipantKey(player),
-    displayName: player.displayName,
-    seed: index + 1,
-  }));
+  const participants: Array<TournamentMatchParticipant | null> = players.map(
+    (player, index) => ({
+      key: getParticipantKey(player),
+      displayName: player.displayName,
+      seed: index + 1,
+    })
+  );
 
-  const bracketSize = Math.max(2, nextPowerOfTwo(Math.max(participants.length, 1)));
+  const bracketSize = Math.max(
+    2,
+    nextPowerOfTwo(Math.max(participants.length, 1))
+  );
   const totalRounds = Math.max(1, Math.log2(bracketSize));
 
   while (participants.length < bracketSize) {
@@ -78,7 +85,10 @@ export function applySingleEliminationResult(
   const timestamp = payload.timestamp ?? new Date();
   const updatedProgress: TournamentProgress = {
     ...progress,
-    rounds: progress.rounds.map((round) => ({ ...round, matchIds: [...round.matchIds] })),
+    rounds: progress.rounds.map((round) => ({
+      ...round,
+      matchIds: [...round.matchIds],
+    })),
     matches: { ...progress.matches },
   };
 
@@ -91,7 +101,9 @@ export function applySingleEliminationResult(
 
   const winnerParticipant =
     payload.winnerParticipant ||
-    match.participants.find((participant) => participant.key === payload.winnerKey);
+    match.participants.find(
+      (participant) => participant.key === payload.winnerKey
+    );
 
   if (!winnerParticipant) {
     throw new Error('Winner participant not found for the provided key');
@@ -118,11 +130,14 @@ export function applySingleEliminationResult(
 
   updatedProgress.matches[payload.matchId] = match;
 
-  const roundIndex = updatedProgress.rounds.findIndex((round) => round.id === match.roundId);
+  const roundIndex = updatedProgress.rounds.findIndex(
+    (round) => round.id === match.roundId
+  );
   if (roundIndex !== -1) {
     const round = updatedProgress.rounds[roundIndex];
     const isRoundComplete = round.matchIds.every((matchId) => {
-      const roundMatch = matchId === match.id ? match : updatedProgress.matches[matchId];
+      const roundMatch =
+        matchId === match.id ? match : updatedProgress.matches[matchId];
       return roundMatch.status === 'completed';
     });
 
@@ -133,7 +148,10 @@ export function applySingleEliminationResult(
 
     if (isRoundComplete && roundIndex + 1 < updatedProgress.rounds.length) {
       const nextRound = updatedProgress.rounds[roundIndex + 1];
-      updatedProgress.rounds[roundIndex + 1] = { ...nextRound, status: 'active' };
+      updatedProgress.rounds[roundIndex + 1] = {
+        ...nextRound,
+        status: 'active',
+      };
       updatedProgress.currentRoundId = nextRound.id;
     } else if (isRoundComplete) {
       updatedProgress.currentRoundId = round.id;
@@ -160,11 +178,14 @@ export function applySingleEliminationResult(
       }
 
       let participants = nextMatch.participants.filter(
-        (participant) => participant.slot !== slot && participant.key !== payload.winnerKey
+        (participant) =>
+          participant.slot !== slot && participant.key !== payload.winnerKey
       );
 
       if (previousWinnerKey) {
-        participants = participants.filter((participant) => participant.key !== previousWinnerKey);
+        participants = participants.filter(
+          (participant) => participant.key !== previousWinnerKey
+        );
       }
 
       const participantWithSlot: TournamentMatchParticipant = {
@@ -182,7 +203,9 @@ export function applySingleEliminationResult(
               ? nextMatch.winnerKey
               : undefined;
           nextMatch.scores = nextMatch.scores.filter((score) =>
-            participants.some((participant) => participant.key === score.participantKey)
+            participants.some(
+              (participant) => participant.key === score.participantKey
+            )
           );
           nextMatch.history = nextMatch.history.filter(
             (entry) => entry.result.winnerKey !== previousWinnerKey
@@ -226,14 +249,27 @@ function seedFirstRoundParticipants(
     const bottom = participants[i + 1];
 
     if (top) {
-      match.participants = upsertMatchParticipant(match.participants, { ...top, slot: 0 });
+      match.participants = upsertMatchParticipant(match.participants, {
+        ...top,
+        slot: 0,
+      });
     }
     if (bottom) {
-      match.participants = upsertMatchParticipant(match.participants, { ...bottom, slot: 1 });
+      match.participants = upsertMatchParticipant(match.participants, {
+        ...bottom,
+        slot: 1,
+      });
     }
 
     if (match.participants.length === 1) {
-      autoAdvanceWinner(match.participants[0]!, 0, matchIndex, matches, rounds, now);
+      autoAdvanceWinner(
+        match.participants[0]!,
+        0,
+        matchIndex,
+        matches,
+        rounds,
+        now
+      );
     }
   }
 }
@@ -277,7 +313,9 @@ function autoAdvanceWinner(
     },
   ];
 
-  const isRoundComplete = round.matchIds.every((id) => matches[id]?.status === 'completed');
+  const isRoundComplete = round.matchIds.every(
+    (id) => matches[id]?.status === 'completed'
+  );
   if (isRoundComplete) {
     round.status = 'completed';
     const nextRound = rounds[roundIndex + 1];
@@ -302,7 +340,10 @@ function autoAdvanceWinner(
     ...participant,
     slot,
   };
-  nextMatch.participants = upsertMatchParticipant(nextMatch.participants, participantWithSlot);
+  nextMatch.participants = upsertMatchParticipant(
+    nextMatch.participants,
+    participantWithSlot
+  );
 }
 
 function upsertMatchParticipant(
@@ -382,13 +423,21 @@ function pruneDownstreamMatches(
   participantKey: string,
   timestamp: Date
 ) {
-  for (let roundIndex = startRoundIndex; roundIndex < progress.rounds.length; roundIndex += 1) {
+  for (
+    let roundIndex = startRoundIndex;
+    roundIndex < progress.rounds.length;
+    roundIndex += 1
+  ) {
     const round = progress.rounds[roundIndex];
     for (const matchId of round.matchIds) {
       const match = progress.matches[matchId];
       if (!match) continue;
 
-      if (!match.participants.some((participant) => participant.key === participantKey)) {
+      if (
+        !match.participants.some(
+          (participant) => participant.key === participantKey
+        )
+      ) {
         continue;
       }
 
@@ -401,7 +450,9 @@ function pruneDownstreamMatches(
       match.participants = match.participants.filter(
         (participant) => participant.key !== participantKey
       );
-      match.scores = match.scores.filter((score) => score.participantKey !== participantKey);
+      match.scores = match.scores.filter(
+        (score) => score.participantKey !== participantKey
+      );
       if (match.winnerKey === participantKey) {
         match.winnerKey = undefined;
       }
@@ -410,5 +461,3 @@ function pruneDownstreamMatches(
     }
   }
 }
-
-

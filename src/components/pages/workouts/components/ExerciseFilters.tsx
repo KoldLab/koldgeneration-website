@@ -93,7 +93,8 @@ export default function ExerciseFilters({
 
   const getStringValue = (value: string | { name: string } | any): string => {
     if (typeof value === 'string') return value;
-    if (value && typeof value === 'object' && 'name' in value) return value.name;
+    if (value && typeof value === 'object' && 'name' in value)
+      return value.name;
     return String(value || '');
   };
 
@@ -138,10 +139,7 @@ export default function ExerciseFilters({
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="space-y-2">
           <Label>{t('workouts.exerciseLibrary.filters.bodyPart')}</Label>
-          <Select
-            value={selectedBodyPart}
-            onValueChange={setSelectedBodyPart}
-          >
+          <Select value={selectedBodyPart} onValueChange={setSelectedBodyPart}>
             <SelectTrigger className="w-full">
               <SelectValue />
             </SelectTrigger>
@@ -205,4 +203,3 @@ export default function ExerciseFilters({
     </div>
   );
 }
-

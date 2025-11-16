@@ -96,9 +96,7 @@ export default function EnterTournament() {
               autoComplete="off"
               className="uppercase"
             />
-            {error && (
-              <p className="text-sm text-destructive">{error}</p>
-            )}
+            {error && <p className="text-sm text-destructive">{error}</p>}
           </div>
 
           <div className="space-y-2">
@@ -121,4 +119,3 @@ export default function EnterTournament() {
     </div>
   );
 }
-

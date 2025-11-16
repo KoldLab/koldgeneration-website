@@ -1,11 +1,11 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardFooter,
   CardImage,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 
 export default function CardImageDemo() {
   return (

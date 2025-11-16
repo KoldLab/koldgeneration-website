@@ -33,7 +33,7 @@ const combinedRules = mergeRules(
   baseTypeScriptConfigs,
   react.configs.recommended,
   reactHooks.configs['recommended-latest'],
-  reactRefresh.configs.vite,
+  reactRefresh.configs.vite
 );
 
 const jsoncRecommended = jsonc.configs['recommended-with-jsonc'];

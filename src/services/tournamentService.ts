@@ -46,12 +46,18 @@ function generateTournamentCode(): string {
 // Check if a tournament code already exists
 async function codeExists(code: string): Promise<boolean> {
   try {
-    const q = query(collection(db, TOURNAMENTS_COLLECTION), where('code', '==', code));
+    const q = query(
+      collection(db, TOURNAMENTS_COLLECTION),
+      where('code', '==', code)
+    );
     const querySnapshot = await getDocs(q);
     return !querySnapshot.empty;
   } catch (error: any) {
     // Check if error is due to request being blocked (likely by ad blocker)
-    if (error?.message?.includes('ERR_BLOCKED_BY_CLIENT') || error?.code === 'blocked-by-client') {
+    if (
+      error?.message?.includes('ERR_BLOCKED_BY_CLIENT') ||
+      error?.code === 'blocked-by-client'
+    ) {
       throw new Error('BLOCKED_BY_EXTENSION');
     }
     throw error;
@@ -62,7 +68,7 @@ async function codeExists(code: string): Promise<boolean> {
 async function generateUniqueCode(): Promise<string> {
   let code = generateTournamentCode();
   let attempts = 0;
-  while (await codeExists(code) && attempts < 10) {
+  while ((await codeExists(code)) && attempts < 10) {
     code = generateTournamentCode();
     attempts++;
   }
@@ -83,12 +89,15 @@ function timestampToDate(timestamp: any): Date {
   return new Date(timestamp);
 }
 
-function convertMatchParticipant(participant: Record<string, unknown>): TournamentMatchParticipant | null {
+function convertMatchParticipant(
+  participant: Record<string, unknown>
+): TournamentMatchParticipant | null {
   if (!participant) return null;
 
   const keyCandidate =
     (typeof participant.key === 'string' && participant.key) ||
-    (typeof participant.participantKey === 'string' && participant.participantKey) ||
+    (typeof participant.participantKey === 'string' &&
+      participant.participantKey) ||
     (typeof participant.userId === 'string' && `user:${participant.userId}`) ||
     (typeof participant.guestId === 'string' && `guest:${participant.guestId}`);
 
@@ -100,8 +109,8 @@ function convertMatchParticipant(participant: Record<string, unknown>): Tourname
     typeof participant.displayName === 'string'
       ? participant.displayName
       : typeof participant.name === 'string'
-      ? participant.name
-      : 'Unknown';
+        ? participant.name
+        : 'Unknown';
 
   const seedCandidate =
     typeof participant.seed === 'number' ? participant.seed : undefined;
@@ -110,8 +119,8 @@ function convertMatchParticipant(participant: Record<string, unknown>): Tourname
     typeof participant.slot === 'number'
       ? participant.slot
       : typeof participant.slot === 'string' && participant.slot.trim() !== ''
-      ? Number(participant.slot)
-      : undefined;
+        ? Number(participant.slot)
+        : undefined;
 
   return {
     key: keyCandidate,
@@ -128,7 +137,10 @@ function convertMatchScores(scores: any): TournamentMatchScore[] {
     return scores
       .map((score) => ({
         participantKey: score.participantKey || score.key || score.id || '',
-        score: typeof score.score === 'number' ? score.score : Number(score.value) || 0,
+        score:
+          typeof score.score === 'number'
+            ? score.score
+            : Number(score.value) || 0,
       }))
       .filter((entry) => entry.participantKey);
   }
@@ -151,9 +163,12 @@ function convertMatchHistory(history: any): TournamentMatchHistoryEntry[] {
   return history
     .map((entry) => ({
       id: entry.id || entry.historyId || cryptoRandomId(),
-      timestamp: timestampToDate(entry.timestamp || entry.reportedAt || new Date()),
+      timestamp: timestampToDate(
+        entry.timestamp || entry.reportedAt || new Date()
+      ),
       reportedByUid: entry.reportedByUid || entry.reportedBy || undefined,
-      reporterDisplayName: entry.reporterDisplayName || entry.reporterName || undefined,
+      reporterDisplayName:
+        entry.reporterDisplayName || entry.reporterName || undefined,
       result: {
         scores: convertMatchScores(entry.result?.scores || entry.scores),
         winnerKey:
@@ -183,7 +198,9 @@ function convertMatch(rawMatch: unknown): TournamentMatch {
 
   const participants = participantsArray
     .map((participant) => convertMatchParticipant(participant))
-    .filter((participant): participant is TournamentMatchParticipant => Boolean(participant));
+    .filter((participant): participant is TournamentMatchParticipant =>
+      Boolean(participant)
+    );
 
   const matchId =
     (matchRecord.id as string) ||
@@ -191,14 +208,13 @@ function convertMatch(rawMatch: unknown): TournamentMatch {
     (matchRecord.key as string) ||
     cryptoRandomId();
   const roundId =
-    (matchRecord.roundId as string) ||
-    (matchRecord.round as string) ||
-    '';
+    (matchRecord.roundId as string) || (matchRecord.round as string) || '';
 
   return {
     id: matchId,
     roundId,
-    order: typeof matchRecord.order === 'number' ? (matchRecord.order as number) : 0,
+    order:
+      typeof matchRecord.order === 'number' ? (matchRecord.order as number) : 0,
     participants,
     status: ['pending', 'in-progress', 'completed'].includes(
       matchRecord.status as string
@@ -213,12 +229,16 @@ function convertMatch(rawMatch: unknown): TournamentMatch {
       (matchRecord.result as any)?.winnerParticipantKey ||
       undefined,
     createdAt: timestampToDate(matchRecord.createdAt || new Date()),
-    updatedAt: timestampToDate(matchRecord.updatedAt || matchRecord.createdAt || new Date()),
+    updatedAt: timestampToDate(
+      matchRecord.updatedAt || matchRecord.createdAt || new Date()
+    ),
     history: convertMatchHistory(matchRecord.history),
   };
 }
 
-function convertMatchesRecord(rawMatches: any): Record<string, TournamentMatch> {
+function convertMatchesRecord(
+  rawMatches: any
+): Record<string, TournamentMatch> {
   if (!rawMatches) return {};
 
   if (Array.isArray(rawMatches)) {
@@ -254,7 +274,9 @@ function convertRounds(rawRounds: any): TournamentRound[] {
     id: round?.id || round?.roundId || `${index}`,
     name: round?.name || `Round ${round?.order ?? index + 1}`,
     order: typeof round?.order === 'number' ? round.order : index,
-    status: ['pending', 'active', 'completed'].includes(round?.status) ? round.status : 'pending',
+    status: ['pending', 'active', 'completed'].includes(round?.status)
+      ? round.status
+      : 'pending',
     matchIds: Array.isArray(round?.matchIds) ? round.matchIds : [],
   }));
 }
@@ -290,48 +312,49 @@ function cryptoRandomId() {
   return `match_${Math.random().toString(36).slice(2, 11)}`;
 }
 
-function serializeTournamentProgress(progress: TournamentProgress | null | undefined) {
+function serializeTournamentProgress(
+  progress: TournamentProgress | null | undefined
+) {
   if (!progress) return null;
 
-  const serializedMatches = Object.entries(progress.matches).reduce<Record<string, unknown>>(
-    (acc, [matchId, match]) => {
-      acc[matchId] = {
-        id: match.id,
-        roundId: match.roundId,
-        order: match.order,
-        participants: match.participants.map((participant) => ({
-          key: participant.key,
-          displayName: participant.displayName,
-          seed: participant.seed ?? null,
-          slot: participant.slot ?? null,
-        })),
-        status: match.status,
-        scores: match.scores.map((score) => ({
-          participantKey: score.participantKey,
-          score: score.score,
-        })),
-        winnerKey: match.winnerKey ?? null,
-        createdAt: match.createdAt,
-        updatedAt: match.updatedAt,
-        history: match.history.map((entry) => ({
-          id: entry.id,
-          timestamp: entry.timestamp,
-          reportedByUid: entry.reportedByUid ?? null,
-          reporterDisplayName: entry.reporterDisplayName ?? null,
-          result: {
-            scores: entry.result.scores.map((score) => ({
-              participantKey: score.participantKey,
-              score: score.score,
-            })),
-            winnerKey: entry.result.winnerKey,
-            note: entry.result.note ?? null,
-          },
-        })),
-      };
-      return acc;
-    },
-    {}
-  );
+  const serializedMatches = Object.entries(progress.matches).reduce<
+    Record<string, unknown>
+  >((acc, [matchId, match]) => {
+    acc[matchId] = {
+      id: match.id,
+      roundId: match.roundId,
+      order: match.order,
+      participants: match.participants.map((participant) => ({
+        key: participant.key,
+        displayName: participant.displayName,
+        seed: participant.seed ?? null,
+        slot: participant.slot ?? null,
+      })),
+      status: match.status,
+      scores: match.scores.map((score) => ({
+        participantKey: score.participantKey,
+        score: score.score,
+      })),
+      winnerKey: match.winnerKey ?? null,
+      createdAt: match.createdAt,
+      updatedAt: match.updatedAt,
+      history: match.history.map((entry) => ({
+        id: entry.id,
+        timestamp: entry.timestamp,
+        reportedByUid: entry.reportedByUid ?? null,
+        reporterDisplayName: entry.reporterDisplayName ?? null,
+        result: {
+          scores: entry.result.scores.map((score) => ({
+            participantKey: score.participantKey,
+            score: score.score,
+          })),
+          winnerKey: entry.result.winnerKey,
+          note: entry.result.note ?? null,
+        },
+      })),
+    };
+    return acc;
+  }, {});
 
   return {
     format: progress.format,
@@ -348,10 +371,11 @@ function serializeTournamentProgress(progress: TournamentProgress | null | undef
   };
 }
 
-
 // Convert Firestore document to Tournament
 function docToTournament(docData: any, id: string): Tournament {
-  const progress = docData.progress ? convertTournamentProgress(docData.progress) : undefined;
+  const progress = docData.progress
+    ? convertTournamentProgress(docData.progress)
+    : undefined;
   const settings = {
     requireScores: docData.settings?.requireScores ?? true,
   };
@@ -373,8 +397,12 @@ function docToTournament(docData: any, id: string): Tournament {
     })),
     createdAt: timestampToDate(docData.createdAt),
     updatedAt: timestampToDate(docData.updatedAt),
-    startedAt: docData.startedAt ? timestampToDate(docData.startedAt) : undefined,
-    completedAt: docData.completedAt ? timestampToDate(docData.completedAt) : undefined,
+    startedAt: docData.startedAt
+      ? timestampToDate(docData.startedAt)
+      : undefined,
+    completedAt: docData.completedAt
+      ? timestampToDate(docData.completedAt)
+      : undefined,
     progress,
     settings,
   };
@@ -387,29 +415,32 @@ export async function createTournament(
 ): Promise<Tournament> {
   try {
     const code = await generateUniqueCode();
-    
-          const tournamentData = {
-        code,
-        name: data.name,
-        description: data.description || '',
-        type: data.type,
-        maxPlayers: data.maxPlayers,
-        status: 'pending' as TournamentStatus,
-        ownerId: user.uid,
-        ownerDisplayName: user.displayName || 'Unknown',
-        ownerEmail: user.email || '',
-        players: [],
-        progress: null,
-        settings: {
-          requireScores: data.requireScores ?? true,
-        },
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      };
 
-    const docRef = await addDoc(collection(db, TOURNAMENTS_COLLECTION), tournamentData);
+    const tournamentData = {
+      code,
+      name: data.name,
+      description: data.description || '',
+      type: data.type,
+      maxPlayers: data.maxPlayers,
+      status: 'pending' as TournamentStatus,
+      ownerId: user.uid,
+      ownerDisplayName: user.displayName || 'Unknown',
+      ownerEmail: user.email || '',
+      players: [],
+      progress: null,
+      settings: {
+        requireScores: data.requireScores ?? true,
+      },
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
+
+    const docRef = await addDoc(
+      collection(db, TOURNAMENTS_COLLECTION),
+      tournamentData
+    );
     const docSnap = await getDoc(docRef);
-    
+
     if (!docSnap.exists()) {
       throw new Error('Failed to create tournament');
     }
@@ -432,7 +463,9 @@ export async function createTournament(
 }
 
 // Get tournament by code
-export async function getTournamentByCode(code: string): Promise<Tournament | null> {
+export async function getTournamentByCode(
+  code: string
+): Promise<Tournament | null> {
   const q = query(
     collection(db, TOURNAMENTS_COLLECTION),
     where('code', '==', code),
@@ -449,7 +482,9 @@ export async function getTournamentByCode(code: string): Promise<Tournament | nu
 }
 
 // Get tournament by ID
-export async function getTournamentById(id: string): Promise<Tournament | null> {
+export async function getTournamentById(
+  id: string
+): Promise<Tournament | null> {
   const docRef = doc(db, TOURNAMENTS_COLLECTION, id);
   const docSnap = await getDoc(docRef);
 
@@ -461,9 +496,12 @@ export async function getTournamentById(id: string): Promise<Tournament | null> 
 }
 
 // Register an authenticated player to a tournament
-export async function registerPlayer(tournamentId: string, user: User): Promise<void> {
+export async function registerPlayer(
+  tournamentId: string,
+  user: User
+): Promise<void> {
   const tournament = await getTournamentById(tournamentId);
-  
+
   if (!tournament) {
     throw new Error('Tournament not found');
   }
@@ -504,7 +542,7 @@ export async function registerGuestPlayer(
   guestId: string
 ): Promise<void> {
   const tournament = await getTournamentById(tournamentId);
-  
+
   if (!tournament) {
     throw new Error('Tournament not found');
   }
@@ -523,7 +561,11 @@ export async function registerGuestPlayer(
   }
 
   // Check if pseudonym is already taken (for this tournament)
-  if (tournament.players.some((p) => p.pseudonym?.toLowerCase() === pseudonym.toLowerCase())) {
+  if (
+    tournament.players.some(
+      (p) => p.pseudonym?.toLowerCase() === pseudonym.toLowerCase()
+    )
+  ) {
     throw new Error('This pseudonym is already taken');
   }
 
@@ -543,14 +585,21 @@ export async function registerGuestPlayer(
 }
 
 // Unregister an authenticated player from a tournament
-export async function unregisterPlayer(tournamentId: string, userId: string): Promise<void> {
+export async function unregisterPlayer(
+  tournamentId: string,
+  userId: string
+): Promise<void> {
   const tournament = await getTournamentById(tournamentId);
-  
+
   if (!tournament) {
     throw new Error('Tournament not found');
   }
 
-  if (tournament.status === 'in-progress' || tournament.status === 'completed' || tournament.status === 'paused') {
+  if (
+    tournament.status === 'in-progress' ||
+    tournament.status === 'completed' ||
+    tournament.status === 'paused'
+  ) {
     throw new Error('Cannot unregister from a tournament that has started');
   }
 
@@ -563,18 +612,27 @@ export async function unregisterPlayer(tournamentId: string, userId: string): Pr
 }
 
 // Unregister a guest player from a tournament
-export async function unregisterGuestPlayer(tournamentId: string, guestId: string): Promise<void> {
+export async function unregisterGuestPlayer(
+  tournamentId: string,
+  guestId: string
+): Promise<void> {
   const tournament = await getTournamentById(tournamentId);
-  
+
   if (!tournament) {
     throw new Error('Tournament not found');
   }
 
-  if (tournament.status === 'in-progress' || tournament.status === 'completed' || tournament.status === 'paused') {
+  if (
+    tournament.status === 'in-progress' ||
+    tournament.status === 'completed' ||
+    tournament.status === 'paused'
+  ) {
     throw new Error('Cannot unregister from a tournament that has started');
   }
 
-  const updatedPlayers = tournament.players.filter((p) => p.guestId !== guestId);
+  const updatedPlayers = tournament.players.filter(
+    (p) => p.guestId !== guestId
+  );
   const tournamentRef = doc(db, TOURNAMENTS_COLLECTION, tournamentId);
   await updateDoc(tournamentRef, {
     players: updatedPlayers,
@@ -583,7 +641,9 @@ export async function unregisterGuestPlayer(tournamentId: string, guestId: strin
 }
 
 // Get tournaments where a user has participated (as authenticated player)
-export async function getTournamentsByUserId(userId: string): Promise<Tournament[]> {
+export async function getTournamentsByUserId(
+  userId: string
+): Promise<Tournament[]> {
   // Note: Firestore doesn't support querying nested array fields directly
   // We need to get all tournaments and filter in memory
   // This is acceptable for small datasets, but may need optimization for large scales
@@ -621,7 +681,11 @@ export async function updateTournamentStatus(
     updateData.startedAt = serverTimestamp();
 
     const tournament = await getTournamentById(tournamentId);
-    if (tournament && tournament.type === 'single-elimination' && !tournament.progress) {
+    if (
+      tournament &&
+      tournament.type === 'single-elimination' &&
+      !tournament.progress
+    ) {
       const progress = generateSingleEliminationProgress(tournament);
       updateData.progress = serializeTournamentProgress(progress);
     }
@@ -649,7 +713,10 @@ export async function reportSingleEliminationMatch(
     throw new Error('Tournament bracket has not been initialized');
   }
 
-  const updatedProgress = applySingleEliminationResult(tournament.progress, payload);
+  const updatedProgress = applySingleEliminationResult(
+    tournament.progress,
+    payload
+  );
   const finalRound = updatedProgress.rounds[updatedProgress.rounds.length - 1];
   const isTournamentComplete = finalRound?.status === 'completed';
 

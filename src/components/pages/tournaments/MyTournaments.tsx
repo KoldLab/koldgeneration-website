@@ -6,7 +6,15 @@ import { getTournamentsByUserId } from '@/services/tournamentService';
 import type { Tournament } from '@/types/tournament';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Play, Square, CheckCircle, XCircle, Pause, ExternalLink } from 'lucide-react';
+import {
+  Loader2,
+  Play,
+  Square,
+  CheckCircle,
+  XCircle,
+  Pause,
+  ExternalLink,
+} from 'lucide-react';
 
 export default function MyTournaments() {
   const { user } = useAuth();
@@ -29,8 +37,9 @@ export default function MyTournaments() {
     try {
       const userTournaments = await getTournamentsByUserId(user.uid);
       // Sort by most recent first
-      userTournaments.sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      userTournaments.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
       setTournaments(userTournaments);
     } catch (err: any) {
@@ -45,26 +54,52 @@ export default function MyTournaments() {
       'single-elimination': 'singleElimination',
       'double-elimination': 'doubleElimination',
       'round-robin': 'roundRobin',
-      'swiss': 'swiss',
+      swiss: 'swiss',
     };
     return typeMap[type] || type;
   };
 
   const getStatusBadge = (status: Tournament['status']) => {
     const statusConfig = {
-      pending: { label: t('tournament.status.pending'), icon: Square, className: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' },
-      open: { label: t('tournament.status.open'), icon: CheckCircle, className: 'bg-green-500/10 text-green-600 dark:text-green-400' },
-      'in-progress': { label: t('tournament.status.inProgress'), icon: Play, className: 'bg-blue-500/10 text-blue-600 dark:text-blue-400' },
-      paused: { label: t('tournament.status.paused'), icon: Pause, className: 'bg-orange-500/10 text-orange-600 dark:text-orange-400' },
-      completed: { label: t('tournament.status.completed'), icon: CheckCircle, className: 'bg-gray-500/10 text-gray-600 dark:text-gray-400' },
-      cancelled: { label: t('tournament.status.cancelled'), icon: XCircle, className: 'bg-red-500/10 text-red-600 dark:text-red-400' },
+      pending: {
+        label: t('tournament.status.pending'),
+        icon: Square,
+        className: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400',
+      },
+      open: {
+        label: t('tournament.status.open'),
+        icon: CheckCircle,
+        className: 'bg-green-500/10 text-green-600 dark:text-green-400',
+      },
+      'in-progress': {
+        label: t('tournament.status.inProgress'),
+        icon: Play,
+        className: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+      },
+      paused: {
+        label: t('tournament.status.paused'),
+        icon: Pause,
+        className: 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
+      },
+      completed: {
+        label: t('tournament.status.completed'),
+        icon: CheckCircle,
+        className: 'bg-gray-500/10 text-gray-600 dark:text-gray-400',
+      },
+      cancelled: {
+        label: t('tournament.status.cancelled'),
+        icon: XCircle,
+        className: 'bg-red-500/10 text-red-600 dark:text-red-400',
+      },
     };
 
     const config = statusConfig[status];
     const Icon = config.icon;
 
     return (
-      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${config.className}`}>
+      <span
+        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${config.className}`}
+      >
         <Icon className="h-3 w-3" />
         {config.label}
       </span>
@@ -74,7 +109,9 @@ export default function MyTournaments() {
   if (!user) {
     return (
       <div className="w-full flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <p className="text-muted-foreground">{t('tournament.create.loginRequired')}</p>
+        <p className="text-muted-foreground">
+          {t('tournament.create.loginRequired')}
+        </p>
       </div>
     );
   }
@@ -147,16 +184,24 @@ export default function MyTournaments() {
                     )}
                     <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                       <span>
-                        {t('tournament.view.code')}: <strong className="text-foreground font-mono">{tournament.code}</strong>
+                        {t('tournament.view.code')}:{' '}
+                        <strong className="text-foreground font-mono">
+                          {tournament.code}
+                        </strong>
                       </span>
                       <span>
-                        {t('tournament.view.type')}: {t(`tournament.types.${getTournamentTypeLabel(tournament.type)}`)}
+                        {t('tournament.view.type')}:{' '}
+                        {t(
+                          `tournament.types.${getTournamentTypeLabel(tournament.type)}`
+                        )}
                       </span>
                       <span>
-                        {tournament.players.length} / {tournament.maxPlayers} {t('tournament.view.players')}
+                        {tournament.players.length} / {tournament.maxPlayers}{' '}
+                        {t('tournament.view.players')}
                       </span>
                       <span>
-                        {t('tournament.view.createdAt')}: {new Date(tournament.createdAt).toLocaleDateString()}
+                        {t('tournament.view.createdAt')}:{' '}
+                        {new Date(tournament.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                   </div>

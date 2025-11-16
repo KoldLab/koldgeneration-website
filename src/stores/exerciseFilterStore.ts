@@ -65,92 +65,93 @@ const initialState = {
   showGif: true,
 };
 
-export const useExerciseFilterStore = create<ExerciseFilterState>((set, get) => ({
-  ...initialState,
+export const useExerciseFilterStore = create<ExerciseFilterState>(
+  (set, get) => ({
+    ...initialState,
 
-  loadFilters: async () => {
-    // Don't reload if already loaded
-    if (get().isLoaded && !get().error) {
-      return;
-    }
+    loadFilters: async () => {
+      // Don't reload if already loaded
+      if (get().isLoaded && !get().error) {
+        return;
+      }
 
-    // Don't reload if already loading
-    if (get().isLoading) {
-      return;
-    }
+      // Don't reload if already loading
+      if (get().isLoading) {
+        return;
+      }
 
-    set({ isLoading: true, error: null });
+      set({ isLoading: true, error: null });
 
-    try {
-      const [bodyParts, muscles, equipments] = await Promise.all([
-        getBodyParts(),
-        getMuscles(),
-        getEquipment(),
-      ]);
+      try {
+        const [bodyParts, muscles, equipments] = await Promise.all([
+          getBodyParts(),
+          getMuscles(),
+          getEquipment(),
+        ]);
 
+        set({
+          bodyParts: bodyParts.sort(),
+          muscles: muscles.sort(),
+          equipments: equipments.sort(),
+          isLoading: false,
+          isLoaded: true,
+          error: null,
+        });
+      } catch (error: any) {
+        console.error('Failed to load exercise filters:', error);
+        set({
+          isLoading: false,
+          error: error.message || 'Failed to load filter options',
+        });
+      }
+    },
+
+    reset: () => {
+      set(initialState);
+    },
+
+    // Filter actions
+    setSearchQuery: (query: string) => {
+      set({ searchQuery: query });
+    },
+    setSelectedBodyPart: (part: string) => {
+      set({ selectedBodyPart: part });
+    },
+    setSelectedEquipment: (equipment: string) => {
+      set({ selectedEquipment: equipment });
+    },
+    setSelectedTargetMuscle: (muscle: string) => {
+      set({ selectedTargetMuscle: muscle });
+    },
+    clearFilters: () => {
       set({
-        bodyParts: bodyParts.sort(),
-        muscles: muscles.sort(),
-        equipments: equipments.sort(),
-        isLoading: false,
-        isLoaded: true,
-        error: null,
+        searchQuery: '',
+        selectedBodyPart: 'all',
+        selectedEquipment: 'all',
+        selectedTargetMuscle: 'all',
       });
-    } catch (error: any) {
-      console.error('Failed to load exercise filters:', error);
+    },
+
+    // Display options actions
+    setColumns: (columns: number) => {
+      set({ columns });
+    },
+    setItemsPerPage: (items: number) => {
+      set({ itemsPerPage: items });
+    },
+    setShowGif: (show: boolean) => {
+      set({ showGif: show });
+    },
+    setDisplayOptions: (options: {
+      columns: number;
+      itemsPerPage: number;
+      showGif: boolean;
+    }) => {
       set({
-        isLoading: false,
-        error: error.message || 'Failed to load filter options',
+        columns: options.columns,
+        itemsPerPage: options.itemsPerPage,
+        showGif: options.showGif,
       });
-    }
-  },
-
-  reset: () => {
-    set(initialState);
-  },
-
-  // Filter actions
-  setSearchQuery: (query: string) => {
-    set({ searchQuery: query });
-  },
-  setSelectedBodyPart: (part: string) => {
-    set({ selectedBodyPart: part });
-  },
-  setSelectedEquipment: (equipment: string) => {
-    set({ selectedEquipment: equipment });
-  },
-  setSelectedTargetMuscle: (muscle: string) => {
-    set({ selectedTargetMuscle: muscle });
-  },
-  clearFilters: () => {
-    set({
-      searchQuery: '',
-      selectedBodyPart: 'all',
-      selectedEquipment: 'all',
-      selectedTargetMuscle: 'all',
-    });
-  },
-
-  // Display options actions
-  setColumns: (columns: number) => {
-    set({ columns });
-  },
-  setItemsPerPage: (items: number) => {
-    set({ itemsPerPage: items });
-  },
-  setShowGif: (show: boolean) => {
-    set({ showGif: show });
-  },
-  setDisplayOptions: (options: {
-    columns: number;
-    itemsPerPage: number;
-    showGif: boolean;
-  }) => {
-    set({
-      columns: options.columns,
-      itemsPerPage: options.itemsPerPage,
-      showGif: options.showGif,
-    });
-  },
-}));
-
+    },
+  })
+);

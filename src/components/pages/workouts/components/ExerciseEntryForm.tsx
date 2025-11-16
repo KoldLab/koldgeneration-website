@@ -88,7 +88,10 @@ export default function ExerciseEntryForm({
   };
 
   return (
-    <Collapsible open={!isCollapsed} onOpenChange={(open) => onCollapsedChange?.(!open)}>
+    <Collapsible
+      open={!isCollapsed}
+      onOpenChange={(open) => onCollapsedChange?.(!open)}
+    >
       <Card className="p-4">
         <CollapsibleTrigger asChild>
           <div className="flex items-center justify-between w-full cursor-pointer">
@@ -157,7 +160,9 @@ export default function ExerciseEntryForm({
                     key={index}
                     set={set}
                     setNumber={set.setNumber}
-                    onUpdate={(updatedSet) => handleUpdateSet(index, updatedSet)}
+                    onUpdate={(updatedSet) =>
+                      handleUpdateSet(index, updatedSet)
+                    }
                     onRemove={() => handleRemoveSet(index)}
                     onDuplicate={() => handleDuplicateSet(index)}
                   />
@@ -183,4 +188,3 @@ export default function ExerciseEntryForm({
     </Collapsible>
   );
 }
-

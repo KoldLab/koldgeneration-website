@@ -135,7 +135,10 @@ export default function Home() {
             return (
               <div key={card.title} className="relative">
                 {cardMarkup}
-                <div className="absolute inset-0 rounded-3xl" aria-hidden="true" />
+                <div
+                  className="absolute inset-0 rounded-3xl"
+                  aria-hidden="true"
+                />
               </div>
             );
           }

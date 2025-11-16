@@ -14,13 +14,7 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type {
-  Exercise,
-  WorkoutRoutine,
-  WorkoutLog,
-  ExerciseEntry,
-  ExerciseSet,
-} from '@/types/workout';
+import type { Exercise, WorkoutRoutine, WorkoutLog } from '@/types/workout';
 
 // Collection names
 const EXERCISES_COLLECTION = 'exercises';
@@ -55,7 +49,6 @@ export async function createExercise(
   userId: string,
   exerciseData: Omit<Exercise, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
 ): Promise<Exercise> {
-  const now = new Date();
   const exerciseRef = await addDoc(collection(db, EXERCISES_COLLECTION), {
     ...exerciseData,
     userId,
@@ -80,7 +73,9 @@ export async function createExercise(
 /**
  * Get all exercises for a user
  */
-export async function getExercisesByUserId(userId: string): Promise<Exercise[]> {
+export async function getExercisesByUserId(
+  userId: string
+): Promise<Exercise[]> {
   const q = query(
     collection(db, EXERCISES_COLLECTION),
     where('userId', '==', userId),
@@ -102,7 +97,9 @@ export async function getExercisesByUserId(userId: string): Promise<Exercise[]> 
 /**
  * Get exercise by ID
  */
-export async function getExerciseById(exerciseId: string): Promise<Exercise | null> {
+export async function getExerciseById(
+  exerciseId: string
+): Promise<Exercise | null> {
   const docRef = doc(db, EXERCISES_COLLECTION, exerciseId);
   const docSnap = await getDoc(docRef);
 
@@ -207,7 +204,9 @@ export async function createRoutine(
 /**
  * Get all routines for a user
  */
-export async function getRoutinesByUserId(userId: string): Promise<WorkoutRoutine[]> {
+export async function getRoutinesByUserId(
+  userId: string
+): Promise<WorkoutRoutine[]> {
   const q = query(
     collection(db, ROUTINES_COLLECTION),
     where('userId', '==', userId),
@@ -233,7 +232,9 @@ export async function getRoutinesByUserId(userId: string): Promise<WorkoutRoutin
 /**
  * Get routine by ID
  */
-export async function getRoutineById(routineId: string): Promise<WorkoutRoutine | null> {
+export async function getRoutineById(
+  routineId: string
+): Promise<WorkoutRoutine | null> {
   const docRef = doc(db, ROUTINES_COLLECTION, routineId);
   const docSnap = await getDoc(docRef);
 
@@ -259,7 +260,9 @@ export async function getRoutineById(routineId: string): Promise<WorkoutRoutine 
  */
 export async function updateRoutine(
   routineId: string,
-  updates: Partial<Omit<WorkoutRoutine, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>
+  updates: Partial<
+    Omit<WorkoutRoutine, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
+  >
 ): Promise<void> {
   const routineRef = doc(db, ROUTINES_COLLECTION, routineId);
   await updateDoc(routineRef, {
@@ -341,10 +344,7 @@ export async function getWorkoutLogsByUserId(
     endDate?: Date;
   }
 ): Promise<WorkoutLog[]> {
-  let q = query(
-    collection(db, LOGS_COLLECTION),
-    where('userId', '==', userId)
-  );
+  let q = query(collection(db, LOGS_COLLECTION), where('userId', '==', userId));
 
   // Add date range filters if provided
   if (options?.startDate) {
@@ -385,7 +385,9 @@ export async function getWorkoutLogsByUserId(
 /**
  * Get workout log by ID
  */
-export async function getWorkoutLogById(logId: string): Promise<WorkoutLog | null> {
+export async function getWorkoutLogById(
+  logId: string
+): Promise<WorkoutLog | null> {
   const docRef = doc(db, LOGS_COLLECTION, logId);
   const docSnap = await getDoc(docRef);
 
@@ -414,7 +416,9 @@ export async function getWorkoutLogById(logId: string): Promise<WorkoutLog | nul
  */
 export async function updateWorkoutLog(
   logId: string,
-  updates: Partial<Omit<WorkoutLog, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>
+  updates: Partial<
+    Omit<WorkoutLog, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
+  >
 ): Promise<void> {
   const logRef = doc(db, LOGS_COLLECTION, logId);
   const updateData: any = {
@@ -437,4 +441,3 @@ export async function deleteWorkoutLog(logId: string): Promise<void> {
   const logRef = doc(db, LOGS_COLLECTION, logId);
   await deleteDoc(logRef);
 }
-
