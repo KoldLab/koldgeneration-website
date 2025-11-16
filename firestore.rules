@@ -32,6 +32,23 @@ service cloud.firestore {
       allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
 
+    // ExerciseFavorites collection - users can only access their own favorites
+    // Document ID is the userId, so users can only access their own document
+    match /exerciseFavorites/{userId} {
+      allow read: if isAuthenticated() && userId == request.auth.uid;
+      allow create: if isAuthenticated() 
+        && userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.exerciseDBIds is list
+        && request.resource.data.customExerciseIds is list;
+      allow update: if isAuthenticated() 
+        && userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.exerciseDBIds is list
+        && request.resource.data.customExerciseIds is list;
+      allow delete: if isAuthenticated() && userId == request.auth.uid;
+    }
+
     // Tournaments collection - existing rules
     match /tournaments/{tournamentId} {
       allow get: if true;

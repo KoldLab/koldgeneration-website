@@ -21,6 +21,7 @@ interface ExerciseFilterState {
   selectedBodyPart: string;
   selectedEquipment: string;
   selectedTargetMuscle: string;
+  showFavoritesOnly: boolean;
 
   // Display options (persisted across components)
   columns: number;
@@ -35,6 +36,7 @@ interface ExerciseFilterState {
   setSelectedBodyPart: (part: string) => void;
   setSelectedEquipment: (equipment: string) => void;
   setSelectedTargetMuscle: (muscle: string) => void;
+  setShowFavoritesOnly: (show: boolean) => void;
   clearFilters: () => void;
   // Display options actions
   setColumns: (columns: number) => void;
@@ -59,6 +61,7 @@ const initialState = {
   selectedBodyPart: 'all',
   selectedEquipment: 'all',
   selectedTargetMuscle: 'all',
+  showFavoritesOnly: false,
   // Display options defaults
   columns: 4,
   itemsPerPage: 20,
@@ -123,12 +126,16 @@ export const useExerciseFilterStore = create<ExerciseFilterState>(
     setSelectedTargetMuscle: (muscle: string) => {
       set({ selectedTargetMuscle: muscle });
     },
+    setShowFavoritesOnly: (show: boolean) => {
+      set({ showFavoritesOnly: show });
+    },
     clearFilters: () => {
       set({
         searchQuery: '',
         selectedBodyPart: 'all',
         selectedEquipment: 'all',
         selectedTargetMuscle: 'all',
+        showFavoritesOnly: false,
       });
     },
 

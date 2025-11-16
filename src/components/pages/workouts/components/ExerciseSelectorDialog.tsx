@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Dialog,
@@ -10,19 +10,38 @@ import {
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Card } from '@/components/ui/card';
+import {
+  Card,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Plus } from 'lucide-react';
-import { getAllExercises } from '@/services/exerciseDBService';
-import { createExercise } from '@/services/workoutService';
+import { Loader2, Plus, Heart } from 'lucide-react';
+import {
+  getAllExercises,
+  getExerciseById as getExerciseDBById,
+} from '@/services/exerciseDBService';
+import {
+  createExercise,
+  getExercisesByUserId,
+} from '@/services/workoutService';
 import { useExerciseFilterStore } from '@/stores/exerciseFilterStore';
+import { useExerciseFavoritesStore } from '@/stores/exerciseFavoritesStore';
+import { useExerciseCacheStore } from '@/stores/exerciseCacheStore';
+import { useAuth } from '@/contexts/AuthContext';
 import ExerciseGrid from './ExerciseGrid';
 import ExerciseDetailsDialog from './ExerciseDetailsDialog';
 import ExerciseFilters from './ExerciseFilters';
-import type { ExerciseDBExercise, ExerciseEntry } from '@/types/workout';
+import type {
+  ExerciseDBExercise,
+  ExerciseEntry,
+  Exercise,
+} from '@/types/workout';
 
 interface ExerciseSelectorDialogProps {
   open: boolean;
@@ -38,13 +57,26 @@ export default function ExerciseSelectorDialog({
   userId,
 }: ExerciseSelectorDialogProps) {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<'browse' | 'create'>('browse');
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<
+    'browse' | 'favorites' | 'myExercises' | 'create'
+  >('browse');
 
   // Browse tab state
   const [exercises, setExercises] = useState<ExerciseDBExercise[]>([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  // Favorites tab state
+  const [favoriteExercises, setFavoriteExercises] = useState<
+    ExerciseDBExercise[]
+  >([]);
+  const [loadingFavorites, setLoadingFavorites] = useState(false);
+
+  // My Exercises tab state
+  const [customExercises, setCustomExercises] = useState<Exercise[]>([]);
+  const [loadingCustom, setLoadingCustom] = useState(false);
 
   // Get filter and display options from store
   const {
@@ -67,6 +99,24 @@ export default function ExerciseSelectorDialog({
   // Selected exercise for details dialog
   const [selectedExercise, setSelectedExercise] =
     useState<ExerciseDBExercise | null>(null);
+
+  // Favorites and cache stores
+  const {
+    favoriteExerciseDBIds,
+    isFavoriteCustom,
+    isFavoriteExerciseDB,
+    toggleFavoriteCustom,
+    initialize: initializeFavorites,
+    initialized: favoritesInitialized,
+  } = useExerciseFavoritesStore();
+  const { getExercise: getCachedExercise } = useExerciseCacheStore();
+
+  // Initialize favorites when dialog opens and user is available
+  useEffect(() => {
+    if (open && user?.uid && !favoritesInitialized) {
+      initializeFavorites(user.uid);
+    }
+  }, [open, user?.uid, favoritesInitialized, initializeFavorites]);
 
   // Load filter options
   useEffect(() => {
@@ -128,7 +178,91 @@ export default function ExerciseSelectorDialog({
     }
   }, [selectedBodyPart, selectedEquipment, selectedTargetMuscle, searchQuery]);
 
+  // Load favorite exercises
+  const loadFavorites = useCallback(async () => {
+    if (favoriteExerciseDBIds.length === 0) {
+      setFavoriteExercises([]);
+      return;
+    }
+
+    setLoadingFavorites(true);
+    try {
+      const favoriteExercisesList: ExerciseDBExercise[] = [];
+
+      // Try to get from cache first, then fetch from API
+      for (const exerciseDBId of favoriteExerciseDBIds) {
+        const cached = getCachedExercise(exerciseDBId);
+        if (cached) {
+          favoriteExercisesList.push(cached);
+        } else {
+          try {
+            const exercise = await getExerciseDBById(exerciseDBId);
+            favoriteExercisesList.push(exercise);
+          } catch (err) {
+            console.warn(
+              `Failed to load favorite exercise ${exerciseDBId}:`,
+              err
+            );
+          }
+        }
+      }
+
+      setFavoriteExercises(favoriteExercisesList);
+    } catch (error) {
+      console.error('Error loading favorites:', error);
+    } finally {
+      setLoadingFavorites(false);
+    }
+  }, [favoriteExerciseDBIds, getCachedExercise]);
+
+  // Load custom exercises
+  const loadCustomExercises = useCallback(async () => {
+    if (!user?.uid) {
+      setCustomExercises([]);
+      return;
+    }
+
+    setLoadingCustom(true);
+    try {
+      const exercises = await getExercisesByUserId(user.uid);
+      setCustomExercises(exercises);
+    } catch (error) {
+      console.error('Error loading custom exercises:', error);
+    } finally {
+      setLoadingCustom(false);
+    }
+  }, [user?.uid]);
+
+  // Load data when tab changes
+  useEffect(() => {
+    if (open) {
+      if (activeTab === 'favorites') {
+        loadFavorites();
+      } else if (activeTab === 'myExercises') {
+        loadCustomExercises();
+      }
+    }
+  }, [open, activeTab, loadFavorites, loadCustomExercises]);
+
+  // Reload favorites when favoriteExerciseDBIds changes
+  useEffect(() => {
+    if (open && activeTab === 'favorites') {
+      loadFavorites();
+    }
+  }, [favoriteExerciseDBIds, open, activeTab, loadFavorites]);
+
   const handleSelectExercise = (entry: ExerciseEntry) => {
+    onSelectExercise(entry);
+    onOpenChange(false);
+  };
+
+  const handleSelectCustomExercise = (exercise: Exercise) => {
+    const entry: ExerciseEntry = {
+      exerciseId: exercise.id,
+      exerciseName: exercise.name,
+      sets: [],
+      notes: '',
+    };
     onSelectExercise(entry);
     onOpenChange(false);
   };
@@ -155,9 +289,10 @@ export default function ExerciseSelectorDialog({
       onSelectExercise(entry);
       onOpenChange(false);
 
-      // Reset form
+      // Reset form and reload custom exercises
       setCustomName('');
       setCustomDescription('');
+      loadCustomExercises();
     } catch (error) {
       console.error('Error creating exercise:', error);
     } finally {
@@ -177,12 +312,22 @@ export default function ExerciseSelectorDialog({
             <div className="px-4 sm:px-6 py-4 ">
               <Tabs
                 value={activeTab}
-                onValueChange={(v) => setActiveTab(v as 'browse' | 'create')}
+                onValueChange={(v) =>
+                  setActiveTab(
+                    v as 'browse' | 'favorites' | 'myExercises' | 'create'
+                  )
+                }
                 className="w-full"
               >
-                <TabsList>
+                <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="browse">
                     {t('workouts.exerciseSelector.browse')}
+                  </TabsTrigger>
+                  <TabsTrigger value="favorites">
+                    {t('workouts.exerciseSelector.favorites')}
+                  </TabsTrigger>
+                  <TabsTrigger value="myExercises">
+                    {t('workouts.exerciseSelector.myExercises')}
                   </TabsTrigger>
                   <TabsTrigger value="create">
                     {t('workouts.exerciseSelector.create')}
@@ -198,7 +343,24 @@ export default function ExerciseSelectorDialog({
                   {/* Exercise Grid */}
                   <div className="px-4 sm:px-6 py-4">
                     <ExerciseGrid
-                      exercises={exercises}
+                      exercises={useMemo(() => {
+                        // Sort: favorites first, then alphabetically
+                        const sorted = [...exercises].sort((a, b) => {
+                          const aIsFavorite = isFavoriteExerciseDB(
+                            a.exerciseId
+                          );
+                          const bIsFavorite = isFavoriteExerciseDB(
+                            b.exerciseId
+                          );
+
+                          if (aIsFavorite && !bIsFavorite) return -1;
+                          if (!aIsFavorite && bIsFavorite) return 1;
+
+                          // Both are favorites or both are not - sort alphabetically
+                          return a.name.localeCompare(b.name);
+                        });
+                        return sorted;
+                      }, [exercises, isFavoriteExerciseDB])}
                       loading={loading}
                       mode="select"
                       onSelectExercise={handleSelectExercise}
@@ -217,6 +379,78 @@ export default function ExerciseSelectorDialog({
                         setCurrentPage(1); // Reset to page 1 when options change
                       }}
                     />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="favorites" className="mt-4">
+                  <div className="px-4 sm:px-6 py-4">
+                    {loadingFavorites ? (
+                      <div className="flex items-center justify-center py-12">
+                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : favoriteExercises.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-12 text-center">
+                        <p className="text-muted-foreground">
+                          {t('workouts.exerciseSelector.noFavorites')}
+                        </p>
+                      </div>
+                    ) : (
+                      <ExerciseGrid
+                        exercises={favoriteExercises}
+                        loading={false}
+                        mode="select"
+                        onSelectExercise={handleSelectExercise}
+                        onViewDetails={(exercise) =>
+                          setSelectedExercise(exercise)
+                        }
+                        columns={columns}
+                        itemsPerPage={itemsPerPage}
+                        showGif={showGif}
+                        currentPage={1}
+                        totalPages={1}
+                        onPageChange={() => {}}
+                        showDisplayControls={false}
+                      />
+                    )}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="myExercises" className="mt-4">
+                  <div className="px-4 sm:px-6 py-4">
+                    {loadingCustom ? (
+                      <div className="flex items-center justify-center py-12">
+                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : customExercises.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-12 text-center">
+                        <p className="text-muted-foreground">
+                          {t('workouts.exerciseSelector.noCustomExercises')}
+                        </p>
+                      </div>
+                    ) : (
+                      <div
+                        className={`grid gap-4 ${columns === 1 ? 'grid-cols-1' : columns === 2 ? 'grid-cols-1 sm:grid-cols-2' : columns === 3 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'}`}
+                      >
+                        {customExercises.map((exercise) => (
+                          <CustomExerciseCard
+                            key={exercise.id}
+                            exercise={exercise}
+                            onSelect={() =>
+                              handleSelectCustomExercise(exercise)
+                            }
+                            isFavorite={isFavoriteCustom(exercise.id)}
+                            onToggleFavorite={async () => {
+                              if (user?.uid) {
+                                await toggleFavoriteCustom(
+                                  user.uid,
+                                  exercise.id
+                                );
+                              }
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
 
@@ -295,5 +529,69 @@ export default function ExerciseSelectorDialog({
         />
       )}
     </Dialog>
+  );
+}
+
+// Custom Exercise Card Component
+function CustomExerciseCard({
+  exercise,
+  onSelect,
+  isFavorite,
+  onToggleFavorite,
+}: {
+  exercise: Exercise;
+  onSelect: () => void;
+  isFavorite: boolean;
+  onToggleFavorite: () => Promise<void>;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <Card className="hover:shadow-lg transition-shadow overflow-hidden relative">
+      {/* Favorite Button - Top Right */}
+      <button
+        onClick={async (e) => {
+          e.stopPropagation();
+          await onToggleFavorite();
+        }}
+        className="absolute top-2 right-2 z-10 p-1.5 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors shadow-sm"
+        aria-label={
+          isFavorite
+            ? t('workouts.exerciseGrid.removeFavorite')
+            : t('workouts.exerciseGrid.addFavorite')
+        }
+      >
+        <Heart
+          className={`h-4 w-4 ${
+            isFavorite
+              ? 'fill-red-500 text-red-500'
+              : 'text-muted-foreground hover:text-red-500'
+          } transition-colors`}
+        />
+      </button>
+
+      <CardHeader className="pt-6">
+        <CardTitle className="line-clamp-2">{exercise.name}</CardTitle>
+        {exercise.description && (
+          <CardDescription className="line-clamp-2">
+            {exercise.description}
+          </CardDescription>
+        )}
+      </CardHeader>
+
+      <CardFooter className="flex-col gap-2">
+        <Button
+          variant="default"
+          className="w-full text-sm"
+          size="sm"
+          onClick={onSelect}
+        >
+          <Plus className="h-4 w-4 mr-1.5 shrink-0" />
+          <span className="truncate">
+            {t('workouts.exerciseGrid.addToWorkout')}
+          </span>
+        </Button>
+      </CardFooter>
+    </Card>
   );
 }

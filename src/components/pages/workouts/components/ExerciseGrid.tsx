@@ -17,9 +17,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, Dumbbell, Info, Plus } from 'lucide-react';
+import { Loader2, Dumbbell, Info, Plus, Heart } from 'lucide-react';
 import type { ExerciseDBExercise, ExerciseEntry } from '@/types/workout';
 import { useExerciseCacheStore } from '@/stores/exerciseCacheStore';
+import { useExerciseFavoritesStore } from '@/stores/exerciseFavoritesStore';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ExerciseGridProps {
   exercises: ExerciseDBExercise[];
@@ -42,6 +44,10 @@ interface ExerciseGridProps {
     itemsPerPage: number;
     showGif: boolean;
   }) => void;
+  // Results count (optional)
+  showResultsCount?: boolean;
+  filteredCount?: number;
+  totalCount?: number;
 }
 
 // Helper function to safely extract string value
@@ -65,6 +71,9 @@ export default function ExerciseGrid({
   onPageChange,
   showDisplayControls = true,
   onDisplayOptionsChange,
+  showResultsCount = false,
+  filteredCount,
+  totalCount,
 }: ExerciseGridProps) {
   const { t } = useTranslation();
   const [columns, setColumns] = useState(initialColumns);
@@ -198,6 +207,37 @@ export default function ExerciseGrid({
         </Card>
       )}
 
+      {/* Results Count */}
+      {showResultsCount && (
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <p className="text-sm text-muted-foreground">
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {t('workouts.exerciseLibrary.loading')}
+              </span>
+            ) : (
+              <>
+                {t('workouts.exerciseLibrary.showing', {
+                  count: filteredCount || exercises.length,
+                  total: totalCount || exercises.length,
+                })}
+                {totalPages > 1 && (
+                  <span className="ml-2">
+                    (
+                    {t('workouts.exerciseLibrary.page', {
+                      current: currentPage,
+                      total: totalPages,
+                    })}
+                    )
+                  </span>
+                )}
+              </>
+            )}
+          </p>
+        </div>
+      )}
+
       {/* Exercise Grid */}
       <div className={`grid gap-4 ${gridColsClass}`}>
         {exercises.map((exercise) => (
@@ -255,8 +295,20 @@ function ExerciseCard({
   onSelectExercise?: (entry: ExerciseEntry) => void;
 }) {
   const { t } = useTranslation();
+  const { user } = useAuth();
 
   const { setExercise: cacheExercise } = useExerciseCacheStore();
+  const { toggleFavoriteExerciseDB, isFavoriteExerciseDB } =
+    useExerciseFavoritesStore();
+
+  const isFavorite = isFavoriteExerciseDB(exercise.exerciseId);
+
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (user?.uid) {
+      await toggleFavoriteExerciseDB(user.uid, exercise.exerciseId);
+    }
+  };
 
   const handleSelect = () => {
     if (onSelectExercise) {
@@ -296,8 +348,27 @@ function ExerciseCard({
 
   return (
     <Card
-      className={`${showGif ? 'pt-0' : ''} hover:shadow-lg transition-shadow overflow-hidden`}
+      className={`${showGif ? 'pt-0' : ''} hover:shadow-lg transition-shadow overflow-hidden relative`}
     >
+      {/* Favorite Button - Top Right */}
+      <button
+        onClick={handleToggleFavorite}
+        className="absolute top-2 right-2 z-10 p-1.5 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors shadow-sm"
+        aria-label={
+          isFavorite
+            ? t('workouts.exerciseGrid.removeFavorite')
+            : t('workouts.exerciseGrid.addFavorite')
+        }
+      >
+        <Heart
+          className={`h-4 w-4 ${
+            isFavorite
+              ? 'fill-red-500 text-red-500'
+              : 'text-muted-foreground hover:text-red-500'
+          } transition-colors`}
+        />
+      </button>
+
       {/* Exercise GIF/Image/Placeholder */}
       {showGif && (
         <CardContent className="px-0">

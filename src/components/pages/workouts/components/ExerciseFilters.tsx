@@ -10,8 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, X } from 'lucide-react';
+import { Search, X, Heart } from 'lucide-react';
 import { useExerciseFilterStore } from '@/stores/exerciseFilterStore';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface ExerciseFiltersProps {
   onFiltersChange?: (filters: {
@@ -19,6 +20,7 @@ interface ExerciseFiltersProps {
     bodyPart: string;
     equipment: string;
     targetMuscle: string;
+    showFavoritesOnly: boolean;
   }) => void;
   showResetButton?: boolean;
 }
@@ -39,10 +41,12 @@ export default function ExerciseFilters({
     selectedBodyPart,
     selectedEquipment,
     selectedTargetMuscle,
+    showFavoritesOnly,
     setSearchQuery: setStoreSearchQuery,
     setSelectedBodyPart,
     setSelectedEquipment,
     setSelectedTargetMuscle,
+    setShowFavoritesOnly,
     clearFilters,
   } = useExerciseFilterStore();
 
@@ -76,6 +80,7 @@ export default function ExerciseFilters({
         bodyPart: selectedBodyPart,
         equipment: selectedEquipment,
         targetMuscle: selectedTargetMuscle,
+        showFavoritesOnly,
       });
     }
   }, [
@@ -83,6 +88,7 @@ export default function ExerciseFilters({
     selectedBodyPart,
     selectedEquipment,
     selectedTargetMuscle,
+    showFavoritesOnly,
     onFiltersChange,
   ]);
 
@@ -133,6 +139,24 @@ export default function ExerciseFilters({
             {t('workouts.exerciseLibrary.filters.resetFilters')}
           </Button>
         )}
+      </div>
+
+      {/* Favorites Filter */}
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="show-favorites-only"
+          checked={showFavoritesOnly}
+          onCheckedChange={(checked) =>
+            setShowFavoritesOnly(checked === true)
+          }
+        />
+        <Label
+          htmlFor="show-favorites-only"
+          className="text-sm font-normal cursor-pointer flex items-center gap-2"
+        >
+          <Heart className="h-4 w-4" />
+          {t('workouts.exerciseLibrary.filters.showFavoritesOnly')}
+        </Label>
       </div>
 
       {/* Filter Dropdowns */}

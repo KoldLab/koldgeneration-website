@@ -1,12 +1,13 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dumbbell, Loader2, Filter } from 'lucide-react';
+import { Dumbbell, Filter } from 'lucide-react';
 import { getAllExercises } from '@/services/exerciseDBService';
 import type { ExerciseDBExercise } from '@/types/workout';
 import { useAuth } from '@/contexts/AuthContext';
 import { useExerciseFilterStore } from '@/stores/exerciseFilterStore';
+import { useExerciseFavoritesStore } from '@/stores/exerciseFavoritesStore';
 import ExerciseDetailsDialog from './components/ExerciseDetailsDialog';
 import ExerciseGrid from './components/ExerciseGrid';
 import ExerciseFilters from './components/ExerciseFilters';
@@ -14,6 +15,15 @@ import ExerciseFilters from './components/ExerciseFilters';
 export default function ExerciseLibrary() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { initialize: initializeFavorites, initialized: favoritesInitialized } =
+    useExerciseFavoritesStore();
+
+  // Initialize favorites when component mounts
+  React.useEffect(() => {
+    if (user?.uid && !favoritesInitialized) {
+      initializeFavorites(user.uid);
+    }
+  }, [user?.uid, favoritesInitialized, initializeFavorites]);
   const [exercises, setExercises] = useState<ExerciseDBExercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
@@ -24,12 +34,16 @@ export default function ExerciseLibrary() {
     selectedBodyPart,
     selectedEquipment,
     selectedTargetMuscle,
+    showFavoritesOnly,
     columns,
     itemsPerPage,
     showGif,
     setDisplayOptions,
     loadFilters,
   } = useExerciseFilterStore();
+
+  // Get favorites from store
+  const { isFavoriteExerciseDB } = useExerciseFavoritesStore();
 
   // Selected exercise for details dialog
   const [selectedExercise, setSelectedExercise] =
@@ -112,18 +126,44 @@ export default function ExerciseLibrary() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedBodyPart, selectedEquipment, selectedTargetMuscle, searchQuery]);
+  }, [
+    selectedBodyPart,
+    selectedEquipment,
+    selectedTargetMuscle,
+    searchQuery,
+    showFavoritesOnly,
+  ]);
 
   // Load exercises when filters change
   useEffect(() => {
     loadExercises();
   }, [loadExercises]);
 
-  // Exercises are already filtered by the API, no need for client-side filtering
-  // Search is handled by the API search parameter
+  // Filter and sort exercises client-side
   const filteredExercises = useMemo(() => {
-    return exercises;
-  }, [exercises]);
+    let result = [...exercises];
+
+    // Filter to show only favorites if enabled
+    if (showFavoritesOnly) {
+      result = result.filter((exercise) =>
+        isFavoriteExerciseDB(exercise.exerciseId)
+      );
+    }
+
+    // Sort: favorites first, then alphabetically
+    result.sort((a, b) => {
+      const aIsFavorite = isFavoriteExerciseDB(a.exerciseId);
+      const bIsFavorite = isFavoriteExerciseDB(b.exerciseId);
+
+      if (aIsFavorite && !bIsFavorite) return -1;
+      if (!aIsFavorite && bIsFavorite) return 1;
+
+      // Both are favorites or both are not - sort alphabetically
+      return a.name.localeCompare(b.name);
+    });
+
+    return result;
+  }, [exercises, showFavoritesOnly, isFavoriteExerciseDB]);
 
   if (error && exercises.length === 0) {
     return (
@@ -162,28 +202,6 @@ export default function ExerciseLibrary() {
         <ExerciseFilters />
       </Card>
 
-      {/* Results Count */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <p className="text-sm text-muted-foreground">
-          {loading ? (
-            <span className="flex items-center gap-2">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Loading...
-            </span>
-          ) : (
-            <>
-              Showing {filteredExercises.length} of {totalExercises}{' '}
-              {totalExercises === 1 ? 'exercise' : 'exercises'}
-              {totalPages > 1 && (
-                <span className="ml-2">
-                  (Page {currentPage} of {totalPages})
-                </span>
-              )}
-            </>
-          )}
-        </p>
-      </div>
-
       {/* Exercise Grid */}
       <ExerciseGrid
         exercises={filteredExercises}
@@ -197,6 +215,9 @@ export default function ExerciseLibrary() {
         totalPages={totalPages}
         onPageChange={setCurrentPage}
         showDisplayControls={true}
+        showResultsCount={true}
+        filteredCount={filteredExercises.length}
+        totalCount={totalExercises}
         onDisplayOptionsChange={(options) => {
           setDisplayOptions(options);
           setCurrentPage(1); // Reset to page 1 when options change

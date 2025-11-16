@@ -35,19 +35,25 @@
   "exerciseSelector": {
     "title": "Add Exercise",
     "browse": "Browse Exercises",
+    "favorites": "Favorites",
+    "myExercises": "My Exercises",
     "create": "Create Custom",
     "customName": "Exercise Name",
     "customNamePlaceholder": "Enter exercise name",
     "customDescription": "Description",
     "customDescriptionPlaceholder": "Enter exercise description (optional)",
     "createExercise": "Create Exercise",
-    "creating": "Creating..."
+    "creating": "Creating...",
+    "noFavorites": "No favorite exercises yet. Add favorites by clicking the heart icon on exercises.",
+    "noCustomExercises": "No custom exercises yet. Create your first custom exercise in the Create tab."
   },
   "exerciseGrid": {
     "columns": "Columns",
     "columnsLabel": "Columns",
     "itemsPerPage": "Items Per Page",
     "showGif": "Show GIF",
+    "addFavorite": "Add to favorites",
+    "removeFavorite": "Remove from favorites",
     "addToWorkout": "Add to Workout"
   },
   "history": {
@@ -102,6 +108,8 @@
     "noResults": "No exercises found",
     "loading": "Loading exercises...",
     "error": "Failed to load exercises",
+    "showing": "Showing {{count}} of {{total}} {{total, plural, one {exercise} other {exercises}}}",
+    "page": "Page {{current}} of {{total}}",
     "filters": {
       "title": "Filters",
       "bodyPart": "Body Part",
@@ -109,7 +117,8 @@
       "targetMuscle": "Target Muscle",
       "clearFilters": "Clear Filters",
       "resetFilters": "Reset Filters",
-      "all": "All"
+      "all": "All",
+      "showFavoritesOnly": "Show favorites only"
     },
     "exercise": {
       "name": "Exercise Name",

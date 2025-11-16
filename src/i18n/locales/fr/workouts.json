@@ -35,19 +35,25 @@
   "exerciseSelector": {
     "title": "Ajouter un Exercice",
     "browse": "Parcourir les Exercices",
+    "favorites": "Favoris",
+    "myExercises": "Mes Exercices",
     "create": "Créer un Exercice Personnalisé",
     "customName": "Nom de l'Exercice",
     "customNamePlaceholder": "Entrez le nom de l'exercice",
     "customDescription": "Description",
     "customDescriptionPlaceholder": "Entrez la description de l'exercice (optionnel)",
     "createExercise": "Créer l'Exercice",
-    "creating": "Création..."
+    "creating": "Création...",
+    "noFavorites": "Aucun exercice favori pour le moment. Ajoutez des favoris en cliquant sur l'icône cœur des exercices.",
+    "noCustomExercises": "Aucun exercice personnalisé pour le moment. Créez votre premier exercice personnalisé dans l'onglet Créer."
   },
   "exerciseGrid": {
     "columns": "Colonnes",
     "columnsLabel": "Colonnes",
     "itemsPerPage": "Éléments Par Page",
     "showGif": "Afficher le GIF",
+    "addFavorite": "Ajouter aux favoris",
+    "removeFavorite": "Retirer des favoris",
     "addToWorkout": "Ajouter à l'Entraînement"
   },
   "history": {
@@ -102,6 +108,8 @@
     "noResults": "Aucun exercice trouvé",
     "loading": "Chargement des exercices...",
     "error": "Échec du chargement des exercices",
+    "showing": "Affichage de {{count}} sur {{total}} {{total, plural, one {exercice} other {exercices}}}",
+    "page": "Page {{current}} sur {{total}}",
     "filters": {
       "title": "Filtres",
       "bodyPart": "Partie du Corps",
@@ -109,7 +117,8 @@
       "targetMuscle": "Muscle Cible",
       "clearFilters": "Effacer les Filtres",
       "resetFilters": "Réinitialiser les Filtres",
-      "all": "Tous"
+      "all": "Tous",
+      "showFavoritesOnly": "Afficher uniquement les favoris"
     },
     "exercise": {
       "name": "Nom de l'Exercice",

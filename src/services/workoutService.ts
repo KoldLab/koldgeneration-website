@@ -4,6 +4,7 @@ import {
   getDoc,
   getDocs,
   addDoc,
+  setDoc,
   updateDoc,
   deleteDoc,
   query,
@@ -20,6 +21,7 @@ import type { Exercise, WorkoutRoutine, WorkoutLog } from '@/types/workout';
 const EXERCISES_COLLECTION = 'exercises';
 const ROUTINES_COLLECTION = 'routines';
 const LOGS_COLLECTION = 'workoutLogs';
+const FAVORITES_COLLECTION = 'exerciseFavorites';
 
 // Helper: Convert Firestore timestamp to Date
 function timestampToDate(timestamp: any): Date {
@@ -440,4 +442,150 @@ export async function updateWorkoutLog(
 export async function deleteWorkoutLog(logId: string): Promise<void> {
   const logRef = doc(db, LOGS_COLLECTION, logId);
   await deleteDoc(logRef);
+}
+
+// ==================== EXERCISE FAVORITES ====================
+
+/**
+ * Get user's favorite exercises
+ */
+export async function getFavoriteExercises(
+  userId: string
+): Promise<{ exerciseDBIds: string[]; customExerciseIds: string[]; exists: boolean }> {
+  const docRef = doc(db, FAVORITES_COLLECTION, userId);
+  const docSnap = await getDoc(docRef);
+  const exists = docSnap.exists();
+
+  if (exists) {
+    const data = docSnap.data();
+    return {
+      exerciseDBIds: data.exerciseDBIds || [],
+      customExerciseIds: data.customExerciseIds || [],
+      exists: true,
+    };
+  }
+
+  // Return empty arrays if document doesn't exist
+  return {
+    exerciseDBIds: [],
+    customExerciseIds: [],
+    exists: false,
+  };
+}
+
+/**
+ * Update user's favorite exercises
+ * @param documentExists - Optional flag to skip existence check if we already know
+ */
+export async function updateFavoriteExercises(
+  userId: string,
+  favorites: { exerciseDBIds: string[]; customExerciseIds: string[] },
+  documentExists?: boolean
+): Promise<void> {
+  const docRef = doc(db, FAVORITES_COLLECTION, userId);
+  
+  // Only check existence if we don't already know
+  let exists = documentExists;
+  if (exists === undefined) {
+    const docSnap = await getDoc(docRef);
+    exists = docSnap.exists();
+  }
+
+  if (exists) {
+    // Update existing document
+    await updateDoc(docRef, {
+      exerciseDBIds: favorites.exerciseDBIds,
+      customExerciseIds: favorites.customExerciseIds,
+      updatedAt: serverTimestamp(),
+    });
+  } else {
+    // Create new document with userId as document ID
+    await setDoc(docRef, {
+      userId,
+      exerciseDBIds: favorites.exerciseDBIds,
+      customExerciseIds: favorites.customExerciseIds,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+  }
+}
+
+/**
+ * Add favorite ExerciseDB exercise
+ */
+export async function addFavoriteExerciseDB(
+  userId: string,
+  exerciseDBId: string
+): Promise<void> {
+  const current = await getFavoriteExercises(userId);
+  if (!current.exerciseDBIds.includes(exerciseDBId)) {
+    // Pass the exists flag to skip redundant getDoc check
+    await updateFavoriteExercises(
+      userId,
+      {
+        exerciseDBIds: [...current.exerciseDBIds, exerciseDBId],
+        customExerciseIds: current.customExerciseIds,
+      },
+      current.exists
+    );
+  }
+}
+
+/**
+ * Remove favorite ExerciseDB exercise
+ */
+export async function removeFavoriteExerciseDB(
+  userId: string,
+  exerciseDBId: string
+): Promise<void> {
+  const current = await getFavoriteExercises(userId);
+  // Pass the exists flag to skip redundant getDoc check
+  await updateFavoriteExercises(
+    userId,
+    {
+      exerciseDBIds: current.exerciseDBIds.filter((id) => id !== exerciseDBId),
+      customExerciseIds: current.customExerciseIds,
+    },
+    current.exists
+  );
+}
+
+/**
+ * Add favorite custom exercise
+ */
+export async function addFavoriteCustomExercise(
+  userId: string,
+  exerciseId: string
+): Promise<void> {
+  const current = await getFavoriteExercises(userId);
+  if (!current.customExerciseIds.includes(exerciseId)) {
+    // Pass the exists flag to skip redundant getDoc check
+    await updateFavoriteExercises(
+      userId,
+      {
+        exerciseDBIds: current.exerciseDBIds,
+        customExerciseIds: [...current.customExerciseIds, exerciseId],
+      },
+      current.exists
+    );
+  }
+}
+
+/**
+ * Remove favorite custom exercise
+ */
+export async function removeFavoriteCustomExercise(
+  userId: string,
+  exerciseId: string
+): Promise<void> {
+  const current = await getFavoriteExercises(userId);
+  // Pass the exists flag to skip redundant getDoc check
+  await updateFavoriteExercises(
+    userId,
+    {
+      exerciseDBIds: current.exerciseDBIds,
+      customExerciseIds: current.customExerciseIds.filter((id) => id !== exerciseId),
+    },
+    current.exists
+  );
 }
