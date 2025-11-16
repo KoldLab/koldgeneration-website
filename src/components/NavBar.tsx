@@ -30,24 +30,30 @@ export function NavBar() {
   const isMobile = useIsMobile();
   const { user, loading, error } = useAuth();
   const { t } = useTranslation();
-  const routesConfig = getRoutesConfig(t).map((route) => {
-    // Filter workouts route if user is not authenticated
-    if (route.to === '/workouts' && !user) {
-      return null;
-    }
-    
-    // Filter tournament children if user is not authenticated
-    if (route.to === '/tournaments' && route.children) {
-      const filteredChildren = route.children.filter((child) => {
-        if (!user && (child.to === '/tournaments/create' || child.to === '/tournaments/my')) {
-          return false;
-        }
-        return true;
-      });
-      return { ...route, children: filteredChildren };
-    }
-    return route;
-  }).filter((route): route is RouteConfig => route !== null);
+  const routesConfig = getRoutesConfig(t)
+    .map((route) => {
+      // Filter workouts route if user is not authenticated
+      if (route.to === '/workouts' && !user) {
+        return null;
+      }
+
+      // Filter tournament children if user is not authenticated
+      if (route.to === '/tournaments' && route.children) {
+        const filteredChildren = route.children.filter((child) => {
+          if (
+            !user &&
+            (child.to === '/tournaments/create' ||
+              child.to === '/tournaments/my')
+          ) {
+            return false;
+          }
+          return true;
+        });
+        return { ...route, children: filteredChildren };
+      }
+      return route;
+    })
+    .filter((route): route is RouteConfig => route !== null);
 
   return (
     <div className="w-full flex items-center">
