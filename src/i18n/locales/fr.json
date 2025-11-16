@@ -14,62 +14,66 @@
     "yes": "Oui",
     "no": "Non",
     "previous": "Précédent",
-    "next": "Suivant"
+    "next": "Suivant",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "save": "Enregistrer",
+    "close": "Fermer"
   },
   "nav": {
     "home": "Accueil",
     "tools": "Outils"
   },
-    "routes": {
-      "home": {
-        "title": "Accueil",
-        "description": "Page d'accueil principale"
-      },
-      "tools": {
-        "title": "Outils",
-        "description": "Toutes les utilitaires et scripts personnels",
-        "timer": {
-          "title": "Minuteur",
-          "description": "Chronomètre et compte à rebours avec minutage précis"
-        }
-      },
-      "minecraftTools": {
-        "title": "Outils Minecraft",
-        "description": "Outils pour la création de contenu Minecraft",
-        "listGenerator": {
-          "title": "Générateur d'Image de Contenu de Coffre",
-          "description": "Créez des images personnalisables montrant le contenu de votre coffre Minecraft"
-        }
-      },
-      "workouts": {
-        "title": "Entraînements",
-        "description": "Suivez votre parcours fitness avec l'enregistrement d'entraînements et de routines",
-        "dashboard": {
-          "title": "Tableau de Bord",
-          "description": "Voir et gérer vos entraînements"
-        },
-        "exercises": {
-          "title": "Bibliothèque d'Exercices",
-          "description": "Parcourir et importer des exercices depuis la base de données"
-        }
-      },
-      "tournaments": {
-        "title": "Tournois",
-        "description": "Créer et gérer des tournois",
-        "create": {
-          "title": "Créer un Tournoi",
-          "description": "Créer un nouveau tournoi"
-        },
-        "my": {
-          "title": "Mes Tournois",
-          "description": "Voir tous les tournois auxquels vous avez participé"
-        },
-        "enter": {
-          "title": "Entrer un code de tournoi",
-          "description": "Accéder à la page de saisie d'un code pour rejoindre un tournoi"
-        }
+  "routes": {
+    "home": {
+      "title": "Accueil",
+      "description": "Page d'accueil principale"
+    },
+    "tools": {
+      "title": "Outils",
+      "description": "Toutes les utilitaires et scripts personnels",
+      "timer": {
+        "title": "Minuteur",
+        "description": "Chronomètre et compte à rebours avec minutage précis"
       }
     },
+    "minecraftTools": {
+      "title": "Outils Minecraft",
+      "description": "Outils pour la création de contenu Minecraft",
+      "listGenerator": {
+        "title": "Générateur d'Image de Contenu de Coffre",
+        "description": "Créez des images personnalisables montrant le contenu de votre coffre Minecraft"
+      }
+    },
+    "workouts": {
+      "title": "Entraînements",
+      "description": "Suivez votre parcours fitness avec l'enregistrement d'entraînements et de routines",
+      "dashboard": {
+        "title": "Tableau de Bord",
+        "description": "Voir et gérer vos entraînements"
+      },
+      "exercises": {
+        "title": "Bibliothèque d'Exercices",
+        "description": "Parcourir et importer des exercices depuis la base de données"
+      }
+    },
+    "tournaments": {
+      "title": "Tournois",
+      "description": "Créer et gérer des tournois",
+      "create": {
+        "title": "Créer un Tournoi",
+        "description": "Créer un nouveau tournoi"
+      },
+      "my": {
+        "title": "Mes Tournois",
+        "description": "Voir tous les tournois auxquels vous avez participé"
+      },
+      "enter": {
+        "title": "Entrer un code de tournoi",
+        "description": "Accéder à la page de saisie d'un code pour rejoindre un tournoi"
+      }
+    }
+  },
   "home": {
     "welcome": "Bienvenue sur le Hub Kold Generation",
     "description": "Explorez nos outils et fonctionnalités de tournois pour dynamiser vos événements communautaires.",
@@ -231,7 +235,7 @@
       "description": "Configurez un nouveau tournoi et invitez des participants à rejoindre",
       "name": "Nom du Tournoi",
       "namePlaceholder": "Entrez le nom du tournoi",
-      "description": "Description (optionnel)",
+      "descriptionLabel": "Description (optionnel)",
       "descriptionPlaceholder": "Entrez la description du tournoi",
       "type": "Type de Tournoi",
       "maxPlayers": "Nombre maximum de participants",
@@ -434,7 +438,21 @@
       "sets": "séries",
       "reps": "rép",
       "completed": "Terminé",
-      "notes": "Notes"
+      "notes": "Notes",
+      "editWorkout": "Modifier l'Entraînement",
+      "saveAsRoutine": "Enregistrer comme Routine",
+      "enterRoutineName": "Entrez le nom de la routine :",
+      "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet entraînement ?",
+      "deleted": "Entraînement supprimé avec succès",
+      "deleteError": "Échec de la suppression de l'entraînement",
+      "savedAsRoutine": "Entraînement enregistré comme routine avec succès",
+      "saveRoutineError": "Échec de l'enregistrement de la routine",
+      "updated": "Entraînement mis à jour avec succès",
+      "updateError": "Échec de la mise à jour de l'entraînement",
+      "startWorkout": "Démarrer l'Entraînement",
+      "details": "Détails",
+      "deleteFromHistory": "Supprimer de l'Historique",
+      "workoutLoaded": "Entraînement chargé. Prêt à enregistrer !"
     },
     "routines": {
       "comingSoon": "Fonctionnalité de routines d'entraînement à venir"

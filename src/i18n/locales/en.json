@@ -14,7 +14,11 @@
     "yes": "Yes",
     "no": "No",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "close": "Close"
   },
   "nav": {
     "home": "Home",
@@ -434,7 +438,21 @@
       "sets": "sets",
       "reps": "reps",
       "completed": "Done",
-      "notes": "Notes"
+      "notes": "Notes",
+      "editWorkout": "Edit Workout",
+      "saveAsRoutine": "Save as Routine",
+      "enterRoutineName": "Enter routine name:",
+      "confirmDelete": "Are you sure you want to delete this workout?",
+      "deleted": "Workout deleted successfully",
+      "deleteError": "Failed to delete workout",
+      "savedAsRoutine": "Workout saved as routine successfully",
+      "saveRoutineError": "Failed to save routine",
+      "updated": "Workout updated successfully",
+      "updateError": "Failed to update workout",
+      "startWorkout": "Start Workout",
+      "details": "Details",
+      "deleteFromHistory": "Delete from History",
+      "workoutLoaded": "Workout loaded. Ready to log!"
     },
     "routines": {
       "comingSoon": "Workout Routines feature coming soon"
