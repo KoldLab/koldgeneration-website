@@ -51,12 +51,15 @@ export async function createExercise(
   userId: string,
   exerciseData: Omit<Exercise, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
 ): Promise<Exercise> {
-  const exerciseRef = await addDoc(collection(db, EXERCISES_COLLECTION), {
+  // Remove undefined values before saving
+  const cleanedData = removeUndefined({
     ...exerciseData,
     userId,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
+  
+  const exerciseRef = await addDoc(collection(db, EXERCISES_COLLECTION), cleanedData);
 
   const docSnap = await getDoc(exerciseRef);
   if (!docSnap.exists()) {
