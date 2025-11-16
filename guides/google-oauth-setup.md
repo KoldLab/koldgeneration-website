@@ -22,7 +22,7 @@ If users are seeing "Access blocked: This app's request is invalid" or "This app
    - App name: Your app name
    - User support email: Your email
    - Developer contact information: Your email
-3. **Scopes**: 
+3. **Scopes**:
    - Click "Add or Remove Scopes"
    - Add these scopes:
      - `email`
@@ -116,30 +116,30 @@ If your app is in **Production** mode and you're requesting sensitive scopes:
 ```html
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>Privacy Policy</title>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Privacy Policy</h1>
     <p>Last updated: [Date]</p>
-    
+
     <h2>Data Collection</h2>
     <p>We use Google OAuth to authenticate users. We collect:</p>
     <ul>
-        <li>Email address</li>
-        <li>Name</li>
-        <li>Profile picture</li>
+      <li>Email address</li>
+      <li>Name</li>
+      <li>Profile picture</li>
     </ul>
-    
+
     <h2>Data Usage</h2>
     <p>This data is used solely for authentication and user identification.</p>
-    
+
     <h2>Data Storage</h2>
     <p>User data is stored securely in Firebase.</p>
-    
+
     <h2>Contact</h2>
     <p>For questions, contact: [Your Email]</p>
-</body>
+  </body>
 </html>
 ```
 
@@ -153,18 +153,22 @@ If your app is in **Production** mode and you're requesting sensitive scopes:
 ## Troubleshooting
 
 ### Error: "redirect_uri_mismatch"
+
 - Check **Authorized redirect URIs** in OAuth Client ID settings
 - Ensure Firebase auth handler URLs are included
 
 ### Error: "Access blocked: This app isn't verified"
+
 - App is in Production mode but not verified
 - Either submit for verification OR switch to Testing mode and add test users
 
 ### Error: "Invalid client"
+
 - Check OAuth Client ID configuration
 - Verify Firebase project settings match Google Cloud project
 
 ### Users can't sign in
+
 - Check if user is added as a test user (if app is in Testing mode)
 - Verify authorized domains include the domain they're accessing from
 - Check browser console for specific error messages
@@ -195,4 +199,3 @@ If you just need to test quickly:
 - [Google OAuth Documentation](https://developers.google.com/identity/protocols/oauth2)
 - [Firebase Authentication Setup](https://firebase.google.com/docs/auth)
 - [OAuth Consent Screen Guide](https://support.google.com/cloud/answer/10311615)
-
