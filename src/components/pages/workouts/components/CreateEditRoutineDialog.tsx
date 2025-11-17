@@ -83,7 +83,7 @@ export default function CreateEditRoutineDialog({
       sets: [],
     };
     setExercises([...exercises, entryWithoutSets]);
-    setIsExerciseSelectorOpen(false);
+    // Keep dialog open so user can add multiple exercises
   };
 
   const handleRemoveExercise = (index: number) => {
@@ -111,7 +111,7 @@ export default function CreateEditRoutineDialog({
           description: description.trim() || undefined,
           exercises,
         });
-        
+
         // Reload the routine to get updated data
         const updated = await getRoutineById(routine.id);
         if (updated) {
@@ -175,7 +175,7 @@ export default function CreateEditRoutineDialog({
             {/* Description */}
             <div className="space-y-2">
               <Label htmlFor="routine-description">
-                {t('workouts.routines.descriptionLabel')} (optional)
+                {t('workouts.routines.descriptionLabel')} {t('common.optional')}
               </Label>
               <Textarea
                 id="routine-description"
@@ -253,8 +253,9 @@ export default function CreateEditRoutineDialog({
         onOpenChange={setIsExerciseSelectorOpen}
         onSelectExercise={handleAddExercise}
         userId={user?.uid || ''}
+        closeOnSelect={false}
+        existingExercises={exercises}
       />
     </>
   );
 }
-

@@ -48,6 +48,8 @@ interface ExerciseSelectorDialogProps {
   onOpenChange: (open: boolean) => void;
   onSelectExercise: (entry: ExerciseEntry) => void;
   userId: string;
+  closeOnSelect?: boolean; // If true, closes dialog after selecting an exercise (default: true)
+  existingExercises?: ExerciseEntry[]; // Exercises already added (for showing indicators)
 }
 
 export default function ExerciseSelectorDialog({
@@ -55,6 +57,8 @@ export default function ExerciseSelectorDialog({
   onOpenChange,
   onSelectExercise,
   userId,
+  closeOnSelect = true,
+  existingExercises = [],
 }: ExerciseSelectorDialogProps) {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -253,7 +257,9 @@ export default function ExerciseSelectorDialog({
 
   const handleSelectExercise = (entry: ExerciseEntry) => {
     onSelectExercise(entry);
-    onOpenChange(false);
+    if (closeOnSelect) {
+      onOpenChange(false);
+    }
   };
 
   const handleSelectCustomExercise = (exercise: Exercise) => {
@@ -264,7 +270,9 @@ export default function ExerciseSelectorDialog({
       notes: '',
     };
     onSelectExercise(entry);
-    onOpenChange(false);
+    if (closeOnSelect) {
+      onOpenChange(false);
+    }
   };
 
   const handleCreateCustom = async () => {
@@ -287,7 +295,9 @@ export default function ExerciseSelectorDialog({
         notes: '',
       };
       onSelectExercise(entry);
-      onOpenChange(false);
+      if (closeOnSelect) {
+        onOpenChange(false);
+      }
 
       // Reset form and reload custom exercises
       setCustomName('');
@@ -378,6 +388,7 @@ export default function ExerciseSelectorDialog({
                         setDisplayOptions(options);
                         setCurrentPage(1); // Reset to page 1 when options change
                       }}
+                      existingExercises={existingExercises}
                     />
                   </div>
                 </TabsContent>
@@ -406,6 +417,7 @@ export default function ExerciseSelectorDialog({
                         columns={columns}
                         itemsPerPage={itemsPerPage}
                         showGif={showGif}
+                        existingExercises={existingExercises}
                         currentPage={1}
                         totalPages={1}
                         onPageChange={() => {}}
@@ -514,7 +526,9 @@ export default function ExerciseSelectorDialog({
 
         <DialogFooter className="p-3 sm:px-6 sm:pb-2 sm:justify-end">
           <DialogClose asChild>
-            <Button variant="outline">{t('common.cancel')}</Button>
+            <Button variant="outline">
+              {closeOnSelect ? t('common.cancel') : t('common.close')}
+            </Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

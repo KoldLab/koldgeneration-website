@@ -58,8 +58,11 @@ export async function createExercise(
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
-  
-  const exerciseRef = await addDoc(collection(db, EXERCISES_COLLECTION), cleanedData);
+
+  const exerciseRef = await addDoc(
+    collection(db, EXERCISES_COLLECTION),
+    cleanedData
+  );
 
   const docSnap = await getDoc(exerciseRef);
   if (!docSnap.exists()) {
@@ -181,12 +184,18 @@ export async function createRoutine(
   userId: string,
   routineData: Omit<WorkoutRoutine, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
 ): Promise<WorkoutRoutine> {
-  const routineRef = await addDoc(collection(db, ROUTINES_COLLECTION), {
+  // Remove undefined values before saving
+  const cleanedData = removeUndefined({
     ...routineData,
     userId,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
+
+  const routineRef = await addDoc(
+    collection(db, ROUTINES_COLLECTION),
+    cleanedData
+  );
 
   const docSnap = await getDoc(routineRef);
   if (!docSnap.exists()) {
@@ -269,11 +278,14 @@ export async function updateRoutine(
     Omit<WorkoutRoutine, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
   >
 ): Promise<void> {
-  const routineRef = doc(db, ROUTINES_COLLECTION, routineId);
-  await updateDoc(routineRef, {
+  // Remove undefined values before saving
+  const cleanedUpdates = removeUndefined({
     ...updates,
     updatedAt: serverTimestamp(),
   });
+
+  const routineRef = doc(db, ROUTINES_COLLECTION, routineId);
+  await updateDoc(routineRef, cleanedUpdates);
 }
 
 /**
@@ -452,9 +464,11 @@ export async function deleteWorkoutLog(logId: string): Promise<void> {
 /**
  * Get user's favorite exercises
  */
-export async function getFavoriteExercises(
-  userId: string
-): Promise<{ exerciseDBIds: string[]; customExerciseIds: string[]; exists: boolean }> {
+export async function getFavoriteExercises(userId: string): Promise<{
+  exerciseDBIds: string[];
+  customExerciseIds: string[];
+  exists: boolean;
+}> {
   const docRef = doc(db, FAVORITES_COLLECTION, userId);
   const docSnap = await getDoc(docRef);
   const exists = docSnap.exists();
@@ -486,7 +500,7 @@ export async function updateFavoriteExercises(
   documentExists?: boolean
 ): Promise<void> {
   const docRef = doc(db, FAVORITES_COLLECTION, userId);
-  
+
   // Only check existence if we don't already know
   let exists = documentExists;
   if (exists === undefined) {
@@ -587,7 +601,9 @@ export async function removeFavoriteCustomExercise(
     userId,
     {
       exerciseDBIds: current.exerciseDBIds,
-      customExerciseIds: current.customExerciseIds.filter((id) => id !== exerciseId),
+      customExerciseIds: current.customExerciseIds.filter(
+        (id) => id !== exerciseId
+      ),
     },
     current.exists
   );

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Dialog,
@@ -7,17 +7,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Dumbbell,
-  Download,
-  Check,
-  Loader2,
-  PersonStanding,
-} from 'lucide-react';
+import { Dumbbell, PersonStanding } from 'lucide-react';
 import type { ExerciseDBExercise } from '@/types/workout';
 import { useExerciseCacheStore } from '@/stores/exerciseCacheStore';
 
@@ -32,7 +25,7 @@ interface ExerciseDetailsDialogProps {
   exercise: ExerciseDBExercise;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  userId: string;
+  userId?: string;
 }
 
 export default function ExerciseDetailsDialog({
@@ -43,8 +36,6 @@ export default function ExerciseDetailsDialog({
 }: ExerciseDetailsDialogProps) {
   const { t } = useTranslation();
   const { setExercise: cacheExercise } = useExerciseCacheStore();
-  const [importing, setImporting] = useState(false);
-  const [imported, setImported] = useState(false);
 
   // Cache the exercise when dialog opens
   useEffect(() => {
@@ -52,29 +43,6 @@ export default function ExerciseDetailsDialog({
       cacheExercise(exercise);
     }
   }, [open, exercise, cacheExercise]);
-
-  const handleImport = async () => {
-    if (!userId) {
-      // TODO: Show login required message
-      return;
-    }
-
-    setImporting(true);
-    try {
-      // TODO: Implement import to Firestore
-      // This will be implemented when we create workoutService.ts
-      await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate API call
-      setImported(true);
-      setTimeout(() => {
-        onOpenChange(false);
-        setImported(false);
-      }, 1500);
-    } catch (error) {
-      console.error('Failed to import exercise:', error);
-    } finally {
-      setImporting(false);
-    }
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -306,34 +274,6 @@ export default function ExerciseDetailsDialog({
             )}
           </div>
         </ScrollArea>
-
-        {/* Actions */}
-        {userId && (
-          <div className="flex gap-3 p-4 sm:p-6 pt-4 border-t shrink-0">
-            <Button
-              onClick={handleImport}
-              disabled={importing || imported}
-              className="flex-1 w-full"
-            >
-              {importing ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Importing...
-                </>
-              ) : imported ? (
-                <>
-                  <Check className="h-4 w-4 mr-2" />
-                  {t('workouts.exerciseLibrary.exercise.imported')}
-                </>
-              ) : (
-                <>
-                  <Download className="h-4 w-4 mr-2" />
-                  {t('workouts.exerciseLibrary.exercise.import')}
-                </>
-              )}
-            </Button>
-          </div>
-        )}
       </DialogContent>
     </Dialog>
   );

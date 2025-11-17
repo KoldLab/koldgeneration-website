@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, Dumbbell, Info, Plus, Heart } from 'lucide-react';
+import { Loader2, Dumbbell, Info, Plus, Heart, Check } from 'lucide-react';
 import type { ExerciseDBExercise, ExerciseEntry } from '@/types/workout';
 import { useExerciseCacheStore } from '@/stores/exerciseCacheStore';
 import { useExerciseFavoritesStore } from '@/stores/exerciseFavoritesStore';
@@ -48,6 +48,8 @@ interface ExerciseGridProps {
   showResultsCount?: boolean;
   filteredCount?: number;
   totalCount?: number;
+  // Existing exercises (for showing indicators)
+  existingExercises?: ExerciseEntry[];
 }
 
 // Helper function to safely extract string value
@@ -74,6 +76,7 @@ export default function ExerciseGrid({
   showResultsCount = false,
   filteredCount,
   totalCount,
+  existingExercises = [],
 }: ExerciseGridProps) {
   const { t } = useTranslation();
   const [columns, setColumns] = useState(initialColumns);
@@ -253,6 +256,7 @@ export default function ExerciseGrid({
             showGif={showGif}
             onViewDetails={onViewDetails}
             onSelectExercise={onSelectExercise}
+            existingExercises={existingExercises}
           />
         ))}
       </div>
@@ -292,12 +296,14 @@ function ExerciseCard({
   showGif,
   onViewDetails,
   onSelectExercise,
+  existingExercises = [],
 }: {
   exercise: ExerciseDBExercise;
   mode: 'view' | 'select';
   showGif: boolean;
   onViewDetails?: (exercise: ExerciseDBExercise) => void;
   onSelectExercise?: (entry: ExerciseEntry) => void;
+  existingExercises?: ExerciseEntry[];
 }) {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -307,6 +313,19 @@ function ExerciseCard({
     useExerciseFavoritesStore();
 
   const isFavorite = isFavoriteExerciseDB(exercise.exerciseId);
+
+  // Find all indices where this exercise appears in the routine
+  const routineIndices = existingExercises
+    .map((existing, index) => {
+      const matches =
+        existing.exerciseDBId === exercise.exerciseId ||
+        (existing.exerciseName.toLowerCase() === exercise.name.toLowerCase() &&
+          !existing.exerciseId); // Match by name if it's an ExerciseDB exercise
+      return matches ? index + 1 : null; // +1 to show 1-based index
+    })
+    .filter((index): index is number => index !== null);
+
+  const isInRoutine = routineIndices.length > 0;
 
   const handleToggleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -353,7 +372,9 @@ function ExerciseCard({
 
   return (
     <Card
-      className={`${showGif ? 'pt-0' : ''} hover:shadow-lg transition-shadow overflow-hidden relative`}
+      className={`${showGif ? 'pt-0' : ''} hover:shadow-lg transition-shadow overflow-hidden relative ${
+        isInRoutine ? 'ring-2 ring-primary' : ''
+      }`}
     >
       {/* Favorite Button - Top Right */}
       <button
@@ -373,6 +394,23 @@ function ExerciseCard({
           } transition-colors`}
         />
       </button>
+
+      {/* In Routine Badge - Top Left */}
+      {isInRoutine && (
+        <div
+          className="absolute top-2 left-2 z-10 flex items-center gap-1.5 px-2 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium shadow-sm"
+          title={t('workouts.exerciseGrid.inRoutineTooltip', {
+            indices: routineIndices.join(', '),
+            count: routineIndices.length,
+          })}
+        >
+          <Check className="h-3 w-3" />
+          <span>{t('workouts.exerciseGrid.inRoutine')}</span>
+          {routineIndices.length > 0 && (
+            <span className="opacity-80">({routineIndices.join(', ')})</span>
+          )}
+        </div>
+      )}
 
       {/* Exercise GIF/Image/Placeholder */}
       {showGif && (

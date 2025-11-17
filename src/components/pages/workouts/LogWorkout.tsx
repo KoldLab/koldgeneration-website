@@ -241,11 +241,12 @@ export default function LogWorkout() {
       return obj.map(removeUndefinedValues);
     }
     if (typeof obj === 'object') {
-      // For objects, remove properties with undefined values
+      // For objects, remove properties with undefined values or empty strings
       const cleaned: any = {};
       for (const key in obj) {
         const value = removeUndefinedValues(obj[key]);
-        if (value !== undefined) {
+        // Remove undefined values and empty strings (for optional fields like notes)
+        if (value !== undefined && value !== '') {
           cleaned[key] = value;
         }
       }
@@ -435,7 +436,7 @@ export default function LogWorkout() {
         {routines.length > 0 && (
           <div className="space-y-2">
             <Label htmlFor="routine-select">
-              {t('workouts.logWorkout.startFromRoutine')} (optional)
+              {t('workouts.logWorkout.startFromRoutine')} {t('common.optional')}
             </Label>
             <Select
               value={selectedRoutineId}
@@ -465,7 +466,7 @@ export default function LogWorkout() {
 
         <div className="space-y-2">
           <Label htmlFor="workout-notes">
-            {t('workouts.logWorkout.overallNotes')} (optional)
+            {t('workouts.logWorkout.overallNotes')} {t('common.optional')}
           </Label>
           <Textarea
             id="workout-notes"

@@ -13,6 +13,7 @@
     "date": "Date",
     "duration": "Durée",
     "overallNotes": "Notes Générales de l'Entraînement",
+    "exerciseNotes": "Notes de l'exercice",
     "notesPlaceholder": "Ajoutez des notes sur votre entraînement...",
     "startFromRoutine": "Commencer depuis une Routine",
     "selectRoutine": "Sélectionner une routine",
@@ -55,7 +56,9 @@
     "showGif": "Afficher le GIF",
     "addFavorite": "Ajouter aux favoris",
     "removeFavorite": "Retirer des favoris",
-    "addToWorkout": "Ajouter à l'Entraînement"
+    "addToWorkout": "Ajouter à l'Entraînement",
+    "inRoutine": "Dans la routine",
+    "inRoutineTooltip": "Cet exercice apparaît {{count}} fois dans la routine à la position : {{indices}}"
   },
   "history": {
     "title": "Historique des Entraînements",
