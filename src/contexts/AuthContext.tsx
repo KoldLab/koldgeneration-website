@@ -2,11 +2,14 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import {
   onAuthStateChanged,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider,
   signOut as firebaseSignOut,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import type { User } from 'firebase/auth';
+import { isInAppBrowser } from '@/utils/browserDetection';
 
 interface AuthContextType {
   user: User | null;
@@ -25,6 +28,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     try {
+      // Check for redirect result (when returning from OAuth redirect)
+      getRedirectResult(auth)
+        .then((result) => {
+          if (result) {
+            // User signed in via redirect
+            setUser(result.user);
+            setError(null);
+          }
+        })
+        .catch((err) => {
+          console.error('Redirect result error:', err);
+          // Don't set error for redirect - user might have cancelled
+        });
+
       const unsubscribe = onAuthStateChanged(
         auth,
         (user) => {
@@ -55,10 +72,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       provider.setCustomParameters({
         prompt: 'select_account',
       });
-      await signInWithPopup(auth, provider);
+
+      // Use redirect for in-app browsers (WebView) that block popups
+      // Use popup for regular browsers (better UX)
+      if (isInAppBrowser()) {
+        // Redirect will navigate away, so we don't await it
+        await signInWithRedirect(auth, provider);
+        // Note: User will be redirected to Google, then back to our app
+        // The redirect result will be handled in useEffect via getRedirectResult
+      } else {
+        await signInWithPopup(auth, provider);
+      }
     } catch (err: any) {
       console.error('Sign in error:', err);
-      setError(err.message || 'Failed to sign in');
+      // Don't set error for popup_closed_by_user - it's user cancellation
+      if (err.code !== 'auth/popup-closed-by-user') {
+        setError(err.message || 'Failed to sign in');
+      }
       throw err;
     }
   };
