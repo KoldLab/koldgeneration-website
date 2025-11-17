@@ -539,7 +539,6 @@ export default function ExerciseSelectorDialog({
           exercise={selectedExercise}
           open={!!selectedExercise}
           onOpenChange={(open) => !open && setSelectedExercise(null)}
-          userId={userId}
         />
       )}
     </Dialog>

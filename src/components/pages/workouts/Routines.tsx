@@ -483,7 +483,6 @@ export default function Routines() {
                   setExerciseDBDetails(null);
                 }
               }}
-              userId={user.uid}
             />
           ) : (
             <Dialog

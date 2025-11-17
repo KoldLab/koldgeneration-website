@@ -1060,7 +1060,6 @@ export default function WorkoutHistory() {
                   setExerciseDBDetails(null);
                 }
               }}
-              userId={user.uid}
             />
           ) : (
             <Dialog

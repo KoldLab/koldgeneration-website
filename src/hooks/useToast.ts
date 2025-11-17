@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { toast as sonnerToast, type ToastOptions } from 'sonner';
+import { toast as sonnerToast, type ExternalToast } from 'sonner';
 
 /**
  * Custom hook for consistent toast notifications
@@ -13,7 +13,7 @@ export function useToast() {
    */
   const success = (
     message: string,
-    options?: Omit<ToastOptions, 'description'>
+    options?: Omit<ExternalToast, 'description'>
   ) => {
     return sonnerToast.success(message, {
       duration: 4000,
@@ -26,7 +26,7 @@ export function useToast() {
    */
   const error = (
     message: string,
-    options?: Omit<ToastOptions, 'description'>
+    options?: Omit<ExternalToast, 'description'>
   ) => {
     return sonnerToast.error(message, {
       duration: 5000, // Errors stay longer
@@ -39,7 +39,7 @@ export function useToast() {
    */
   const info = (
     message: string,
-    options?: Omit<ToastOptions, 'description'>
+    options?: Omit<ExternalToast, 'description'>
   ) => {
     return sonnerToast.info(message, {
       duration: 4000,
@@ -52,7 +52,7 @@ export function useToast() {
    */
   const warning = (
     message: string,
-    options?: Omit<ToastOptions, 'description'>
+    options?: Omit<ExternalToast, 'description'>
   ) => {
     return sonnerToast.warning(message, {
       duration: 4000,
@@ -67,7 +67,7 @@ export function useToast() {
     message: string,
     undoAction: () => void,
     undoLabel?: string,
-    options?: Omit<ToastOptions, 'description' | 'action'>
+    options?: Omit<ExternalToast, 'description' | 'action'>
   ) => {
     return sonnerToast.success(message, {
       duration: 5000, // Longer duration for undo
@@ -84,7 +84,7 @@ export function useToast() {
    */
   const loading = (
     message: string,
-    options?: Omit<ToastOptions, 'description'>
+    options?: Omit<ExternalToast, 'description'>
   ) => {
     return sonnerToast.loading(message, {
       duration: Infinity, // Loading toasts don't auto-dismiss
@@ -102,7 +102,7 @@ export function useToast() {
       success: string | ((data: T) => string);
       error: string | ((error: any) => string);
     },
-    options?: Omit<ToastOptions, 'description'>
+    options?: Omit<ExternalToast, 'description'>
   ) => {
     return sonnerToast.promise(promise, {
       loading: messages.loading,

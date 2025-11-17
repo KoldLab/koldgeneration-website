@@ -25,14 +25,12 @@ interface ExerciseDetailsDialogProps {
   exercise: ExerciseDBExercise;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  userId?: string;
 }
 
 export default function ExerciseDetailsDialog({
   exercise,
   open,
   onOpenChange,
-  userId,
 }: ExerciseDetailsDialogProps) {
   const { t } = useTranslation();
   const { setExercise: cacheExercise } = useExerciseCacheStore();

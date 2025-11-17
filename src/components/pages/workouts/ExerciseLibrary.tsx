@@ -230,7 +230,6 @@ export default function ExerciseLibrary() {
           exercise={selectedExercise}
           open={!!selectedExercise}
           onOpenChange={(open) => !open && setSelectedExercise(null)}
-          userId={user?.uid || ''}
         />
       )}
     </div>
