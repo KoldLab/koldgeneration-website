@@ -17,6 +17,8 @@
   "edit": "Modifier",
   "delete": "Supprimer",
   "save": "Enregistrer",
-  "close": "Fermer"
+  "close": "Fermer",
+  "undo": "Annuler",
+  "optional": "(optionnel)"
 }
 

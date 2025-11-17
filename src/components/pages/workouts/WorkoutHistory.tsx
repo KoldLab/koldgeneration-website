@@ -30,6 +30,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
@@ -99,6 +109,8 @@ export default function WorkoutHistory() {
     React.useState(false);
   const [routineNameInput, setRoutineNameInput] = React.useState('');
   const [savingRoutine, setSavingRoutine] = React.useState(false);
+  const [workoutToDelete, setWorkoutToDelete] =
+    React.useState<WorkoutLog | null>(null);
   const { getExercise: getCachedExercise, setExercise: cacheExercise } =
     useExerciseCacheStore();
 
@@ -236,14 +248,19 @@ export default function WorkoutHistory() {
     }
   };
 
-  const handleDelete = async (workoutId: string) => {
-    if (!confirm(t('workouts.history.confirmDelete'))) return;
+  const handleDelete = (workout: WorkoutLog) => {
+    setWorkoutToDelete(workout);
+    setIsActionDialogOpen(false);
+  };
+
+  const confirmDelete = async () => {
+    if (!workoutToDelete) return;
 
     try {
-      await deleteWorkoutLog(workoutId);
-      setWorkouts((prev) => prev.filter((w) => w.id !== workoutId));
+      await deleteWorkoutLog(workoutToDelete.id);
+      setWorkouts((prev) => prev.filter((w) => w.id !== workoutToDelete.id));
       toast.success(t('workouts.history.deleted'));
-      setIsActionDialogOpen(false);
+      setWorkoutToDelete(null);
     } catch (err: any) {
       toast.error(err.message || t('workouts.history.deleteError'));
     }
@@ -914,9 +931,7 @@ export default function WorkoutHistory() {
             <Button
               variant="outline"
               className="w-full justify-start text-destructive hover:text-destructive"
-              onClick={() =>
-                selectedWorkout && handleDelete(selectedWorkout.id)
-              }
+              onClick={() => selectedWorkout && handleDelete(selectedWorkout)}
             >
               <Trash2 className="h-4 w-4 mr-2" />
               {t('workouts.history.deleteFromHistory')}
@@ -1045,7 +1060,6 @@ export default function WorkoutHistory() {
                   setExerciseDBDetails(null);
                 }
               }}
-              userId={user.uid}
             />
           ) : (
             <Dialog
@@ -1258,6 +1272,37 @@ export default function WorkoutHistory() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        open={!!workoutToDelete}
+        onOpenChange={(open) => !open && setWorkoutToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t('workouts.history.confirmDelete')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {workoutToDelete &&
+                t('workouts.history.confirmDeleteDescription', {
+                  date: format(workoutToDelete.date, 'PP', {
+                    locale: i18n.language === 'fr' ? fr : enUS,
+                  }),
+                })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t('common.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

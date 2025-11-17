@@ -1,0 +1,62 @@
+# Build Verification Rules
+
+## Core Requirements
+
+1. **Always Verify Build Before Completing**: When making code changes, especially those that affect TypeScript types, imports, or component props, you MUST verify that the build passes before marking tasks as complete.
+
+2. **Run TypeScript Build Check**: After making changes that could affect the build:
+   ```bash
+   npm run build
+   ```
+   This will catch:
+   - TypeScript errors (unused variables, type mismatches, missing imports)
+   - Missing module exports
+   - Import/export errors
+   - Component prop mismatches
+
+3. **Fix Build Errors Immediately**: If the build fails:
+   - Read the error messages carefully
+   - Fix all TypeScript errors
+   - Fix all import/export issues
+   - Remove unused variables/imports
+   - Verify the build passes again before completing
+
+4. **Common Build Errors to Watch For**:
+   - `TS6133`: Unused variable/parameter - remove or prefix with `_`
+   - `TS2322`: Type mismatch - fix prop types or component interfaces
+   - `TS2459`: Module export not found - use correct import/export
+   - `Cannot find module`: Missing import or incorrect path
+   - `Property does not exist`: Component prop mismatch
+
+5. **When to Run Build Check**:
+   - After removing props from components
+   - After changing TypeScript types
+   - After modifying imports/exports
+   - After refactoring component interfaces
+   - Before completing any task that touches multiple files
+
+## Implementation Pattern
+
+When completing a task:
+1. Make all code changes
+2. Run `npm run build` to verify
+3. Fix any errors found
+4. Re-run build to confirm
+5. Only then mark task as complete
+
+## Example Workflow
+
+```bash
+# After making changes
+npm run build
+
+# If errors found, fix them:
+# - Remove unused variables
+# - Fix type mismatches
+# - Correct imports/exports
+
+# Verify again
+npm run build
+
+# Only proceed when build passes
+```

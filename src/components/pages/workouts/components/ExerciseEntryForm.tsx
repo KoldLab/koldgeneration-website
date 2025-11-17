@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -29,6 +30,7 @@ export default function ExerciseEntryForm({
   isCollapsed = false,
   onCollapsedChange,
 }: ExerciseEntryFormProps) {
+  const { t } = useTranslation();
   const [notes, setNotes] = useState(entry.notes || '');
 
   const handleAddSet = () => {
@@ -95,7 +97,9 @@ export default function ExerciseEntryForm({
       <Card className="p-4">
         <CollapsibleTrigger asChild>
           <div className="flex items-center justify-between w-full cursor-pointer gap-2">
-            <h3 className="scroll-m-20 text-xl sm:text-2xl font-semibold tracking-tight break-words flex-1 min-w-0">{entry.exerciseName}</h3>
+            <h3 className="scroll-m-20 text-xl sm:text-2xl font-semibold tracking-tight break-words flex-1 min-w-0">
+              {entry.exerciseName}
+            </h3>
             <div className="flex items-center gap-2 shrink-0">
               {onCollapsedChange && (
                 <Button
@@ -173,7 +177,7 @@ export default function ExerciseEntryForm({
 
           <div className="space-y-2">
             <Label htmlFor={`notes-${entry.exerciseId}`} className="text-sm">
-              Exercise Notes (optional)
+              {t('workouts.logWorkout.exerciseNotes')} {t('common.optional')}
             </Label>
             <Textarea
               id={`notes-${entry.exerciseId}`}

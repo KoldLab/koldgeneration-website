@@ -25,6 +25,10 @@
         "title": "Entrer un code de tournoi",
         "description": "Accédez à la page de saisie pour entrer un code et rejoindre le bracket."
       }
+    },
+    "workouts": {
+      "title": "Entraînements",
+      "description": "Suivez votre parcours de remise en forme avec l'enregistrement d'entraînements, les routines et la bibliothèque d'exercices."
     }
   },
   "cardBadge": {

@@ -10,6 +10,7 @@ import {
   Lock,
   ArrowRight,
   KeyRound,
+  Dumbbell,
 } from 'lucide-react';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 
@@ -33,6 +34,14 @@ export default function Home() {
       icon: <Timer className="h-12 w-12 text-white drop-shadow-lg" />,
       to: '/tools/timer',
       gradient: 'from-emerald-500 via-teal-500 to-sky-500',
+    },
+    {
+      title: t('home.cards.workouts.title'),
+      description: t('home.cards.workouts.description'),
+      icon: <Dumbbell className="h-12 w-12 text-white drop-shadow-lg" />,
+      to: '/workouts',
+      gradient: 'from-red-500 via-rose-500 to-pink-500',
+      requireAuth: true,
     },
     {
       title: t('home.cards.tools.minecraftListGenerator.title'),
@@ -106,7 +115,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                {card.requireAuth && (
+                {card.requireAuth && !user && (
                   <span className="absolute right-6 top-6 inline-flex items-center gap-1 rounded-full bg-background/85 px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur">
                     <Lock className="h-3.5 w-3.5" />
                     {t('home.cardBadge.authRequired')}

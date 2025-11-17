@@ -1,0 +1,190 @@
+# User Feedback Rules
+
+## Core Principle
+
+**Always provide clear, immediate feedback to users for every action they take.** Users should never wonder if their action was successful or if something went wrong.
+
+## Feedback Methods
+
+### 1. Sonner (Toast Notifications)
+
+Use **Sonner toasts** for:
+
+- ✅ **Success feedback**: When actions complete successfully
+  - "Workout saved successfully!"
+  - "Exercise added to routine"
+  - "Settings updated"
+
+- ✅ **Error feedback**: When actions fail
+  - "Failed to save workout. Please try again."
+  - "Network error. Please check your connection."
+
+- ✅ **Info/Warning feedback**: Non-critical information
+  - "Workout loaded. Ready to log!"
+  - "Some exercises could not be loaded"
+
+- ✅ **Reversible actions with undo**: Actions that can be undone
+  - "Exercise removed" (with undo button)
+  - "Item deleted" (with undo button)
+
+- ✅ **Simple confirmations**: Non-destructive actions that don't require input
+  - "Copied to clipboard"
+  - "Exercise favorited"
+
+### 2. AlertDialog (Blocking Dialogs)
+
+Use **AlertDialog** ONLY for:
+
+- ⚠️ **Destructive actions that cannot be undone**
+  - Deleting workouts, routines, or data
+  - Clearing all data
+  - Permanent account actions
+
+- ⚠️ **Critical operations with significant consequences**
+  - Actions that affect multiple users
+  - Financial transactions
+  - Data export/deletion
+
+### 3. Dialog (Input Dialogs)
+
+Use **Dialog** for:
+
+- 📝 **Actions requiring user input**
+  - Naming routines
+  - Entering confirmation text
+  - Form submissions with validation
+
+## Implementation Guidelines
+
+### Toast Usage Pattern
+
+**Use the `useToast` hook for consistent styling and i18n integration:**
+
+```tsx
+import { useToast } from '@/hooks/useToast';
+
+const { success, error, successWithUndo } = useToast();
+
+// Success
+success(t('workouts.logWorkout.saveSuccess'));
+
+// Error
+error(t('workouts.logWorkout.saveError'));
+
+// With undo (if applicable)
+successWithUndo(
+  t('workouts.history.deleted'),
+  () => handleUndo(),
+  t('common.undo')
+);
+
+// Promise-based (handles loading, success, error automatically)
+promise(
+  saveWorkout(),
+  {
+    loading: t('workouts.saving'),
+    success: t('workouts.saveSuccess'),
+    error: t('workouts.saveError'),
+  }
+);
+```
+
+**Legacy pattern (still works, but prefer hook):**
+```tsx
+import { toast } from 'sonner';
+toast.success(t('workouts.logWorkout.saveSuccess'));
+```
+
+### AlertDialog Usage Pattern
+
+```tsx
+// Only for destructive actions
+<AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>{t('confirmDelete')}</AlertDialogTitle>
+      <AlertDialogDescription>
+        {t('confirmDeleteDescription')}
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+      <AlertDialogAction onClick={handleDelete}>
+        {t('common.delete')}
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+```
+
+## When to Use Each
+
+| Action Type | Feedback Method | Example |
+|------------|----------------|---------|
+| Save/Create | Toast (success) | "Workout saved!" |
+| Delete | AlertDialog + Toast | Dialog to confirm, toast on success |
+| Update | Toast (success) | "Routine updated" |
+| Error | Toast (error) | "Failed to save" |
+| Reversible delete | Toast with undo | "Exercise removed" (undo) |
+| Copy/Share | Toast (success) | "Copied to clipboard" |
+| Load/Import | Toast (info) | "Workout loaded" |
+| Validation error | Toast (error) | "Please fill all required fields" |
+
+## Best Practices
+
+1. **Always show feedback**: Every user action should have a response
+2. **Be specific**: "Workout 'Leg Day' saved" is better than "Saved"
+3. **Use appropriate severity**: Success = green, Error = red, Info = blue
+4. **Provide context**: Include relevant details (item name, count, etc.)
+5. **Consider undo**: For reversible actions, provide an undo option
+6. **Don't overuse dialogs**: Most confirmations can be toasts
+7. **Loading states**: Show loading indicators during async operations
+8. **Error recovery**: Suggest next steps in error messages
+
+## Examples
+
+### ✅ Good: Toast for non-destructive action
+```tsx
+const handleAddExercise = () => {
+  addExercise(exercise);
+  toast.success(t('workouts.exerciseAdded'));
+};
+```
+
+### ✅ Good: AlertDialog for destructive action
+```tsx
+const handleDelete = () => {
+  setShowDeleteDialog(true);
+};
+
+const confirmDelete = async () => {
+  await deleteWorkout(id);
+  toast.success(t('workouts.deleted'));
+  setShowDeleteDialog(false);
+};
+```
+
+### ❌ Bad: Dialog for simple confirmation
+```tsx
+// Don't use dialog for this
+const handleSave = () => {
+  if (confirm('Save workout?')) {
+    saveWorkout();
+  }
+};
+```
+
+### ✅ Good: Toast for simple confirmation
+```tsx
+const handleSave = async () => {
+  await saveWorkout();
+  toast.success(t('workouts.saved'));
+};
+```
+
+## Accessibility
+
+- Use `aria-live` regions for screen readers
+- Provide descriptive error messages
+- Include action buttons in toasts when applicable
+- Ensure dialogs are keyboard accessible

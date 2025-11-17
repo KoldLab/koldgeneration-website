@@ -25,6 +25,10 @@
         "title": "Enter Tournament Code",
         "description": "Open the join page to enter a tournament code and jump into the bracket."
       }
+    },
+    "workouts": {
+      "title": "Workouts",
+      "description": "Track your fitness journey with workout logging, routines, and exercise library."
     }
   },
   "cardBadge": {

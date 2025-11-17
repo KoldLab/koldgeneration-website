@@ -13,6 +13,7 @@
     "date": "Date",
     "duration": "Duration",
     "overallNotes": "Overall Workout Notes",
+    "exerciseNotes": "Exercise Notes",
     "notesPlaceholder": "Add any notes about your workout...",
     "startFromRoutine": "Start from Routine",
     "selectRoutine": "Select a routine",
@@ -55,7 +56,10 @@
     "showGif": "Show GIF",
     "addFavorite": "Add to favorites",
     "removeFavorite": "Remove from favorites",
-    "addToWorkout": "Add to Workout"
+    "addToWorkout": "Add to Workout",
+    "inRoutine": "In Routine",
+    "inRoutineTooltip": "This exercise appears {{count}} time(s) in the routine at position(s): {{indices}}",
+    "alreadyAdded": "Already Added"
   },
   "history": {
     "title": "Workout History",
@@ -80,7 +84,8 @@
     "routineWillContain_one": "This routine will contain {{count}} exercise.",
     "routineWillContain_other": "This routine will contain {{count}} exercises.",
     "enterRoutineName": "Enter routine name:",
-    "confirmDelete": "Are you sure you want to delete this workout?",
+    "confirmDelete": "Delete Workout?",
+    "confirmDeleteDescription": "Are you sure you want to delete the workout from {{date}}? This action cannot be undone.",
     "deleted": "Workout deleted successfully",
     "deleteError": "Failed to delete workout",
     "savedAsRoutine": "Workout saved as routine successfully",
