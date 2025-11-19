@@ -125,7 +125,6 @@ export default function ExerciseFilters({
           {localSearchQuery && (
             <Button
               variant="ghost"
-              size="icon"
               className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7"
               onClick={() => setLocalSearchQuery('')}
             >
@@ -138,9 +137,9 @@ export default function ExerciseFilters({
           <Button
             variant="outline"
             onClick={handleClearFilters}
-            className="shrink-0 h-10"
+            className="shrink-0 h-11"
           >
-            <X className="h-4 w-4 mr-2" />
+            <X className="h-4 w-4 " />
             {t('workouts.exerciseLibrary.filters.resetFilters')}
           </Button>
         )}
@@ -151,9 +150,7 @@ export default function ExerciseFilters({
         <Checkbox
           id="show-favorites-only"
           checked={showFavoritesOnly}
-          onCheckedChange={(checked) =>
-            setShowFavoritesOnly(checked === true)
-          }
+          onCheckedChange={(checked) => setShowFavoritesOnly(checked === true)}
         />
         <Label
           htmlFor="show-favorites-only"

@@ -1,22 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { useIsMobile } from '@/hooks/useMobile';
 import ExerciseLibrary from './ExerciseLibrary';
 import LogWorkout from './LogWorkout';
 import WorkoutHistory from './WorkoutHistory';
 import Routines from './Routines';
+import { MobileBottomNav } from './MobileBottomNav';
 
 const WORKOUTS_TAB_STORAGE_KEY = 'workouts-active-tab';
 
 export default function Workouts() {
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState(() => {
     // Load from localStorage on initial render
     if (typeof window !== 'undefined') {
@@ -54,69 +50,48 @@ export default function Workouts() {
   }, []);
 
   return (
-    <div className="w-full space-y-6">
-      <div>
-        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-          {t('workouts.title')}
-        </h1>
-        <p className="text-muted-foreground text-xl leading-7 [&:not(:first-child)]:mt-6">
-          {t('workouts.description')}
-        </p>
-      </div>
+    <>
+      <div className="w-full space-y-6 pb-20 md:pb-6">
+        <div hidden={isMobile}>
+          <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
+            {t('workouts.title')}
+          </h1>
+          <p className="text-muted-foreground text-xl leading-7 [&:not(:first-child)]:mt-6">
+            {t('workouts.description')}
+          </p>
+        </div>
 
-      {/* Mobile: Dropdown Selector */}
-      <div className="md:hidden">
-        <Select value={activeTab} onValueChange={setActiveTab}>
-          <SelectTrigger className="w-full">
-            <SelectValue>
-              {activeTab === 'log' && t('workouts.tabs.log')}
-              {activeTab === 'history' && t('workouts.tabs.history')}
-              {activeTab === 'routines' && t('workouts.tabs.routines')}
-              {activeTab === 'exercises' && t('workouts.tabs.exercises')}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="log">{t('workouts.tabs.log')}</SelectItem>
-            <SelectItem value="history">
+        {/* Desktop: Tabs */}
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="w-full hidden md:block"
+        >
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="log">{t('workouts.tabs.log')}</TabsTrigger>
+            <TabsTrigger value="history">
               {t('workouts.tabs.history')}
-            </SelectItem>
-            <SelectItem value="routines">
+            </TabsTrigger>
+            <TabsTrigger value="routines">
               {t('workouts.tabs.routines')}
-            </SelectItem>
-            <SelectItem value="exercises">
+            </TabsTrigger>
+            <TabsTrigger value="exercises">
               {t('workouts.tabs.exercises')}
-            </SelectItem>
-          </SelectContent>
-        </Select>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        {/* Content - Shared for both mobile and desktop */}
+        <div className="mt-6">
+          {activeTab === 'log' && <LogWorkout />}
+          {activeTab === 'history' && <WorkoutHistory />}
+          {activeTab === 'routines' && <Routines />}
+          {activeTab === 'exercises' && <ExerciseLibrary />}
+        </div>
       </div>
 
-      {/* Desktop: Tabs */}
-      <Tabs
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="w-full hidden md:block"
-      >
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="log">{t('workouts.tabs.log')}</TabsTrigger>
-          <TabsTrigger value="history">
-            {t('workouts.tabs.history')}
-          </TabsTrigger>
-          <TabsTrigger value="routines">
-            {t('workouts.tabs.routines')}
-          </TabsTrigger>
-          <TabsTrigger value="exercises">
-            {t('workouts.tabs.exercises')}
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
-
-      {/* Content - Shared for both mobile and desktop */}
-      <div className="mt-6">
-        {activeTab === 'log' && <LogWorkout />}
-        {activeTab === 'history' && <WorkoutHistory />}
-        {activeTab === 'routines' && <Routines />}
-        {activeTab === 'exercises' && <ExerciseLibrary />}
-      </div>
-    </div>
+      {/* Mobile: Bottom Navigation */}
+      <MobileBottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+    </>
   );
 }

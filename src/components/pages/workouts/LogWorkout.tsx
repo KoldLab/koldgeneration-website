@@ -2,29 +2,13 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWorkoutStore } from '@/stores/workoutStore';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Loader2, Plus, Save, CalendarIcon, FileDown } from 'lucide-react';
+import { Loader2, Plus, Save, FileDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { parseDate } from 'chrono-node';
 import ExerciseEntryForm from './components/ExerciseEntryForm';
 import ExerciseSelectorDialog from './components/ExerciseSelectorDialog';
+import WorkoutDetails from './WorkoutDetails';
 import {
   getExercisesByUserId,
   createWorkoutLog,
@@ -66,6 +50,7 @@ export default function LogWorkout() {
   // Data
   const [routines, setRoutines] = useState<WorkoutRoutine[]>([]);
   const [exerciseSelectorOpen, setExerciseSelectorOpen] = useState(false);
+  const [workoutDetailsOpen, setWorkoutDetailsOpen] = useState(true);
 
   // Form state - initialize from store or defaults
   const today = new Date();
@@ -346,140 +331,48 @@ export default function LogWorkout() {
       </div>
 
       {/* Workout Details */}
-      <Card className="p-6 space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="workout-date">
-              {t('workouts.logWorkout.date')}
-            </Label>
-            <div className="relative flex gap-2">
-              <Input
-                id="workout-date"
-                value={workoutDateValue}
-                placeholder="Today, Tomorrow, or next week"
-                className="bg-background pr-10"
-                onChange={(e) => {
-                  setWorkoutDateValue(e.target.value);
-                  const parsedDate = parseDate(e.target.value);
-                  if (parsedDate) {
-                    setWorkoutDateState(parsedDate);
-                    setWorkoutDateMonth(parsedDate);
-                    setWorkoutDate(parsedDate);
-                  }
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    setWorkoutDateOpen(true);
-                  }
-                }}
-              />
-              <Popover open={workoutDateOpen} onOpenChange={setWorkoutDateOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    id="date-picker"
-                    variant="ghost"
-                    className="absolute top-1/2 right-2 size-6 -translate-y-1/2"
-                  >
-                    <CalendarIcon className="size-3.5" />
-                    <span className="sr-only">Select date</span>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-auto overflow-hidden p-0"
-                  align="end"
-                >
-                  <Calendar
-                    mode="single"
-                    selected={workoutDate}
-                    captionLayout="dropdown"
-                    month={workoutDateMonth}
-                    onMonthChange={setWorkoutDateMonth}
-                    onSelect={(date) => {
-                      setWorkoutDateState(date);
-                      if (date) {
-                        setWorkoutDate(date);
-                        setWorkoutDateValue(
-                          date.toLocaleDateString('en-US', {
-                            day: '2-digit',
-                            month: 'long',
-                            year: 'numeric',
-                          })
-                        );
-                      }
-                      setWorkoutDateOpen(false);
-                    }}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="workout-duration">
-              {t('workouts.logWorkout.duration')} (minutes)
-            </Label>
-            <Input
-              id="workout-duration"
-              type="number"
-              min="0"
-              value={workoutDuration}
-              onChange={(e) => {
-                setWorkoutDurationState(e.target.value);
-                setWorkoutDuration(e.target.value);
-              }}
-              placeholder="Optional"
-            />
-          </div>
-        </div>
-
-        {routines.length > 0 && (
-          <div className="space-y-2">
-            <Label htmlFor="routine-select">
-              {t('workouts.logWorkout.startFromRoutine')} {t('common.optional')}
-            </Label>
-            <Select
-              value={selectedRoutineId}
-              onValueChange={(value) => {
-                setSelectedRoutineIdState(value);
-                setSelectedRoutineId(value);
-              }}
-            >
-              <SelectTrigger id="routine-select">
-                <SelectValue
-                  placeholder={t('workouts.logWorkout.selectRoutine')}
-                />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">
-                  {t('workouts.logWorkout.startFromScratch')}
-                </SelectItem>
-                {routines.map((routine) => (
-                  <SelectItem key={routine.id} value={routine.id}>
-                    {routine.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-
-        <div className="space-y-2">
-          <Label htmlFor="workout-notes">
-            {t('workouts.logWorkout.overallNotes')} {t('common.optional')}
-          </Label>
-          <Textarea
-            id="workout-notes"
-            value={workoutNotes}
-            onChange={(e) => {
-              setWorkoutNotesState(e.target.value);
-              setWorkoutNotes(e.target.value);
-            }}
-            placeholder={t('workouts.logWorkout.notesPlaceholder')}
-            rows={3}
-          />
-        </div>
-      </Card>
+      <WorkoutDetails
+        workoutDate={workoutDate}
+        workoutDateValue={workoutDateValue}
+        workoutDateMonth={workoutDateMonth}
+        workoutDateOpen={workoutDateOpen}
+        workoutDuration={workoutDuration}
+        workoutNotes={workoutNotes}
+        selectedRoutineId={selectedRoutineId}
+        routines={routines}
+        workoutDetailsOpen={workoutDetailsOpen}
+        onWorkoutDateChange={(date) => {
+          const dateValue = date ?? undefined;
+          setWorkoutDateState(dateValue);
+          setWorkoutDate(dateValue ?? null);
+        }}
+        onWorkoutDateValueChange={(value) => {
+          setWorkoutDateValue(value);
+          const parsedDate = parseDate(value);
+          if (parsedDate) {
+            setWorkoutDateState(parsedDate);
+            setWorkoutDateMonth(parsedDate);
+            setWorkoutDate(parsedDate);
+          }
+        }}
+        onWorkoutDateMonthChange={(date) =>
+          setWorkoutDateMonth(date ?? undefined)
+        }
+        onWorkoutDateOpenChange={setWorkoutDateOpen}
+        onWorkoutDurationChange={(value) => {
+          setWorkoutDurationState(value);
+          setWorkoutDuration(value);
+        }}
+        onWorkoutNotesChange={(value) => {
+          setWorkoutNotesState(value);
+          setWorkoutNotes(value);
+        }}
+        onSelectedRoutineIdChange={(value) => {
+          setSelectedRoutineIdState(value);
+          setSelectedRoutineId(value);
+        }}
+        onWorkoutDetailsOpenChange={setWorkoutDetailsOpen}
+      />
 
       {/* Exercises */}
       <div className="space-y-4">
@@ -487,7 +380,7 @@ export default function LogWorkout() {
           <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
             {t('workouts.logWorkout.exercises')} ({workoutEntries.length})
           </h3>
-          <div className="flex gap-2 w-full sm:w-auto">
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
             {routines.length > 0 && (
               <Button
                 type="button"
@@ -526,20 +419,11 @@ export default function LogWorkout() {
         </div>
 
         {workoutEntries.length === 0 ? (
-          <Card className="p-8 text-center">
+          <div className="p-8 text-center border rounded-md">
             <p className="text-muted-foreground">
               {t('workouts.logWorkout.noExercisesMessage')}
             </p>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleAddExercise}
-              className="mt-4 gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              {t('workouts.logWorkout.addFirstExercise')}
-            </Button>
-          </Card>
+          </div>
         ) : (
           <div className="space-y-4">
             {workoutEntries.map((entry, index) => (

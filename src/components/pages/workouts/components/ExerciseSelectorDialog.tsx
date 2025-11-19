@@ -9,7 +9,13 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Card,
   CardDescription,
@@ -312,46 +318,50 @@ export default function ExerciseSelectorDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="mb-8 flex h-[calc(100vh-2rem)] sm:h-[calc(100vh-4rem)] min-w-[calc(100vw-2rem)] sm:min-w-[600px] max-w-[calc(100vw-2rem)] sm:max-w-7xl flex-col justify-between gap-0 p-0">
-        <ScrollArea className="flex flex-col justify-between overflow-hidden">
+      <DialogContent className=" mb-8 flex h-[calc(100vh-2rem)] sm:h-[calc(100vh-4rem)] min-w-[calc(100vw-2rem)] sm:min-w-[600px] max-w-[calc(100vw-2rem)] sm:max-w-7xl flex-col justify-between gap-0 p-0">
+        <ScrollArea className="pt-3 flex flex-col justify-between overflow-hidden">
           <DialogHeader className="contents space-y-0 text-left">
             <DialogTitle className="px-4 sm:px-6 pt-4 sm:pt-6">
               {t('workouts.exerciseSelector.title')}
             </DialogTitle>
 
-            <div className="px-4 sm:px-6 py-4 ">
-              <Tabs
+            <div className="px-4 sm:px-6 py-4 space-y-4">
+              <Select
                 value={activeTab}
                 onValueChange={(v) =>
                   setActiveTab(
                     v as 'browse' | 'favorites' | 'myExercises' | 'create'
                   )
                 }
-                className="w-full"
               >
-                <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="browse">
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="browse">
                     {t('workouts.exerciseSelector.browse')}
-                  </TabsTrigger>
-                  <TabsTrigger value="favorites">
+                  </SelectItem>
+                  <SelectItem value="favorites">
                     {t('workouts.exerciseSelector.favorites')}
-                  </TabsTrigger>
-                  <TabsTrigger value="myExercises">
+                  </SelectItem>
+                  <SelectItem value="myExercises">
                     {t('workouts.exerciseSelector.myExercises')}
-                  </TabsTrigger>
-                  <TabsTrigger value="create">
+                  </SelectItem>
+                  <SelectItem value="create">
                     {t('workouts.exerciseSelector.create')}
-                  </TabsTrigger>
-                </TabsList>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
 
-                <TabsContent value="browse" className="mt-4">
-                  <div className="px-6 space-y-4">
+              {activeTab === 'browse' && (
+                <div className="mt-4">
+                  <div className="space-y-4">
                     {/* Search and Filters */}
                     <ExerciseFilters />
                   </div>
 
                   {/* Exercise Grid */}
-                  <div className="px-4 sm:px-6 py-4">
+                  <div className="py-4">
                     <ExerciseGrid
                       exercises={useMemo(() => {
                         // Sort: favorites first, then alphabetically
@@ -391,9 +401,11 @@ export default function ExerciseSelectorDialog({
                       existingExercises={existingExercises}
                     />
                   </div>
-                </TabsContent>
+                </div>
+              )}
 
-                <TabsContent value="favorites" className="mt-4">
+              {activeTab === 'favorites' && (
+                <div className="mt-4">
                   <div className="px-4 sm:px-6 py-4">
                     {loadingFavorites ? (
                       <div className="flex items-center justify-center py-12">
@@ -425,9 +437,11 @@ export default function ExerciseSelectorDialog({
                       />
                     )}
                   </div>
-                </TabsContent>
+                </div>
+              )}
 
-                <TabsContent value="myExercises" className="mt-4">
+              {activeTab === 'myExercises' && (
+                <div className="mt-4">
                   <div className="px-4 sm:px-6 py-4">
                     {loadingCustom ? (
                       <div className="flex items-center justify-center py-12">
@@ -464,9 +478,11 @@ export default function ExerciseSelectorDialog({
                       </div>
                     )}
                   </div>
-                </TabsContent>
+                </div>
+              )}
 
-                <TabsContent value="create" className="mt-4">
+              {activeTab === 'create' && (
+                <div className="mt-4">
                   <div className="px-4 sm:px-6 py-4">
                     <Card className="p-4 sm:p-6 space-y-4 max-w-2xl mx-auto">
                       <div className="space-y-2">
@@ -518,8 +534,8 @@ export default function ExerciseSelectorDialog({
                       </Button>
                     </Card>
                   </div>
-                </TabsContent>
-              </Tabs>
+                </div>
+              )}
             </div>
           </DialogHeader>
         </ScrollArea>
