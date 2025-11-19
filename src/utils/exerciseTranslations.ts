@@ -10,17 +10,29 @@ const getStringValue = (value: string | { name: string } | any): string => {
 };
 
 /**
+ * Helper function to ensure translation result is always a string
+ */
+const ensureString = (value: any, fallback: string): string => {
+  if (typeof value === 'string' && value.length > 0) {
+    return value;
+  }
+  return fallback;
+};
+
+/**
  * Translate a body part name
  */
 export const translateBodyPart = (t: TFunction, value: string | { name: string } | any): string => {
   const key = getStringValue(value);
   const translationKey = `workouts.bodyParts.${key}`;
-  const translated = t(translationKey);
-  // If translation returns an object or the key itself, return original key
-  if (typeof translated !== 'string' || translated === translationKey) {
+  try {
+    const translated = t(translationKey);
+    // Ensure we always return a string, never an object
+    return ensureString(translated, key);
+  } catch (error) {
+    console.warn('Translation error for body part:', key, error);
     return key;
   }
-  return translated;
 };
 
 /**
@@ -29,12 +41,14 @@ export const translateBodyPart = (t: TFunction, value: string | { name: string }
 export const translateEquipment = (t: TFunction, value: string | { name: string } | any): string => {
   const key = getStringValue(value);
   const translationKey = `workouts.equipments.${key}`;
-  const translated = t(translationKey);
-  // If translation returns an object or the key itself, return original key
-  if (typeof translated !== 'string' || translated === translationKey) {
+  try {
+    const translated = t(translationKey);
+    // Ensure we always return a string, never an object
+    return ensureString(translated, key);
+  } catch (error) {
+    console.warn('Translation error for equipment:', key, error);
     return key;
   }
-  return translated;
 };
 
 /**
@@ -43,11 +57,13 @@ export const translateEquipment = (t: TFunction, value: string | { name: string 
 export const translateMuscle = (t: TFunction, value: string | { name: string } | any): string => {
   const key = getStringValue(value);
   const translationKey = `workouts.muscles.${key}`;
-  const translated = t(translationKey);
-  // If translation returns an object or the key itself, return original key
-  if (typeof translated !== 'string' || translated === translationKey) {
+  try {
+    const translated = t(translationKey);
+    // Ensure we always return a string, never an object
+    return ensureString(translated, key);
+  } catch (error) {
+    console.warn('Translation error for muscle:', key, error);
     return key;
   }
-  return translated;
 };
 
