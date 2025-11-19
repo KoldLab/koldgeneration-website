@@ -6,10 +6,6 @@
   "framework": "vite",
   "rewrites": [
     {
-      "source": "/api/exercisedb/:path*",
-      "destination": "https://kold-exercisedb-api.vercel.app/api/:path*"
-    },
-    {
       "source": "/__/auth/handler",
       "destination": "/index.html"
     },

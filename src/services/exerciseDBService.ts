@@ -1,6 +1,6 @@
 import type { ExerciseDBExercise } from '@/types/workout';
 
-// Use proxy in production to avoid CORS issues, direct URL in development or if explicitly set
+// Use direct URL - if explicitly set via env var, use it, otherwise use default
 const getAPIBaseURL = () => {
   // If explicitly set, use it
   if (import.meta.env.VITE_EXERCISEDB_API_URL) {
@@ -10,23 +10,16 @@ const getAPIBaseURL = () => {
     );
     return import.meta.env.VITE_EXERCISEDB_API_URL;
   }
-  // In production, use proxy to avoid CORS
-  if (import.meta.env.PROD) {
-    return '/api/exercisedb'; // Use proxy path (proxy adds /api/ prefix)
-  }
-  // In development, use direct URL
-  console.log(
-    'Using default dev URL:',
-    'https://kold-exercisedb-api.vercel.app'
-  );
-  return 'https://kold-exercisedb-api.vercel.app';
+  // Default API URL (used in both dev and production)
+  const defaultUrl =
+    'https://kold-exercisedb-api-git-develop-sami-steenhauts-projects.vercel.app';
+  console.log('Using default API URL:', defaultUrl);
+  return defaultUrl;
 };
 
 const API_BASE_URL = getAPIBaseURL();
-// API_VERSION: When using proxy (/api/exercisedb), proxy adds /api/ prefix, so we only need /v1
-// When using direct URL (localhost or Vercel), we need full /api/v1 path
-const isUsingProxy = API_BASE_URL === '/api/exercisedb';
-const API_VERSION = isUsingProxy ? '/v1' : '/api/v1';
+// API_VERSION: Always use full /api/v1 path since we're using direct URL
+const API_VERSION = '/api/v1';
 
 // API Response types
 interface ExerciseDBResponse<T> {
