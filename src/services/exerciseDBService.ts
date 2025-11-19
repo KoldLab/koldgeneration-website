@@ -11,6 +11,7 @@ const getAPIBaseURL = () => {
     return import.meta.env.VITE_EXERCISEDB_API_URL;
   }
   // Default API URL (used in both dev and production)
+  // Note: The API base URL should NOT include /api, as we add it in API_VERSION
   const defaultUrl =
     'https://kold-exercisedb-api-git-develop-sami-steenhauts-projects.vercel.app';
   console.log('Using default API URL:', defaultUrl);
@@ -18,8 +19,10 @@ const getAPIBaseURL = () => {
 };
 
 const API_BASE_URL = getAPIBaseURL();
-// API_VERSION: Always use full /api/v1 path since we're using direct URL
-const API_VERSION = '/api/v1';
+// API_VERSION: Check if API_BASE_URL already includes /api
+// If it does, use /v1, otherwise use /api/v1
+const hasApiInBaseUrl = API_BASE_URL.includes('/api');
+const API_VERSION = hasApiInBaseUrl ? '/v1' : '/api/v1';
 
 // API Response types
 interface ExerciseDBResponse<T> {
