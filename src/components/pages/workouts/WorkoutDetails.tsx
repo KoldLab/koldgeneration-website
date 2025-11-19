@@ -4,13 +4,6 @@ import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import {
   Popover,
@@ -27,7 +20,6 @@ import {
 } from '@/components/ui/form';
 import { CalendarIcon, Expand, Shrink } from 'lucide-react';
 import { parseDate } from 'chrono-node';
-import type { WorkoutRoutine } from '@/types/workout';
 
 interface WorkoutDetailsProps {
   workoutDate: Date | undefined;
@@ -36,8 +28,6 @@ interface WorkoutDetailsProps {
   workoutDateOpen: boolean;
   workoutDuration: string;
   workoutNotes: string;
-  selectedRoutineId: string;
-  routines: WorkoutRoutine[];
   workoutDetailsOpen: boolean;
   onWorkoutDateChange: (date: Date | undefined) => void;
   onWorkoutDateValueChange: (value: string) => void;
@@ -45,7 +35,6 @@ interface WorkoutDetailsProps {
   onWorkoutDateOpenChange: (open: boolean) => void;
   onWorkoutDurationChange: (value: string) => void;
   onWorkoutNotesChange: (value: string) => void;
-  onSelectedRoutineIdChange: (value: string) => void;
   onWorkoutDetailsOpenChange: (open: boolean) => void;
 }
 
@@ -53,7 +42,6 @@ interface WorkoutDetailsFormValues {
   workoutDateValue: string;
   workoutDuration: string;
   workoutNotes: string;
-  selectedRoutineId: string;
 }
 
 export default function WorkoutDetails({
@@ -63,8 +51,6 @@ export default function WorkoutDetails({
   workoutDateOpen,
   workoutDuration,
   workoutNotes,
-  selectedRoutineId,
-  routines,
   workoutDetailsOpen,
   onWorkoutDateChange,
   onWorkoutDateValueChange,
@@ -72,7 +58,6 @@ export default function WorkoutDetails({
   onWorkoutDateOpenChange,
   onWorkoutDurationChange,
   onWorkoutNotesChange,
-  onSelectedRoutineIdChange,
   onWorkoutDetailsOpenChange,
 }: WorkoutDetailsProps) {
   const { t } = useTranslation();
@@ -82,7 +67,6 @@ export default function WorkoutDetails({
       workoutDateValue,
       workoutDuration,
       workoutNotes,
-      selectedRoutineId,
     },
   });
 
@@ -92,15 +76,8 @@ export default function WorkoutDetails({
       workoutDateValue,
       workoutDuration,
       workoutNotes,
-      selectedRoutineId,
     });
-  }, [
-    workoutDateValue,
-    workoutDuration,
-    workoutNotes,
-    selectedRoutineId,
-    form,
-  ]);
+  }, [workoutDateValue, workoutDuration, workoutNotes, form]);
 
   const handleDateSelect = (date: Date | null | undefined) => {
     const selectedDate = date || undefined;
@@ -236,46 +213,6 @@ export default function WorkoutDetails({
               />
             )}
           </div>
-
-          {workoutDetailsOpen && routines.length > 0 && (
-            <FormField
-              control={form.control}
-              name="selectedRoutineId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    {t('workouts.logWorkout.startFromRoutine')}{' '}
-                    {t('common.optional')}
-                  </FormLabel>
-                  <FormControl>
-                    <Select
-                      value={field.value}
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        onSelectedRoutineIdChange(value);
-                      }}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue
-                          placeholder={t('workouts.logWorkout.selectRoutine')}
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">
-                          {t('workouts.logWorkout.startFromScratch')}
-                        </SelectItem>
-                        {routines.map((routine) => (
-                          <SelectItem key={routine.id} value={routine.id}>
-                            {routine.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-          )}
 
           {workoutDetailsOpen && (
             <FormField

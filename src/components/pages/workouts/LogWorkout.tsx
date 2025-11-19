@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { parseDate } from 'chrono-node';
 import ExerciseEntryForm from './components/ExerciseEntryForm';
 import ExerciseSelectorDialog from './components/ExerciseSelectorDialog';
+import RoutineSelectorDialog from './components/RoutineSelectorDialog';
 import WorkoutDetails from './WorkoutDetails';
 import {
   getExercisesByUserId,
@@ -50,6 +51,7 @@ export default function LogWorkout() {
   // Data
   const [routines, setRoutines] = useState<WorkoutRoutine[]>([]);
   const [exerciseSelectorOpen, setExerciseSelectorOpen] = useState(false);
+  const [routineSelectorOpen, setRoutineSelectorOpen] = useState(false);
   const [workoutDetailsOpen, setWorkoutDetailsOpen] = useState(true);
 
   // Form state - initialize from store or defaults
@@ -338,8 +340,6 @@ export default function LogWorkout() {
         workoutDateOpen={workoutDateOpen}
         workoutDuration={workoutDuration}
         workoutNotes={workoutNotes}
-        selectedRoutineId={selectedRoutineId}
-        routines={routines}
         workoutDetailsOpen={workoutDetailsOpen}
         onWorkoutDateChange={(date) => {
           const dateValue = date ?? undefined;
@@ -367,10 +367,6 @@ export default function LogWorkout() {
           setWorkoutNotesState(value);
           setWorkoutNotes(value);
         }}
-        onSelectedRoutineIdChange={(value) => {
-          setSelectedRoutineIdState(value);
-          setSelectedRoutineId(value);
-        }}
         onWorkoutDetailsOpenChange={setWorkoutDetailsOpen}
       />
 
@@ -385,21 +381,7 @@ export default function LogWorkout() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => {
-                  // Scroll to routine selector and focus it
-                  const routineSelect =
-                    document.getElementById('routine-select');
-                  if (routineSelect) {
-                    routineSelect.scrollIntoView({
-                      behavior: 'smooth',
-                      block: 'center',
-                    });
-                    setTimeout(() => {
-                      routineSelect.focus();
-                      routineSelect.click();
-                    }, 300);
-                  }
-                }}
+                onClick={() => setRoutineSelectorOpen(true)}
                 className="gap-2 flex-1 sm:flex-none"
               >
                 <FileDown className="h-4 w-4" />
@@ -489,6 +471,18 @@ export default function LogWorkout() {
           userId={user.uid}
         />
       )}
+
+      {/* Routine Selector Dialog */}
+      <RoutineSelectorDialog
+        open={routineSelectorOpen}
+        onOpenChange={setRoutineSelectorOpen}
+        routines={routines}
+        selectedRoutineId={selectedRoutineId}
+        onSelectRoutine={(routineId) => {
+          setSelectedRoutineIdState(routineId);
+          setSelectedRoutineId(routineId);
+        }}
+      />
     </div>
   );
 }
