@@ -159,7 +159,9 @@ export default function ExerciseLibrary() {
       if (!aIsFavorite && bIsFavorite) return 1;
 
       // Both are favorites or both are not - sort alphabetically
-      return a.name.localeCompare(b.name);
+      const aName = typeof a.name === 'string' ? a.name : String(a.name || '');
+      const bName = typeof b.name === 'string' ? b.name : String(b.name || '');
+      return aName.localeCompare(bName);
     });
 
     return result;

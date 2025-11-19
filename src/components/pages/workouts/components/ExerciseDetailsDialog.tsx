@@ -13,13 +13,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Dumbbell, PersonStanding } from 'lucide-react';
 import type { ExerciseDBExercise } from '@/types/workout';
 import { useExerciseCacheStore } from '@/stores/exerciseCacheStore';
-
-// Helper function to safely extract string value (handles both string and object with name property)
-const getStringValue = (value: string | { name: string } | any): string => {
-  if (typeof value === 'string') return value;
-  if (value && typeof value === 'object' && 'name' in value) return value.name;
-  return String(value || '');
-};
+import {
+  translateBodyPart,
+  translateEquipment,
+  translateMuscle,
+} from '@/utils/exerciseTranslations';
 
 interface ExerciseDetailsDialogProps {
   exercise: ExerciseDBExercise;
@@ -105,14 +103,11 @@ export default function ExerciseDetailsDialog({
                       {t('workouts.exerciseLibrary.exercise.bodyParts')}
                     </h3>
                     <div className="flex flex-wrap gap-2">
-                      {exercise.bodyParts.map((part: any, index: number) => {
-                        const partValue = getStringValue(part);
-                        return (
-                          <Badge key={index} variant="default">
-                            {partValue}
-                          </Badge>
-                        );
-                      })}
+                      {exercise.bodyParts.map((part: any, index: number) => (
+                        <Badge key={index} variant="default">
+                          {translateBodyPart(t, part)}
+                        </Badge>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -125,14 +120,11 @@ export default function ExerciseDetailsDialog({
                       {t('workouts.exerciseLibrary.exercise.equipment')}
                     </h3>
                     <div className="flex flex-wrap gap-2">
-                      {exercise.equipments.map((eq: any, index: number) => {
-                        const eqValue = getStringValue(eq);
-                        return (
-                          <Badge key={index} variant="secondary">
-                            {eqValue}
-                          </Badge>
-                        );
-                      })}
+                      {exercise.equipments.map((eq: any, index: number) => (
+                        <Badge key={index} variant="secondary">
+                          {translateEquipment(t, eq)}
+                        </Badge>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -156,14 +148,11 @@ export default function ExerciseDetailsDialog({
                         </h4>
                         <div className="flex flex-wrap gap-2">
                           {exercise.targetMuscles.map(
-                            (muscle: any, index: number) => {
-                              const muscleValue = getStringValue(muscle);
-                              return (
-                                <Badge key={index} variant="outline">
-                                  {muscleValue}
-                                </Badge>
-                              );
-                            }
+                            (muscle: any, index: number) => (
+                              <Badge key={index} variant="outline">
+                                {translateMuscle(t, muscle)}
+                              </Badge>
+                            )
                           )}
                         </div>
                       </div>
@@ -180,18 +169,15 @@ export default function ExerciseDetailsDialog({
                         </h4>
                         <div className="flex flex-wrap gap-2">
                           {exercise.secondaryMuscles.map(
-                            (muscle: any, index: number) => {
-                              const muscleValue = getStringValue(muscle);
-                              return (
-                                <Badge
-                                  key={index}
-                                  variant="outline"
-                                  className="bg-secondary/50"
-                                >
-                                  {muscleValue}
-                                </Badge>
-                              );
-                            }
+                            (muscle: any, index: number) => (
+                              <Badge
+                                key={index}
+                                variant="outline"
+                                className="bg-secondary/50"
+                              >
+                                {translateMuscle(t, muscle)}
+                              </Badge>
+                            )
                           )}
                         </div>
                       </div>

@@ -13,6 +13,11 @@ import {
 import { Search, X, Heart } from 'lucide-react';
 import { useExerciseFilterStore } from '@/stores/exerciseFilterStore';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  translateBodyPart,
+  translateEquipment,
+  translateMuscle,
+} from '@/utils/exerciseTranslations';
 
 interface ExerciseFiltersProps {
   onFiltersChange?: (filters: {
@@ -171,11 +176,14 @@ export default function ExerciseFilters({
               <SelectItem value="all">
                 {t('workouts.exerciseLibrary.filters.all')}
               </SelectItem>
-              {bodyParts.map((part: any, index: number) => (
-                <SelectItem key={index} value={getStringValue(part)}>
-                  {getStringValue(part)}
-                </SelectItem>
-              ))}
+              {bodyParts.map((part: any, index: number) => {
+                const partValue = getStringValue(part);
+                return (
+                  <SelectItem key={index} value={partValue}>
+                    {translateBodyPart(t, part)}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>
@@ -193,11 +201,14 @@ export default function ExerciseFilters({
               <SelectItem value="all">
                 {t('workouts.exerciseLibrary.filters.all')}
               </SelectItem>
-              {equipment.map((eq: any, index: number) => (
-                <SelectItem key={index} value={getStringValue(eq)}>
-                  {getStringValue(eq)}
-                </SelectItem>
-              ))}
+              {equipment.map((eq: any, index: number) => {
+                const eqValue = getStringValue(eq);
+                return (
+                  <SelectItem key={index} value={eqValue}>
+                    {translateEquipment(t, eq)}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>
@@ -215,11 +226,14 @@ export default function ExerciseFilters({
               <SelectItem value="all">
                 {t('workouts.exerciseLibrary.filters.all')}
               </SelectItem>
-              {targetMuscles.map((muscle: any, index: number) => (
-                <SelectItem key={index} value={getStringValue(muscle)}>
-                  {getStringValue(muscle)}
-                </SelectItem>
-              ))}
+              {targetMuscles.map((muscle: any, index: number) => {
+                const muscleValue = getStringValue(muscle);
+                return (
+                  <SelectItem key={index} value={muscleValue}>
+                    {translateMuscle(t, muscle)}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>

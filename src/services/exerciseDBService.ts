@@ -4,6 +4,10 @@ import type { ExerciseDBExercise } from '@/types/workout';
 const getAPIBaseURL = () => {
   // If explicitly set, use it
   if (import.meta.env.VITE_EXERCISEDB_API_URL) {
+    console.log(
+      'Using VITE_EXERCISEDB_API_URL:',
+      import.meta.env.VITE_EXERCISEDB_API_URL
+    );
     return import.meta.env.VITE_EXERCISEDB_API_URL;
   }
   // In production, use proxy to avoid CORS
@@ -11,13 +15,18 @@ const getAPIBaseURL = () => {
     return '/api/exercisedb'; // Use proxy path (proxy adds /api/ prefix)
   }
   // In development, use direct URL
+  console.log(
+    'Using default dev URL:',
+    'https://kold-exercisedb-api.vercel.app'
+  );
   return 'https://kold-exercisedb-api.vercel.app';
 };
 
 const API_BASE_URL = getAPIBaseURL();
-// API_VERSION: In prod, proxy adds /api/ prefix, so we only need /v1
-// In dev, we need full /api/v1 path
-const API_VERSION = import.meta.env.PROD ? '/v1' : '/api/v1';
+// API_VERSION: When using proxy (/api/exercisedb), proxy adds /api/ prefix, so we only need /v1
+// When using direct URL (localhost or Vercel), we need full /api/v1 path
+const isUsingProxy = API_BASE_URL === '/api/exercisedb';
+const API_VERSION = isUsingProxy ? '/v1' : '/api/v1';
 
 // API Response types
 interface ExerciseDBResponse<T> {

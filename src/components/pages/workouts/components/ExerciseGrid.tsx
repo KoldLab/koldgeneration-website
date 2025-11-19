@@ -22,6 +22,10 @@ import type { ExerciseDBExercise, ExerciseEntry } from '@/types/workout';
 import { useExerciseCacheStore } from '@/stores/exerciseCacheStore';
 import { useExerciseFavoritesStore } from '@/stores/exerciseFavoritesStore';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  translateBodyPart,
+  translateEquipment,
+} from '@/utils/exerciseTranslations';
 
 interface ExerciseGridProps {
   exercises: ExerciseDBExercise[];
@@ -52,12 +56,6 @@ interface ExerciseGridProps {
   existingExercises?: ExerciseEntry[];
 }
 
-// Helper function to safely extract string value
-const getStringValue = (value: string | { name: string } | any): string => {
-  if (typeof value === 'string') return value;
-  if (value && typeof value === 'object' && 'name' in value) return value.name;
-  return String(value || '');
-};
 
 export default function ExerciseGrid({
   exercises,
@@ -361,9 +359,15 @@ function ExerciseCard({
   // Get description from body parts or equipment
   const getDescription = () => {
     const parts =
-      exercise.bodyParts?.slice(0, 2).map(getStringValue).join(', ') || '';
+      exercise.bodyParts
+        ?.slice(0, 2)
+        .map((part) => translateBodyPart(t, part))
+        .join(', ') || '';
     const equipment =
-      exercise.equipments?.slice(0, 1).map(getStringValue).join(', ') || '';
+      exercise.equipments
+        ?.slice(0, 1)
+        .map((eq) => translateEquipment(t, eq))
+        .join(', ') || '';
     if (parts && equipment) {
       return `${parts} • ${equipment}`;
     }
