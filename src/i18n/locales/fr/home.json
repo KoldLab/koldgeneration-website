@@ -10,6 +10,10 @@
       "minecraftListGenerator": {
         "title": "Générateur de listes Minecraft",
         "description": "Générez des listes partageables à partir de coffres Minecraft : parfait pour gérer vos ressources."
+      },
+      "mazeGenerator": {
+        "title": "Générateur de labyrinthe",
+        "description": "Créez des labyrinthes parfaits pour énigmes, jeux de société ou projets créatifs."
       }
     },
     "tournaments": {

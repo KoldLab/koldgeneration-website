@@ -1,0 +1,8 @@
+{
+  "title": "Générateur de labyrinthe",
+  "description": "Générez un labyrinthe parfait avec un seul chemin entre deux cases — idéal pour jeux, énigmes ou fiches à imprimer.",
+  "width": "Largeur (cases)",
+  "height": "Hauteur (cases)",
+  "regenerate": "Nouveau labyrinthe",
+  "mazeSummary": "Labyrinthe {{width}} × {{height}} cases. Entrée en haut à gauche, sortie en bas à droite."
+}

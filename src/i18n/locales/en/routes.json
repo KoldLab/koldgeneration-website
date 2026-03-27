@@ -9,6 +9,10 @@
     "timer": {
       "title": "Timer",
       "description": "Stopwatch and countdown timer with precision timing"
+    },
+    "mazeGenerator": {
+      "title": "Maze generator",
+      "description": "Create random perfect mazes—print or use in your projects"
     }
   },
   "minecraftTools": {

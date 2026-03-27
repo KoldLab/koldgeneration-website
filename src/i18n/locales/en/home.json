@@ -10,6 +10,10 @@
       "minecraftListGenerator": {
         "title": "Minecraft List Generator",
         "description": "Generate clean, shareable lists from Minecraft chest data—perfect for resource management."
+      },
+      "mazeGenerator": {
+        "title": "Maze generator",
+        "description": "Spin up perfect mazes for puzzles, tabletop games, or creative projects."
       }
     },
     "tournaments": {

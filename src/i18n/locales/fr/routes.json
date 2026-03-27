@@ -9,6 +9,10 @@
     "timer": {
       "title": "Minuteur",
       "description": "Chronomètre et compte à rebours avec minutage précis"
+    },
+    "mazeGenerator": {
+      "title": "Générateur de labyrinthe",
+      "description": "Créez des labyrinthes parfaits aléatoires — à imprimer ou à intégrer dans vos projets"
     }
   },
   "minecraftTools": {

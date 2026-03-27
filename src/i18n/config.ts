@@ -9,6 +9,7 @@ import enHome from './locales/en/home.json';
 import enError from './locales/en/error.json';
 import enMinecraft from './locales/en/minecraft.json';
 import enTimer from './locales/en/timer.json';
+import enMazeGenerator from './locales/en/mazeGenerator.json';
 import enTournament from './locales/en/tournament.json';
 import enWorkouts from './locales/en/workouts.json';
 import enRoutes from './locales/en/routes.json';
@@ -20,6 +21,7 @@ import frHome from './locales/fr/home.json';
 import frError from './locales/fr/error.json';
 import frMinecraft from './locales/fr/minecraft.json';
 import frTimer from './locales/fr/timer.json';
+import frMazeGenerator from './locales/fr/mazeGenerator.json';
 import frTournament from './locales/fr/tournament.json';
 import frWorkouts from './locales/fr/workouts.json';
 import frRoutes from './locales/fr/routes.json';
@@ -33,6 +35,7 @@ const enTranslations = {
   error: enError,
   minecraft: enMinecraft,
   timer: enTimer,
+  mazeGenerator: enMazeGenerator,
   tournament: enTournament,
   workouts: enWorkouts,
   routes: enRoutes,
@@ -46,6 +49,7 @@ const frTranslations = {
   error: frError,
   minecraft: frMinecraft,
   timer: frTimer,
+  mazeGenerator: frMazeGenerator,
   tournament: frTournament,
   workouts: frWorkouts,
   routes: frRoutes,

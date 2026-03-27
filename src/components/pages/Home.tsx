@@ -11,6 +11,7 @@ import {
   ArrowRight,
   KeyRound,
   Dumbbell,
+  Grid3x3,
 } from 'lucide-react';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 
@@ -34,6 +35,13 @@ export default function Home() {
       icon: <Timer className="h-12 w-12 text-white drop-shadow-lg" />,
       to: '/tools/timer',
       gradient: 'from-emerald-500 via-teal-500 to-sky-500',
+    },
+    {
+      title: t('home.cards.tools.mazeGenerator.title'),
+      description: t('home.cards.tools.mazeGenerator.description'),
+      icon: <Grid3x3 className="h-12 w-12 text-white drop-shadow-lg" />,
+      to: '/tools/maze-generator',
+      gradient: 'from-violet-500 via-purple-500 to-fuchsia-500',
     },
     {
       title: t('home.cards.workouts.title'),

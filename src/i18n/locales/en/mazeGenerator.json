@@ -1,0 +1,8 @@
+{
+  "title": "Maze generator",
+  "description": "Generate a perfect maze with one path between any two cells—handy for games, puzzles, or print-and-play sheets.",
+  "width": "Width (cells)",
+  "height": "Height (cells)",
+  "regenerate": "New maze",
+  "mazeSummary": "Maze {{width}} by {{height}} cells. Entrance at top left, exit at bottom right."
+}

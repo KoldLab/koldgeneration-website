@@ -4,6 +4,7 @@ import Home from './components/pages/Home';
 import Layout from './components/Layout';
 import MinecraftListGenerator from './components/pages/tools/minecraft list generator/MinecraftListGenerator';
 import Timer from './components/pages/tools/timer/Timer';
+import MazeGenerator from './components/pages/tools/maze-generator/MazeGenerator';
 import CreateTournament from './components/pages/tournaments/CreateTournament';
 import TournamentView from './components/pages/tournaments/TournamentView';
 import MyTournaments from './components/pages/tournaments/MyTournaments';
@@ -31,6 +32,10 @@ export const router = createBrowserRouter([
           {
             path: '/tools/timer',
             element: <Timer />,
+          },
+          {
+            path: '/tools/maze-generator',
+            element: <MazeGenerator />,
           },
         ],
       },

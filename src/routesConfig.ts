@@ -24,6 +24,11 @@ export const getRoutesConfig = (t: TFunction): RouteConfig[] => [
         to: '/tools/timer',
         description: t('routes.tools.timer.description'),
       },
+      {
+        title: t('routes.tools.mazeGenerator.title'),
+        to: '/tools/maze-generator',
+        description: t('routes.tools.mazeGenerator.description'),
+      },
     ],
   },
   {
@@ -95,6 +100,11 @@ export const routesConfig: RouteConfig[] = [
         title: 'Timer',
         to: '/tools/timer',
         description: 'Stopwatch and countdown timer with precision timing',
+      },
+      {
+        title: 'Maze generator',
+        to: '/tools/maze-generator',
+        description: 'Generate printable perfect mazes for games and puzzles',
       },
     ],
   },
