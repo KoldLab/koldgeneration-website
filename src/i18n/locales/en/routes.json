@@ -21,6 +21,10 @@
     "listGenerator": {
       "title": "Chest Contents Image Generator",
       "description": "Create customizable images showing the contents of your Minecraft chest"
+    },
+    "shulkerGenerator": {
+      "title": "Shulker Box Command Generator",
+      "description": "Generate /give commands for shulker boxes pre-filled with items from a Litematica material list"
     }
   },
   "workouts": {

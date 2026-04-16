@@ -21,6 +21,10 @@
     "listGenerator": {
       "title": "Générateur d'Image de Contenu de Coffre",
       "description": "Créez des images personnalisables montrant le contenu de votre coffre Minecraft"
+    },
+    "shulkerGenerator": {
+      "title": "Générateur de Commande Shulker Box",
+      "description": "Générez des commandes /give pour des shulker boxes pré-remplies avec les items d'une liste Litematica"
     }
   },
   "workouts": {

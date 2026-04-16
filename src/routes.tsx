@@ -3,6 +3,7 @@ import Tools from './components/pages/Tools';
 import Home from './components/pages/Home';
 import Layout from './components/Layout';
 import MinecraftListGenerator from './components/pages/tools/minecraft list generator/MinecraftListGenerator';
+import ShulkerBoxGenerator from './components/pages/tools/minecraft-shulker-generator/ShulkerBoxGenerator';
 import Timer from './components/pages/tools/timer/Timer';
 import MazeGenerator from './components/pages/tools/maze-generator/MazeGenerator';
 import CreateTournament from './components/pages/tournaments/CreateTournament';
@@ -46,6 +47,10 @@ export const router = createBrowserRouter([
           {
             path: '/minecraft-tools/list-generator',
             element: <MinecraftListGenerator />,
+          },
+          {
+            path: '/minecraft-tools/shulker-generator',
+            element: <ShulkerBoxGenerator />,
           },
         ],
       },

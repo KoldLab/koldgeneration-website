@@ -41,6 +41,11 @@ export const getRoutesConfig = (t: TFunction): RouteConfig[] => [
         to: '/minecraft-tools/list-generator',
         description: t('routes.minecraftTools.listGenerator.description'),
       },
+      {
+        title: t('routes.minecraftTools.shulkerGenerator.title'),
+        to: '/minecraft-tools/shulker-generator',
+        description: t('routes.minecraftTools.shulkerGenerator.description'),
+      },
     ],
   },
   {
@@ -118,6 +123,12 @@ export const routesConfig: RouteConfig[] = [
         to: '/minecraft-tools/list-generator',
         description:
           'Create customizable images showing the contents of your Minecraft chest',
+      },
+      {
+        title: 'Shulker Box Command Generator',
+        to: '/minecraft-tools/shulker-generator',
+        description:
+          'Generate /give commands for shulker boxes pre-filled with items from a Litematica material list',
       },
     ],
   },
