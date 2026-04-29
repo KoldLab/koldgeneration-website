@@ -66,6 +66,10 @@
       "title": "Enter Tournament Code",
       "description": "Open the join page to enter a tournament code"
     }
+  },
+  "notes": {
+    "title": "Notes",
+    "description": "Create and share notes and lists"
   }
 }
 

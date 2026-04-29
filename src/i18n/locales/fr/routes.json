@@ -66,6 +66,10 @@
       "title": "Entrer un code de tournoi",
       "description": "Accéder à la page de saisie d'un code pour rejoindre un tournoi"
     }
+  },
+  "notes": {
+    "title": "Notes",
+    "description": "Créer et partager des notes et des listes"
   }
 }
 

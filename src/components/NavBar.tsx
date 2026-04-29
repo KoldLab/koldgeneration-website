@@ -73,7 +73,11 @@ export function NavBar() {
           </SheetTrigger>
           <SheetContent side="left" className="w-72">
             <SheetHeader>
-              <SheetTitle>{t('common.menu')}</SheetTitle>
+              <SheetTitle>
+                <Link to="/">
+                  <img src="/logo.png" alt="Logo" className="h-10 w-auto shrink-0 invert dark:invert-0" />
+                </Link>
+              </SheetTitle>
             </SheetHeader>
             <nav className="mt-4 flex flex-col gap-2">
               {routesConfig.map((route) => (
@@ -88,6 +92,11 @@ export function NavBar() {
       <div className="hidden sm:flex flex-1 justify-start items-center ">
         <NavigationMenu viewport={isMobile} delayDuration={150}>
           <NavigationMenuList className="items-center  gap-2">
+            <NavigationMenuItem>
+              <Link to="/">
+                <img src="/logo.png" alt="Logo" className="h-10 w-auto shrink-0 invert dark:invert-0" />
+              </Link>
+            </NavigationMenuItem>
             {routesConfig.map((route) => (
               <ListItem key={route.title} {...route} />
             ))}

@@ -16,6 +16,10 @@ import Marathons from './components/pages/marathons/Marathons';
 import MarathonView from './components/pages/marathons/MarathonView';
 import CreateEditMarathon from './components/pages/marathons/CreateEditMarathon';
 import Movies from './components/pages/movies/Movies';
+import NotesPage from './components/pages/notes/NotesPage';
+import NoteEditor from './components/pages/notes/NoteEditor';
+import SharedNotePage from './components/pages/notes/SharedNotePage';
+import JoinNotePage from './components/pages/notes/JoinNotePage';
 import ErrorBoundary from './components/ErrorBoundary';
 import NotFound from './components/pages/NotFound';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -129,6 +133,30 @@ export const router = createBrowserRouter([
             <MarathonView />
           </ProtectedRoute>
         ),
+      },
+      {
+        path: '/notes',
+        element: (
+          <ProtectedRoute>
+            <NotesPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/notes/:noteId',
+        element: (
+          <ProtectedRoute>
+            <NoteEditor />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/share/notes/:shareToken',
+        element: <SharedNotePage />,
+      },
+      {
+        path: '/join/notes/:inviteToken',
+        element: <JoinNotePage />,
       },
       {
         path: '*',

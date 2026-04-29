@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:minecraft.wiki)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "WebSearch",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(gh pr create --title 'feat\\(minecraft-tools\\): add Shulker Box Command Generator' --body ':*)",
+      "Bash(git checkout *)",
+      "Bash(npx tsc *)",
+      "Bash(npx firebase *)",
+      "Bash(git add *)",
+      "Bash(gh pr *)",
+      "Bash(npm run *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(npx shadcn@latest add dropdown-menu --yes)"
+    ]
+  }
+}

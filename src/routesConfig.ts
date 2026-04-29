@@ -104,6 +104,11 @@ export const getRoutesConfig = (t: TFunction): RouteConfig[] => [
       },
     ],
   },
+  {
+    title: t('routes.notes.title'),
+    to: '/notes',
+    description: t('routes.notes.description'),
+  },
 ];
 
 // Legacy export for backwards compatibility (will use default English)
