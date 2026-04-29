@@ -37,6 +37,8 @@ export function NavBar() {
         return null;
       }
 
+      // Movies/Marathons dropdown is always visible (no auth-required children)
+
       // Filter tournament children if user is not authenticated
       if (route.to === '/tournaments' && route.children) {
         const filteredChildren = route.children.filter((child) => {

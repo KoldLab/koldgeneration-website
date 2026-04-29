@@ -19,6 +19,7 @@
   "save": "Enregistrer",
   "close": "Fermer",
   "undo": "Annuler",
-  "optional": "(optionnel)"
+  "optional": "(optionnel)",
+  "saving": "Enregistrement..."
 }
 

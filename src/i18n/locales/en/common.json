@@ -19,6 +19,7 @@
   "save": "Save",
   "close": "Close",
   "undo": "Undo",
-  "optional": "(optional)"
+  "optional": "(optional)",
+  "saving": "Saving..."
 }
 

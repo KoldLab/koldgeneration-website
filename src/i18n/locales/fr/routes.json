@@ -27,6 +27,18 @@
       "description": "Générez des commandes /give pour des shulker boxes pré-remplies avec les items d'une liste Litematica"
     }
   },
+  "marathons": {
+    "title": "Films",
+    "description": "Parcourir des films et suivre des marathons",
+    "movies": {
+      "title": "Films",
+      "description": "Rechercher et suivre des films"
+    },
+    "marathons": {
+      "title": "Marathons",
+      "description": "Parcourir et démarrer des marathons de films"
+    }
+  },
   "workouts": {
     "title": "Entraînements",
     "description": "Suivez votre parcours fitness avec l'enregistrement d'entraînements et de routines",

@@ -1,0 +1,75 @@
+{
+  "title": "Movie Marathons",
+  "new": "New Marathon",
+  "movies": "movies",
+  "private": "Private",
+  "start": "Start",
+  "deleted": "Deleted",
+  "loginRequired": "You must be logged in to do this",
+  "indexBuilding": "Database indexes are still building (usually takes 1-2 minutes). Please refresh the page shortly.",
+  "tabs": {
+    "browse": "Browse",
+    "mine": "My Marathons",
+    "created": "Created by Me"
+  },
+  "browse": {
+    "empty": "No public marathons yet.",
+    "createFirst": "Create the first one"
+  },
+  "mine": {
+    "empty": "You haven't started any marathon yet."
+  },
+  "created": {
+    "empty": "You haven't created any marathon yet."
+  },
+  "search": {
+    "title": "Search Movies",
+    "placeholder": "Search by title...",
+    "noResults": "No results found.",
+    "error": "Failed to search movies. Check your API key."
+  },
+  "create": {
+    "newTitle": "New Marathon",
+    "editTitle": "Edit Marathon",
+    "titleLabel": "Title",
+    "titlePlaceholder": "e.g. Marvel Cinematic Universe",
+    "titleRequired": "Please enter a title",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Describe this marathon...",
+    "publicLabel": "Public (visible to everyone)",
+    "moviesLabel": "Movies",
+    "addMovie": "Add Movie",
+    "noMovies": "No movies added yet. Click \"Add Movie\" to search.",
+    "moviesRequired": "Add at least one movie",
+    "createMarathon": "Create Marathon",
+    "saveChanges": "Save Changes",
+    "created": "Marathon created!",
+    "updated": "Marathon updated!"
+  },
+  "import": {
+    "button": "Import from AI",
+    "title": "Import from AI",
+    "description": "Copy the prompt below, paste it into ChatGPT with your request, then paste the JSON response here.",
+    "step1": "1. Copy this prompt and send it to ChatGPT with your request",
+    "step1hint": "Example request: \"Give me the MCU movies in chronological order, movies only.\"",
+    "step2": "2. Paste the JSON response here",
+    "import": "Import",
+    "importing": "Fetching movies...",
+    "fetching": "Fetching movie {{done}} of {{total}}...",
+    "invalidJson": "Invalid JSON. Make sure you copied the full response from ChatGPT.",
+    "noMoviesFound": "No movies could be found on OMDB. Try again with different titles.",
+    "partialSuccess": "{{count}} movie(s) could not be found and were skipped: {{titles}}",
+    "success": "{{count}} movie(s) imported successfully!"
+  },
+  "view": {
+    "watched": "watched",
+    "progress": "progress",
+    "totalRuntime": "total runtime",
+    "completed": "Marathon completed! Congratulations!",
+    "completedBadge": "Completed!",
+    "saveProgress": "Save Progress",
+    "saved": "Progress saved",
+    "continue": "Continue",
+    "review": "Review"
+  }
+}
