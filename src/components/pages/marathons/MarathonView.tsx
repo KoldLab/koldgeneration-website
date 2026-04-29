@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserMarathon, updateMovieProgress } from '@/services/marathonService';
 import MovieCard from './components/MovieCard';
-import type { UserMarathon, MarathonMovieEntry } from '@/types/marathon';
+import type { UserMarathon } from '@/types/marathon';
 import { toast } from 'sonner';
 
 export default function MarathonView() {
