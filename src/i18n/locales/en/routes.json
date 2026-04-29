@@ -27,6 +27,18 @@
       "description": "Generate /give commands for shulker boxes pre-filled with items from a Litematica material list"
     }
   },
+  "marathons": {
+    "title": "Movies",
+    "description": "Browse movies and track marathons",
+    "movies": {
+      "title": "Movies",
+      "description": "Search and track movies"
+    },
+    "marathons": {
+      "title": "Marathons",
+      "description": "Browse and start movie marathons"
+    }
+  },
   "workouts": {
     "title": "Workouts",
     "description": "Track your fitness journey with workout logging and routines",

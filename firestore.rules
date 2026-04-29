@@ -103,6 +103,25 @@ service cloud.firestore {
       allow delete: if request.auth != null && resource.data.ownerId == request.auth.uid;
     }
 
+    // Marathons collection - public marathons are readable by all, write only by owner
+    match /marathons/{marathonId} {
+      allow read: if resource.data.visibility == 'public' || isOwner(resource.data.createdBy);
+      allow create: if isAuthenticated() && request.resource.data.createdBy == request.auth.uid;
+      allow update, delete: if isOwner(resource.data.createdBy);
+    }
+
+    // UserMarathons collection - private per user
+    match /userMarathons/{marathonId} {
+      allow read, update, delete: if isOwner(resource.data.userId);
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    }
+
+    // UserMovies collection - private per user (doc ID = userId_imdbId)
+    match /userMovies/{docId} {
+      allow read, update, delete: if isOwner(resource.data.userId);
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    }
+
     // Default deny rule for all other collections
     match /{document=**} {
       allow read, write: if false;

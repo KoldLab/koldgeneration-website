@@ -12,6 +12,10 @@ import MyTournaments from './components/pages/tournaments/MyTournaments';
 import EnterTournament from './components/pages/tournaments/EnterTournament';
 import ExerciseLibrary from './components/pages/workouts/ExerciseLibrary';
 import Workouts from './components/pages/workouts/Workouts';
+import Marathons from './components/pages/marathons/Marathons';
+import MarathonView from './components/pages/marathons/MarathonView';
+import CreateEditMarathon from './components/pages/marathons/CreateEditMarathon';
+import Movies from './components/pages/movies/Movies';
 import ErrorBoundary from './components/ErrorBoundary';
 import NotFound from './components/pages/NotFound';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -93,6 +97,38 @@ export const router = createBrowserRouter([
       {
         path: '/tournament/:code',
         element: <TournamentView />,
+      },
+      {
+        path: '/movies',
+        element: <Movies />,
+      },
+      {
+        path: '/marathons',
+        element: <Marathons />,
+      },
+      {
+        path: '/marathons/create',
+        element: (
+          <ProtectedRoute>
+            <CreateEditMarathon />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/marathons/edit/:id',
+        element: (
+          <ProtectedRoute>
+            <CreateEditMarathon />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/marathons/track/:id',
+        element: (
+          <ProtectedRoute>
+            <MarathonView />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '*',

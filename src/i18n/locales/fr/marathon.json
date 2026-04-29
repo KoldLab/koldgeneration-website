@@ -1,0 +1,75 @@
+{
+  "title": "Marathons de Films",
+  "new": "Nouveau Marathon",
+  "movies": "films",
+  "private": "Privé",
+  "start": "Démarrer",
+  "deleted": "Supprimé",
+  "loginRequired": "Vous devez être connecté pour faire cela",
+  "indexBuilding": "Les index de la base de données sont en cours de construction (1-2 minutes). Veuillez rafraîchir la page.",
+  "tabs": {
+    "browse": "Parcourir",
+    "mine": "Mes Marathons",
+    "created": "Créés par moi"
+  },
+  "browse": {
+    "empty": "Aucun marathon public pour le moment.",
+    "createFirst": "Créez le premier"
+  },
+  "mine": {
+    "empty": "Vous n'avez pas encore commencé de marathon."
+  },
+  "created": {
+    "empty": "Vous n'avez encore créé aucun marathon."
+  },
+  "search": {
+    "title": "Rechercher des Films",
+    "placeholder": "Rechercher par titre...",
+    "noResults": "Aucun résultat trouvé.",
+    "error": "Échec de la recherche. Vérifiez votre clé API."
+  },
+  "create": {
+    "newTitle": "Nouveau Marathon",
+    "editTitle": "Modifier le Marathon",
+    "titleLabel": "Titre",
+    "titlePlaceholder": "ex. Marvel Cinematic Universe",
+    "titleRequired": "Veuillez entrer un titre",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Décrivez ce marathon...",
+    "publicLabel": "Public (visible par tous)",
+    "moviesLabel": "Films",
+    "addMovie": "Ajouter un Film",
+    "noMovies": "Aucun film ajouté. Cliquez sur \"Ajouter un Film\" pour chercher.",
+    "moviesRequired": "Ajoutez au moins un film",
+    "createMarathon": "Créer le Marathon",
+    "saveChanges": "Enregistrer les modifications",
+    "created": "Marathon créé !",
+    "updated": "Marathon mis à jour !"
+  },
+  "import": {
+    "button": "Importer via IA",
+    "title": "Importer via IA",
+    "description": "Copiez le prompt ci-dessous, collez-le dans ChatGPT avec votre demande, puis collez le JSON ici.",
+    "step1": "1. Copiez ce prompt et envoyez-le à ChatGPT avec votre demande",
+    "step1hint": "Exemple : \"Donne-moi les films MCU en ordre chronologique, uniquement les films.\"",
+    "step2": "2. Collez la réponse JSON ici",
+    "import": "Importer",
+    "importing": "Récupération des films...",
+    "fetching": "Récupération du film {{done}} sur {{total}}...",
+    "invalidJson": "JSON invalide. Assurez-vous d'avoir copié la réponse complète de ChatGPT.",
+    "noMoviesFound": "Aucun film trouvé sur OMDB. Réessayez avec des titres différents.",
+    "partialSuccess": "{{count}} film(s) introuvable(s) et ignoré(s) : {{titles}}",
+    "success": "{{count}} film(s) importé(s) avec succès !"
+  },
+  "view": {
+    "watched": "vus",
+    "progress": "progression",
+    "totalRuntime": "durée totale",
+    "completed": "Marathon terminé ! Félicitations !",
+    "completedBadge": "Terminé !",
+    "saveProgress": "Sauvegarder la progression",
+    "saved": "Progression sauvegardée",
+    "continue": "Continuer",
+    "review": "Revoir"
+  }
+}
