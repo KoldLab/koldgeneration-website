@@ -58,27 +58,29 @@ function MarathonTemplateCard({ marathon, onStart, onEdit, onDelete, isOwner }: 
   isOwner: boolean;
 }) {
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/20 transition-colors">
-      {marathon.coverPosterUrl ? (
-        <img src={marathon.coverPosterUrl} alt={marathon.title} className="w-12 h-16 object-cover rounded flex-shrink-0" />
-      ) : (
-        <div className="w-12 h-16 bg-muted rounded flex-shrink-0 flex items-center justify-center">
-          <Film className="h-5 w-5 text-muted-foreground" />
-        </div>
-      )}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <p className="font-semibold truncate">{marathon.title}</p>
-          {marathon.visibility === 'private' && (
-            <Badge variant="outline" className="text-xs">Private</Badge>
-          )}
-        </div>
-        {marathon.description && (
-          <p className="text-sm text-muted-foreground line-clamp-1 mt-0.5">{marathon.description}</p>
+    <div className="flex flex-col xs:flex-row items-start gap-3 p-3 rounded-lg border bg-card hover:bg-accent/20 transition-colors">
+      <div className="flex items-start gap-3 flex-1 min-w-0">
+        {marathon.coverPosterUrl ? (
+          <img src={marathon.coverPosterUrl} alt={marathon.title} className="w-12 h-16 object-cover rounded flex-shrink-0" />
+        ) : (
+          <div className="w-12 h-16 bg-muted rounded flex-shrink-0 flex items-center justify-center">
+            <Film className="h-5 w-5 text-muted-foreground" />
+          </div>
         )}
-        <p className="text-xs text-muted-foreground mt-1">{marathon.movies.length} movies</p>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="font-semibold truncate">{marathon.title}</p>
+            {marathon.visibility === 'private' && (
+              <Badge variant="outline" className="text-xs">Private</Badge>
+            )}
+          </div>
+          {marathon.description && (
+            <p className="text-sm text-muted-foreground line-clamp-1 mt-0.5">{marathon.description}</p>
+          )}
+          <p className="text-xs text-muted-foreground mt-1">{marathon.movies.length} movies</p>
+        </div>
       </div>
-      <div className="flex flex-col gap-1 flex-shrink-0">
+      <div className="flex gap-1 flex-shrink-0 self-end xs:self-auto xs:flex-col">
         <Button size="sm" onClick={() => onStart(marathon)}>
           <Play className="h-3 w-3 mr-1" /> Start
         </Button>
@@ -236,6 +238,34 @@ export default function Marathons() {
         </Button>
       </div>
 
+      {/* Mobile nav — full-width, sits above the flex row */}
+      <div className="sm:hidden mb-4">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+          {navItems.map((item) => {
+            if (item.authRequired && !user) return null;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setSection(item.id)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-colors flex-shrink-0 ${
+                  section === item.id
+                    ? 'bg-primary text-primary-foreground font-medium'
+                    : 'bg-muted text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {item.icon}
+                {item.label}
+                {item.count !== undefined && (
+                  <span className={`text-xs tabular-nums ${
+                    section === item.id ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                  }`}>{item.count}</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="flex gap-6">
         {/* Side nav — desktop */}
         <aside className="hidden sm:flex flex-col w-48 shrink-0 space-y-0.5">
@@ -256,29 +286,6 @@ export default function Marathons() {
             );
           })}
         </aside>
-
-        {/* Mobile nav */}
-        <div className="sm:hidden w-full mb-4">
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {navItems.map((item) => {
-              if (item.authRequired && !user) return null;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setSection(item.id)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-colors flex-shrink-0 ${
-                    section === item.id
-                      ? 'bg-primary text-primary-foreground font-medium'
-                      : 'bg-muted text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {item.icon}
-                  {item.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
 
         {/* Content */}
         <main className="flex-1 min-w-0 space-y-4">

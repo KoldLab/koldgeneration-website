@@ -66,7 +66,7 @@ export default function MovieSearchDialog({ open, onClose, onAdd, existingIds, n
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col gap-4">
+      <DialogContent className="w-full max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[85dvh] flex flex-col gap-4">
         <DialogHeader>
           <DialogTitle>{t('marathon.search.title')}</DialogTitle>
         </DialogHeader>

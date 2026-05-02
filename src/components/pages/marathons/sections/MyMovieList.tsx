@@ -15,8 +15,8 @@ function MovieRow({ movie, onSelect, onRemove, onStatusChange }: {
   onStatusChange: (id: string, status: 'watched' | 'want_to_watch') => void;
 }) {
   return (
-    <div className="flex items-center gap-3 p-2 rounded-lg border bg-card hover:bg-accent/20 transition-colors">
-      <button onClick={() => onSelect(movie.imdbId)} className="flex items-center gap-3 flex-1 min-w-0 text-left">
+    <div className="flex items-center gap-2 p-2 rounded-lg border bg-card hover:bg-accent/20 transition-colors">
+      <button onClick={() => onSelect(movie.imdbId)} className="flex items-center gap-2 flex-1 min-w-0 text-left">
         {movie.posterUrl ? (
           <img src={movie.posterUrl} alt={movie.title} className="w-10 h-14 object-cover rounded flex-shrink-0" />
         ) : (
@@ -24,7 +24,7 @@ function MovieRow({ movie, onSelect, onRemove, onStatusChange }: {
             <Film className="h-4 w-4 text-muted-foreground" />
           </div>
         )}
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="font-medium text-sm truncate">{movie.title}</p>
           <p className="text-xs text-muted-foreground">
             {movie.releaseYear ?? '—'}
@@ -107,11 +107,15 @@ export default function MyMovieList() {
     <>
       <Tabs defaultValue="watchlist">
         <TabsList className="w-full">
-          <TabsTrigger value="watchlist" className="flex-1 gap-2">
-            <Bookmark className="h-4 w-4" /> Watchlist ({watchlist.length})
+          <TabsTrigger value="watchlist" className="flex-1 gap-1.5">
+            <Bookmark className="h-4 w-4" />
+            <span className="hidden xs:inline">Watchlist</span>
+            <span className="xs:hidden">Watch</span>
+            ({watchlist.length})
           </TabsTrigger>
-          <TabsTrigger value="watched" className="flex-1 gap-2">
-            <Eye className="h-4 w-4" /> Watched ({watched.length})
+          <TabsTrigger value="watched" className="flex-1 gap-1.5">
+            <Eye className="h-4 w-4" />
+            Watched ({watched.length})
           </TabsTrigger>
         </TabsList>
 

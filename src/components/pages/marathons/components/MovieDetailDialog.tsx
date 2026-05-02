@@ -97,7 +97,7 @@ export default function MovieDetailDialog({ imdbId, onClose }: Props) {
 
   return (
     <Dialog open={!!imdbId} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="w-full max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90dvh] overflow-y-auto">
         {loading && (
           <div className="flex justify-center py-16">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -110,12 +110,12 @@ export default function MovieDetailDialog({ imdbId, onClose }: Props) {
               <DialogTitle className="text-xl pr-8">{movie.Title}</DialogTitle>
             </DialogHeader>
 
-            <div className="flex gap-5">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-5">
               {/* Poster */}
               {poster ? (
-                <img src={poster} alt={movie.Title} className="w-32 h-48 object-cover rounded-lg flex-shrink-0 shadow-md" />
+                <img src={poster} alt={movie.Title} className="w-full sm:w-32 max-h-48 sm:max-h-none sm:h-48 object-cover rounded-lg flex-shrink-0 shadow-md" />
               ) : (
-                <div className="w-32 h-48 bg-muted rounded-lg flex-shrink-0" />
+                <div className="w-full sm:w-32 h-40 sm:h-48 bg-muted rounded-lg flex-shrink-0" />
               )}
 
               {/* Info */}
@@ -154,13 +154,13 @@ export default function MovieDetailDialog({ imdbId, onClose }: Props) {
 
             {/* Actions */}
             {user && (
-              <div className="flex gap-2 flex-wrap pt-1">
+              <div className="flex flex-wrap gap-2 pt-1">
                 {!userMovie ? (
                   <>
-                    <Button onClick={() => handleAdd('watched')} disabled={acting} className="gap-2">
+                    <Button onClick={() => handleAdd('watched')} disabled={acting} className="gap-2 flex-1 sm:flex-none">
                       <Eye className="h-4 w-4" /> Mark as Watched
                     </Button>
-                    <Button variant="outline" onClick={() => handleAdd('want_to_watch')} disabled={acting} className="gap-2">
+                    <Button variant="outline" onClick={() => handleAdd('want_to_watch')} disabled={acting} className="gap-2 flex-1 sm:flex-none">
                       <Bookmark className="h-4 w-4" /> Add to Watchlist
                     </Button>
                   </>

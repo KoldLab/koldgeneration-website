@@ -42,6 +42,29 @@ export default function Movies() {
         <h1 className="text-2xl font-bold">Movies</h1>
       </div>
 
+      {/* Mobile nav — full-width, above the flex row */}
+      <div className="sm:hidden mb-4">
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {navItems.map((item) => {
+            if (item.authRequired && !user) return null;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setSection(item.id)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-colors flex-shrink-0 ${
+                  section === item.id
+                    ? 'bg-primary text-primary-foreground font-medium'
+                    : 'bg-muted text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {item.icon}
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="flex gap-6">
         {/* Side nav — desktop */}
         <aside className="hidden sm:flex flex-col w-48 shrink-0 space-y-0.5">
@@ -62,31 +85,8 @@ export default function Movies() {
           })}
         </aside>
 
-        {/* Mobile nav */}
-        <div className="sm:hidden w-full mb-4">
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {navItems.map((item) => {
-              if (item.authRequired && !user) return null;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setSection(item.id)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-colors flex-shrink-0 ${
-                    section === item.id
-                      ? 'bg-primary text-primary-foreground font-medium'
-                      : 'bg-muted text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {item.icon}
-                  {item.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
         {/* Content */}
-        <main className="flex-1 min-w-0">
+        <main className="flex-1 min-w-0 space-y-4">
           {section === 'browse' && <BrowseMovies />}
           {section === 'my-list' && <MyMovieList />}
         </main>
