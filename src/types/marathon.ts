@@ -41,34 +41,36 @@ export type UserMarathon = {
   updatedAt: Date;
 };
 
-export type OMDBSearchMovie = {
-  Title: string;
-  Year: string;
-  imdbID: string;
-  Type: string;
-  Poster: string;
+export type TMDBSearchMovie = {
+  id: number;
+  title: string;
+  release_date: string;
+  poster_path: string | null;
+  overview: string;
 };
 
-export type OMDBSearchResult = {
-  Search: OMDBSearchMovie[];
-  totalResults: string;
-  Response: 'True' | 'False';
-  Error?: string;
+export type TMDBSearchResult = {
+  results: TMDBSearchMovie[];
+  total_results: number;
+  total_pages: number;
+  page: number;
 };
 
-export type OMDBMovieDetail = {
-  Title: string;
-  Year: string;
-  Rated: string;
-  Runtime: string;
-  Genre: string;
-  Director: string;
-  Actors: string;
-  Plot: string;
-  Poster: string;
-  imdbID: string;
-  imdbRating: string;
-  Type: string;
-  Response: 'True' | 'False';
-  Error?: string;
+export type TMDBMovieDetail = {
+  id: number;
+  imdb_id: string | null;
+  title: string;
+  release_date: string;
+  poster_path: string | null;
+  overview: string;
+  runtime: number | null;
+  genres: { id: number; name: string }[];
+  vote_average: number;
+  certification: string | null;
+  director: string | null;
+  cast: string[];
 };
+
+export type OMDBSearchMovie = TMDBSearchMovie;
+export type OMDBSearchResult = TMDBSearchResult;
+export type OMDBMovieDetail = TMDBMovieDetail;

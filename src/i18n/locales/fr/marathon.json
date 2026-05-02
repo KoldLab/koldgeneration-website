@@ -26,7 +26,22 @@
     "title": "Rechercher des Films",
     "placeholder": "Rechercher par titre...",
     "noResults": "Aucun résultat trouvé.",
-    "error": "Échec de la recherche. Vérifiez votre clé API."
+    "error": "Échec de la recherche. Vérifiez votre clé API.",
+    "start": "Recherchez un film pour commencer.",
+    "pageOf": "Page {{page}} sur {{total}}"
+  },
+  "movie": {
+    "director": "Réalisateur",
+    "cast": "Distribution",
+    "markWatched": "Marquer comme vu",
+    "addWatchlist": "Ajouter à la liste",
+    "moveWatchlist": "Déplacer vers la liste",
+    "watched": "Vu",
+    "watchlist": "À voir",
+    "addedWatched": "Ajouté aux films vus",
+    "addedWatchlist": "Ajouté à la liste à voir",
+    "updated": "Mis à jour",
+    "removed": "Retiré de la liste"
   },
   "create": {
     "newTitle": "Nouveau Marathon",
@@ -57,7 +72,7 @@
     "importing": "Récupération des films...",
     "fetching": "Récupération du film {{done}} sur {{total}}...",
     "invalidJson": "JSON invalide. Assurez-vous d'avoir copié la réponse complète de ChatGPT.",
-    "noMoviesFound": "Aucun film trouvé sur OMDB. Réessayez avec des titres différents.",
+    "noMoviesFound": "Aucun film trouvé sur TMDb. Réessayez avec des titres différents.",
     "partialSuccess": "{{count}} film(s) introuvable(s) et ignoré(s) : {{titles}}",
     "success": "{{count}} film(s) importé(s) avec succès !"
   },

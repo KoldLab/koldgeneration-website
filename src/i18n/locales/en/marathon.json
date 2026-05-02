@@ -26,7 +26,22 @@
     "title": "Search Movies",
     "placeholder": "Search by title...",
     "noResults": "No results found.",
-    "error": "Failed to search movies. Check your API key."
+    "error": "Failed to search movies. Check your API key.",
+    "start": "Search for a movie to get started.",
+    "pageOf": "Page {{page}} of {{total}}"
+  },
+  "movie": {
+    "director": "Director",
+    "cast": "Cast",
+    "markWatched": "Mark as Watched",
+    "addWatchlist": "Add to Watchlist",
+    "moveWatchlist": "Move to Watchlist",
+    "watched": "Watched",
+    "watchlist": "Watchlist",
+    "addedWatched": "Added to watched list",
+    "addedWatchlist": "Added to watchlist",
+    "updated": "Updated",
+    "removed": "Removed from list"
   },
   "create": {
     "newTitle": "New Marathon",
@@ -57,7 +72,7 @@
     "importing": "Fetching movies...",
     "fetching": "Fetching movie {{done}} of {{total}}...",
     "invalidJson": "Invalid JSON. Make sure you copied the full response from ChatGPT.",
-    "noMoviesFound": "No movies could be found on OMDB. Try again with different titles.",
+    "noMoviesFound": "No movies could be found on TMDb. Try again with different titles.",
     "partialSuccess": "{{count}} movie(s) could not be found and were skipped: {{titles}}",
     "success": "{{count}} movie(s) imported successfully!"
   },

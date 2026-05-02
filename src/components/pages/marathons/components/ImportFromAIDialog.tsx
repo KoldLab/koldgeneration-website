@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { getMovieByTitle, omdbDetailMovieToMarathonMovie } from '@/services/omdbService';
+import { getMovieByTitle, tmdbDetailMovieToMarathonMovie } from '@/services/tmdbService';
 import type { MarathonMovie } from '@/types/marathon';
 import { toast } from 'sonner';
 
@@ -93,7 +93,7 @@ export default function ImportFromAIDialog({ open, onClose, onImport, existingCo
       try {
         const detail = await getMovieByTitle(entry.title, entry.year);
         if (detail) {
-          results.push(omdbDetailMovieToMarathonMovie(detail, existingCount + i));
+          results.push(tmdbDetailMovieToMarathonMovie(detail, existingCount + i));
         } else {
           failed.push(entry.title);
         }
