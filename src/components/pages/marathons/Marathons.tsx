@@ -58,7 +58,7 @@ function MarathonTemplateCard({ marathon, onStart, onEdit, onDelete, isOwner }: 
   isOwner: boolean;
 }) {
   return (
-    <div className="flex flex-col xs:flex-row items-start gap-3 p-3 rounded-lg border bg-card hover:bg-accent/20 transition-colors">
+    <div className="flex flex-col gap-3 rounded-lg border bg-card p-3 transition-colors hover:bg-accent/20 xs:flex-row xs:items-start">
       <div className="flex items-start gap-3 flex-1 min-w-0">
         {marathon.coverPosterUrl ? (
           <img src={marathon.coverPosterUrl} alt={marathon.title} className="w-12 h-16 object-cover rounded flex-shrink-0" />
@@ -68,19 +68,21 @@ function MarathonTemplateCard({ marathon, onStart, onEdit, onDelete, isOwner }: 
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <p className="font-semibold truncate">{marathon.title}</p>
+          <div className="flex items-start gap-2 flex-wrap">
+            <p className="min-w-0 text-base font-semibold leading-tight break-words sm:text-lg">
+              {marathon.title}
+            </p>
             {marathon.visibility === 'private' && (
               <Badge variant="outline" className="text-xs">Private</Badge>
             )}
           </div>
           {marathon.description && (
-            <p className="text-sm text-muted-foreground line-clamp-1 mt-0.5">{marathon.description}</p>
+            <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground break-words">{marathon.description}</p>
           )}
           <p className="text-xs text-muted-foreground mt-1">{marathon.movies.length} movies</p>
         </div>
       </div>
-      <div className="flex gap-1 flex-shrink-0 self-end xs:self-auto xs:flex-col">
+      <div className="flex w-full gap-1 sm:w-auto xs:w-auto flex-shrink-0 xs:self-auto xs:flex-col">
         <Button size="sm" onClick={() => onStart(marathon)}>
           <Play className="h-3 w-3 mr-1" /> Start
         </Button>
@@ -115,7 +117,7 @@ function UserMarathonCard({ marathon, onContinue, onDelete }: {
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className="font-semibold truncate">{marathon.marathonTitle}</p>
+            <p className="font-semibold break-words leading-tight">{marathon.marathonTitle}</p>
             {marathon.completedAt && <Trophy className="h-4 w-4 text-primary flex-shrink-0" />}
           </div>
           <p className="text-sm text-muted-foreground">{watched}/{total} watched · {progress}%</p>
@@ -229,18 +231,18 @@ export default function Marathons() {
   );
 
   return (
-    <div className="container max-w-5xl mx-auto px-4 py-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="container max-w-5xl mx-auto px-2 py-3 sm:px-4 sm:py-6">
+      <div className="mb-6 flex items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">Marathons</h1>
-        <Button onClick={() => navigate('/marathons/create')}>
+        <Button onClick={() => navigate('/marathons/create')} className="shrink-0">
           <Plus className="h-4 w-4 mr-2" />
           {t('marathon.new')}
         </Button>
       </div>
 
       {/* Mobile nav — full-width, sits above the flex row */}
-      <div className="sm:hidden mb-4">
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+      <div className="sm:hidden mb-4 -mx-2 px-2">
+        <div className="flex gap-2 overflow-x-auto px-0.5 pb-1 scrollbar-hide">
           {navItems.map((item) => {
             if (item.authRequired && !user) return null;
             return (
