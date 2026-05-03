@@ -71,7 +71,7 @@ export default function UserMenu() {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-56 bg-background border rounded-md shadow-lg z-50">
           <div className="p-2">
-            <div className="px-3 py-2 text-sm border-b mb-2">
+            <div className="px-3 py-2 text-sm border-b mb-1">
               <p className="font-medium">
                 {user.displayName || t('common.user')}
               </p>
@@ -81,18 +81,18 @@ export default function UserMenu() {
             </div>
 
             {/* Language Settings */}
-            <div className="px-2 py-1.5 border-b">
+            <div className="py-1 border-b">
               <LanguageSwitcher variant="accordion" expandInline={true} />
             </div>
 
             {/* Theme Settings */}
-            <div className="px-2 py-2 border-b">
+            <div className="px-3 py-2.5 border-b">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {theme === 'dark' ? (
-                    <Moon className="h-4 w-4 text-muted-foreground" />
+                    <Moon className="h-4 w-4 text-muted-foreground shrink-0" />
                   ) : (
-                    <Sun className="h-4 w-4 text-muted-foreground" />
+                    <Sun className="h-4 w-4 text-muted-foreground shrink-0" />
                   )}
                   <span className="text-sm font-medium">Theme</span>
                 </div>
@@ -104,14 +104,16 @@ export default function UserMenu() {
             </div>
 
             {/* Sign Out */}
-            <Button
-              variant="ghost"
-              onClick={handleSignOut}
-              className="w-full justify-start gap-2 mt-2"
-            >
-              <LogOut className="h-4 w-4" />
-              {t('common.signOut')}
-            </Button>
+            <div className="pt-1">
+              <Button
+                variant="ghost"
+                onClick={handleSignOut}
+                className="w-full justify-start gap-2 px-3 py-2 h-auto"
+              >
+                <LogOut className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span className="text-sm font-medium">{t('common.signOut')}</span>
+              </Button>
+            </div>
           </div>
         </div>
       )}

@@ -3,8 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import type { Note, NoteColor } from '@/types/notes';
 
+
 const colorClasses: Record<NoteColor, string> = {
-  default: 'bg-card',
+  default: 'bg-muted',
   red: 'bg-red-100 dark:bg-red-950/40 border-red-200 dark:border-red-900',
   orange: 'bg-orange-100 dark:bg-orange-950/40 border-orange-200 dark:border-orange-900',
   yellow: 'bg-yellow-100 dark:bg-yellow-950/40 border-yellow-200 dark:border-yellow-900',
@@ -17,11 +18,13 @@ const colorClasses: Record<NoteColor, string> = {
 interface NoteCardProps {
   note: Note;
   isCollaborator?: boolean;
+  onClick?: () => void;
 }
 
-export default function NoteCard({ note, isCollaborator = false }: NoteCardProps) {
+export default function NoteCard({ note, isCollaborator = false, onClick }: NoteCardProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const handleClick = onClick ?? (() => navigate(`/notes/${note.id}`));
 
   const previewItems = note.items.slice(0, 6);
   const extraCount = note.items.length - previewItems.length;
@@ -29,13 +32,17 @@ export default function NoteCard({ note, isCollaborator = false }: NoteCardProps
 
   return (
     <div
-      onClick={() => navigate(`/notes/${note.id}`)}
+      onClick={handleClick}
       className={`rounded-lg border p-4 cursor-pointer transition-shadow hover:shadow-md flex flex-col gap-2 min-h-[80px] max-h-[260px] overflow-hidden ${colorClasses[note.color]}`}
     >
       {note.title && (
         <h3 className="font-semibold text-sm leading-tight truncate">
           {note.title}
         </h3>
+      )}
+
+      {note.type === 'note' && !note.title && !note.content && (
+        <p className="text-sm text-muted-foreground italic">{t('notes.card.empty')}</p>
       )}
 
       {note.type === 'note' && note.content && (

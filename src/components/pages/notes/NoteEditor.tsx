@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import type { ReactNode } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
-  MoreVertical,
   Pin,
   PinOff,
   Link,
@@ -16,13 +16,6 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,9 +33,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useToast } from '@/hooks/useToast';
 import { useAuth } from '@/contexts/AuthContext';
 import {
+  createNote,
   subscribeToNote,
   updateNote,
   deleteNote,
@@ -259,8 +254,70 @@ function CollaboratorsDialog({
 
 // ─── Main editor ───────────────────────────────────────────────────────────
 
-export default function NoteEditor() {
-  const { noteId } = useParams<{ noteId: string }>();
+interface HeaderActionButtonProps {
+  label: string;
+  icon: ReactNode;
+  onClick: () => void;
+  disabled?: boolean;
+  destructive?: boolean;
+}
+
+function HeaderActionButton({
+  label,
+  icon,
+  onClick,
+  disabled = false,
+  destructive = false,
+}: HeaderActionButtonProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <Popover open={isOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onClick}
+          onMouseEnter={() => !disabled && setIsOpen(true)}
+          onMouseLeave={() => setIsOpen(false)}
+          onFocus={() => !disabled && setIsOpen(true)}
+          onBlur={() => setIsOpen(false)}
+          aria-label={label}
+          title={label}
+          disabled={disabled}
+          className={destructive ? 'text-destructive hover:text-destructive' : undefined}
+        >
+          {icon}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        side="bottom"
+        align="center"
+        sideOffset={8}
+        className="w-auto rounded-full px-3 py-1.5 text-xs font-medium"
+      >
+        {label}
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+interface NoteEditorProps {
+  noteId?: string;
+  onClose?: () => void;
+  onDeleted?: (deletedNoteId: string) => void;
+}
+
+export default function NoteEditor({
+  noteId: propNoteId,
+  onClose,
+  onDeleted,
+}: NoteEditorProps = {}) {
+  const { noteId: paramNoteId } = useParams<{ noteId: string }>();
+  const noteId = propNoteId ?? paramNoteId;
+  const [searchParams] = useSearchParams();
+  const isDraftRoute = noteId === 'new';
+  const draftType = (searchParams.get('type') ?? 'note') as 'note' | 'list';
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -279,12 +336,93 @@ export default function NoteEditor() {
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latestNoteRef = useRef<Note | null>(null);
   const newItemInputRef = useRef<HTMLInputElement>(null);
+  const saveTextNow = useCallback(async () => {
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+    }
+
+    const current = latestNoteRef.current;
+    if (!current) return;
+
+    const hasContent = current.title.trim() || (current.type === 'note' && current.content.trim());
+    if (!hasContent) return;
+
+    setIsSaving(true);
+    try {
+      if (current.id === 'draft') {
+        if (!user) return;
+        const created = await createNote(user.uid, {
+          title: current.title,
+          type: current.type,
+          content: current.content,
+          color: current.color,
+        });
+        const realNote = { ...current, id: created.id };
+        latestNoteRef.current = realNote;
+        setNote(realNote);
+        navigate(`/notes/${created.id}`, { replace: true });
+      } else {
+        await updateNote(current.id, {
+          title: current.title,
+          content: current.content,
+          color: current.color,
+        });
+      }
+
+      isDirtyTextRef.current = false;
+      setHasSaved(true);
+    } catch {
+      showError(t('notes.editor.saveError'));
+    } finally {
+      setIsSaving(false);
+    }
+  }, [navigate, showError, t, user]);
+
+  const goBack = useCallback(async () => {
+    if (isDirtyTextRef.current) {
+      await saveTextNow();
+    }
+
+    if (onClose) {
+      onClose();
+      return;
+    }
+
+    navigate('/notes');
+  }, [navigate, onClose, saveTextNow]);
   // True while title/content has unsaved changes — used to avoid remote snapshot clobbering local text
   const isDirtyTextRef = useRef(false);
 
+  // Draft init — populate local state without touching Firestore
+  useEffect(() => {
+    if (!isDraftRoute) return;
+    const empty: Note = {
+      id: 'draft',
+      userId: user?.uid ?? '',
+      title: '',
+      type: draftType,
+      content: '',
+      items: [],
+      color: 'default',
+      isPinned: false,
+      isPublic: false,
+      shareToken: null,
+      inviteToken: null,
+      collaborators: [],
+      collaboratorProfiles: {},
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    setNote(empty);
+    latestNoteRef.current = empty;
+    setIsLoading(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDraftRoute, draftType, user?.uid]);
+
   // Real-time subscription
   useEffect(() => {
-    if (!noteId) return;
+    if (!noteId || isDraftRoute) return;
     const unsub = subscribeToNote(noteId, (remoteNote) => {
       if (!remoteNote) {
         setIsLoading(false);
@@ -314,24 +452,9 @@ export default function NoteEditor() {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     isDirtyTextRef.current = true;
     saveTimerRef.current = setTimeout(async () => {
-      const current = latestNoteRef.current;
-      if (!current) return;
-      setIsSaving(true);
-      try {
-        await updateNote(current.id, {
-          title: current.title,
-          content: current.content,
-          color: current.color,
-        });
-        isDirtyTextRef.current = false;
-        setHasSaved(true);
-      } catch {
-        showError(t('notes.editor.saveError'));
-      } finally {
-        setIsSaving(false);
-      }
+      await saveTextNow();
     }, 1500);
-  }, [showError, t]);
+  }, [saveTextNow]);
 
   useEffect(() => {
     return () => {
@@ -342,14 +465,32 @@ export default function NoteEditor() {
   // Immediate save for items (collaboration-critical)
   const saveItemsNow = useCallback(
     async (items: ChecklistItem[]) => {
-      if (!latestNoteRef.current) return;
+      const current = latestNoteRef.current;
+      if (!current) return;
+      if (current.id === 'draft') {
+        if (!user) return;
+        try {
+          const created = await createNote(user.uid, {
+            title: current.title,
+            type: 'list',
+            items,
+          });
+          const realNote = { ...current, id: created.id, items };
+          latestNoteRef.current = realNote;
+          setNote(realNote);
+          navigate(`/notes/${created.id}`, { replace: true });
+        } catch {
+          showError(t('notes.editor.saveError'));
+        }
+        return;
+      }
       try {
-        await updateNote(latestNoteRef.current.id, { items });
+        await updateNote(current.id, { items });
       } catch {
         showError(t('notes.editor.saveError'));
       }
     },
-    [showError, t]
+    [showError, t, user, navigate]
   );
 
   const updateTextField = useCallback(
@@ -420,19 +561,22 @@ export default function NoteEditor() {
     saveItemsNow(updated);
   };
 
+  const isDraft = note?.id === 'draft';
+
   const handleDeleteConfirm = async () => {
-    if (!note) return;
+    if (!note || isDraft) return;
     try {
       await deleteNote(note.id);
+      onDeleted?.(note.id);
       success(t('notes.editor.deleted'));
-      navigate('/notes');
+      await goBack();
     } catch {
       showError(t('notes.editor.deleteError'));
     }
   };
 
   const handleTogglePin = async () => {
-    if (!note) return;
+    if (!note || isDraft) return;
     const newPinned = !note.isPinned;
     const updated = { ...note, isPinned: newPinned };
     setNote(updated);
@@ -447,7 +591,7 @@ export default function NoteEditor() {
   };
 
   const handleToggleShare = async () => {
-    if (!note) return;
+    if (!note || isDraft) return;
     setIsTogglingShare(true);
     try {
       if (note.isPublic) {
@@ -499,7 +643,7 @@ export default function NoteEditor() {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
         <p className="font-semibold">{t('notes.notFound')}</p>
-        <Button variant="outline" onClick={() => navigate('/notes')}>
+        <Button variant="outline" onClick={goBack}>
           {t('notes.editor.back')}
         </Button>
       </div>
@@ -518,11 +662,11 @@ export default function NoteEditor() {
     <div className={`min-h-[calc(100vh-4rem)] transition-colors ${colorBgClasses[note.color]}`}>
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
         {/* Header */}
-        <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center gap-1.5">
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate('/notes')}
+            onClick={goBack}
             aria-label={t('notes.editor.back')}
           >
             <ArrowLeft className="h-4 w-4" />
@@ -532,74 +676,60 @@ export default function NoteEditor() {
 
           <span className="text-xs text-muted-foreground px-1">{saveStatus}</span>
 
-          {/* Collaborators button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowCollabDialog(true)}
-            className="gap-1.5 h-8 text-xs"
-          >
-            <Users className="h-3.5 w-3.5" />
-            {collaboratorCount > 0 && (
-              <span className="text-xs">{collaboratorCount + 1}</span>
-            )}
-          </Button>
+          {isOwner && !isDraft && (
+            <HeaderActionButton
+              label={note.isPinned ? t('notes.editor.unpin') : t('notes.editor.pin')}
+              onClick={handleTogglePin}
+              icon={note.isPinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+            />
+          )}
 
-          {/* Options menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {isOwner && (
-                <DropdownMenuItem onClick={handleTogglePin}>
-                  {note.isPinned ? (
-                    <><PinOff className="mr-2 h-4 w-4" />{t('notes.editor.unpin')}</>
-                  ) : (
-                    <><Pin className="mr-2 h-4 w-4" />{t('notes.editor.pin')}</>
-                  )}
-                </DropdownMenuItem>
-              )}
-              {isOwner && (
-                <DropdownMenuItem onClick={handleToggleShare} disabled={isTogglingShare}>
-                  {note.isPublic ? (
-                    <><Link2Off className="mr-2 h-4 w-4" />{t('notes.editor.unshare')}</>
-                  ) : (
-                    <><Link className="mr-2 h-4 w-4" />{t('notes.editor.share')}</>
-                  )}
-                </DropdownMenuItem>
-              )}
-              {note.isPublic && isOwner && (
-                <DropdownMenuItem onClick={() => setShowShareDialog(true)}>
-                  <Link className="mr-2 h-4 w-4" />
-                  {t('notes.editor.viewShareLink')}
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => setShowCollabDialog(true)}
-              >
-                <Users className="mr-2 h-4 w-4" />
-                {t('notes.editor.manageCollaborators')}
-              </DropdownMenuItem>
-              {isOwner && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => setShowDeleteDialog(true)}
-                    className="text-destructive focus:text-destructive"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    {note.type === 'list'
-                      ? t('notes.editor.deleteList')
-                      : t('notes.editor.deleteNote')}
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {isOwner && !isDraft && (
+            <HeaderActionButton
+              label={note.isPublic ? t('notes.editor.unshare') : t('notes.editor.share')}
+              onClick={handleToggleShare}
+              disabled={isTogglingShare}
+              icon={note.isPublic ? <Link2Off className="h-4 w-4" /> : <Link className="h-4 w-4" />}
+            />
+          )}
+
+          {note.isPublic && isOwner && !isDraft && (
+            <HeaderActionButton
+              label={t('notes.editor.viewShareLink')}
+              onClick={() => setShowShareDialog(true)}
+              icon={<Link className="h-4 w-4" />}
+            />
+          )}
+
+          {!isDraft && (
+            <HeaderActionButton
+              label={t('notes.editor.manageCollaborators')}
+              onClick={() => setShowCollabDialog(true)}
+              icon={
+                collaboratorCount > 0 ? (
+                  <div className="relative flex items-center justify-center">
+                    <Users className="h-4 w-4" />
+                    <span className="absolute -right-2 -top-2 min-w-4 rounded-full bg-primary px-1 text-[10px] leading-4 text-primary-foreground">
+                      {collaboratorCount + 1}
+                    </span>
+                  </div>
+                ) : (
+                  <Users className="h-4 w-4" />
+                )
+              }
+            />
+          )}
+
+          {isOwner && !isDraft && (
+            <HeaderActionButton
+              label={note.type === 'list'
+                ? t('notes.editor.deleteList')
+                : t('notes.editor.deleteNote')}
+              onClick={() => setShowDeleteDialog(true)}
+              destructive
+              icon={<Trash2 className="h-4 w-4" />}
+            />
+          )}
         </div>
 
         {/* Title */}

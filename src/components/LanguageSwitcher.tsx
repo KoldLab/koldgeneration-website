@@ -59,27 +59,25 @@ export function LanguageSwitcher({
         <div className={className} ref={dropdownRef}>
           <Button
             variant="ghost"
-            size="sm"
-            className="w-full justify-between px-2 py-1.5"
+            className="w-full justify-between px-3 py-2 h-auto"
             onClick={(e) => {
               e.stopPropagation();
               setIsOpen(!isOpen);
             }}
           >
             <div className="flex items-center gap-2">
-              <Languages className="h-4 w-4 text-muted-foreground" />
+              <Languages className="h-4 w-4 text-muted-foreground shrink-0" />
               <span className="text-sm font-medium">Language</span>
             </div>
           </Button>
           {isOpen && (
-            <div className="mt-2 space-y-1">
+            <div className="mt-1 space-y-1">
               {languages.map((lang) => (
                 <Button
                   key={lang.code}
                   variant="ghost"
-                  size="sm"
-                  className={`w-full justify-start px-2 py-1.5 text-xs ${
-                    i18n.language === lang.code ? 'bg-accent font-medium' : ''
+                  className={`w-full justify-start pl-9 pr-3 py-1.5 h-auto text-sm ${
+                    i18n.language === lang.code ? 'bg-accent font-medium' : 'text-muted-foreground'
                   }`}
                   onClick={(e) => {
                     e.stopPropagation();

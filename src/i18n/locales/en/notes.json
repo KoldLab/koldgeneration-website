@@ -13,7 +13,8 @@
   "card": {
     "shared": "Shared",
     "pinned": "Pinned",
-    "moreItems": "+{{count}} more"
+    "moreItems": "+{{count}} more",
+    "empty": "Empty note"
   },
   "editor": {
     "titlePlaceholder": "Title",
