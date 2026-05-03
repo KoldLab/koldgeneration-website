@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useIsMobile } from '@/hooks/useMobile';
 import {
   NavigationMenu,
@@ -8,16 +9,9 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
-import { Link } from 'react-router-dom';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { getRoutesConfig, type RouteConfig } from '@/routesConfig';
 import { useAuth } from '@/contexts/AuthContext';
 import LoginButton from '@/components/auth/LoginButton';
@@ -30,92 +24,157 @@ export function NavBar() {
   const isMobile = useIsMobile();
   const { user, loading, error } = useAuth();
   const { t } = useTranslation();
-  const routesConfig = getRoutesConfig(t)
+  const location = useLocation();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  const routes = getRoutesConfig(t)
     .map((route) => {
-      // Filter workouts route if user is not authenticated
-      if (route.to === '/workouts' && !user) {
-        return null;
-      }
-
-      // Movies/Marathons dropdown is always visible (no auth-required children)
-
-      // Filter tournament children if user is not authenticated
+      if (route.to === '/workouts' && !user) return null;
       if (route.to === '/tournaments' && route.children) {
-        const filteredChildren = route.children.filter((child) => {
-          if (
-            !user &&
-            (child.to === '/tournaments/create' ||
-              child.to === '/tournaments/my')
-          ) {
-            return false;
-          }
-          return true;
-        });
+        const filteredChildren = route.children.filter(
+          (child) =>
+            user ||
+            (child.to !== '/tournaments/create' && child.to !== '/tournaments/my')
+        );
         return { ...route, children: filteredChildren };
       }
       return route;
     })
     .filter((route): route is RouteConfig => route !== null);
 
+  // Close drawer on route change
+  useEffect(() => {
+    setDrawerOpen(false);
+  }, [location.pathname]);
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setDrawerOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [drawerOpen]);
+
+  // Lock body scroll while drawer is open
+  useEffect(() => {
+    document.body.style.overflow = drawerOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [drawerOpen]);
+
+  // Move focus to close button when drawer opens
+  useEffect(() => {
+    if (drawerOpen) closeButtonRef.current?.focus();
+  }, [drawerOpen]);
+
+  const close = useCallback(() => setDrawerOpen(false), []);
+
   return (
     <div className="w-full flex items-center">
-      {/* Left: Mobile menu trigger */}
+      {/* Left: Mobile hamburger */}
       <div className="flex-1 flex items-center sm:hidden">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={t('common.openMenu')}
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-72">
-            <SheetHeader>
-              <SheetTitle>
-                <Link to="/">
-                  <img src="/logo.png" alt="Logo" className="h-10 w-auto shrink-0 invert dark:invert-0" />
-                </Link>
-              </SheetTitle>
-            </SheetHeader>
-            <nav className="mt-4 flex flex-col gap-2">
-              {routesConfig.map((route) => (
-                <MobileItem key={route.title} {...route} />
-              ))}
-            </nav>
-          </SheetContent>
-        </Sheet>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={t('common.openMenu')}
+          aria-expanded={drawerOpen}
+          aria-controls="mobile-drawer"
+          onClick={() => setDrawerOpen(true)}
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
       </div>
 
-      {/* Center: Desktop navigation */}
-      <div className="hidden sm:flex flex-1 justify-start items-center ">
+      {/* Mobile drawer */}
+      {/* Backdrop */}
+      <div
+        aria-hidden="true"
+        onClick={close}
+        className={[
+          'fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-300 sm:hidden',
+          drawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
+        ].join(' ')}
+      />
+
+      {/* Panel */}
+      <div
+        id="mobile-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('common.openMenu')}
+        className={[
+          'fixed inset-y-0 left-0 z-50 w-72 flex flex-col bg-background border-r border-border',
+          'transition-transform duration-300 ease-in-out sm:hidden',
+          drawerOpen ? 'translate-x-0' : '-translate-x-full',
+        ].join(' ')}
+      >
+        {/* Drawer header */}
+        <div className="flex items-center justify-between px-4 py-4 border-b border-border">
+          <Link to="/" onClick={close}>
+            <img
+              src="/logo.png"
+              alt="Logo"
+              className="h-10 w-auto shrink-0 invert dark:invert-0"
+            />
+          </Link>
+          <button
+            ref={closeButtonRef}
+            onClick={close}
+            aria-label={t('common.close')}
+            className="rounded-md p-2 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Nav links */}
+        <nav className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1">
+          {routes.map((route) => (
+            <MobileItem key={route.title} {...route} onNavigate={close} />
+          ))}
+        </nav>
+
+        {/* Footer: lang + theme toggles (only when logged out, since UserMenu has them) */}
+        {!user && (
+          <div className="px-4 py-4 border-t border-border flex items-center gap-3">
+            <LanguageSwitcher variant="accordion" />
+            <ThemeToggle />
+          </div>
+        )}
+      </div>
+
+      {/* Desktop navigation */}
+      <div className="hidden sm:flex flex-1 justify-start items-center">
         <NavigationMenu viewport={isMobile} delayDuration={150}>
-          <NavigationMenuList className="items-center  gap-2">
+          <NavigationMenuList className="items-center gap-2">
             <NavigationMenuItem>
               <Link to="/">
-                <img src="/logo.png" alt="Logo" className="h-10 w-auto shrink-0 invert dark:invert-0" />
+                <img
+                  src="/logo.png"
+                  alt="Logo"
+                  className="h-10 w-auto shrink-0 invert dark:invert-0"
+                />
               </Link>
             </NavigationMenuItem>
-            {routesConfig.map((route) => (
+            {routes.map((route) => (
               <ListItem key={route.title} {...route} />
             ))}
           </NavigationMenuList>
         </NavigationMenu>
       </div>
 
-      {/* Right: Language + Theme + Auth */}
+      {/* Right: Lang + Theme + Auth */}
       <div className="flex-1 flex items-center justify-end gap-3">
         {!user && (
-          <>
+          <div className="hidden sm:flex items-center gap-3">
             <LanguageSwitcher variant="accordion" />
             <ThemeToggle />
-          </>
+          </div>
         )}
         {loading ? (
-          <span className="text-xs text-muted-foreground">
-            {t('common.loading')}
-          </span>
+          <span className="text-xs text-muted-foreground">{t('common.loading')}</span>
         ) : error ? (
           <span className="text-xs text-destructive">{t('common.error')}</span>
         ) : user ? (
@@ -128,12 +187,7 @@ export function NavBar() {
   );
 }
 
-function ListItem({
-  title,
-  children,
-  to,
-  isSub,
-}: RouteConfig & { isSub?: boolean }) {
+function ListItem({ title, children, to, isSub }: RouteConfig & { isSub?: boolean }) {
   if (!children) {
     return isSub ? (
       <li>
@@ -155,8 +209,7 @@ function ListItem({
       <NavigationMenuTrigger
         className="group/trigger"
         onPointerDown={(event) => {
-          const state = event.currentTarget.getAttribute('data-state');
-          if (state === 'open') {
+          if (event.currentTarget.getAttribute('data-state') === 'open') {
             event.preventDefault();
           }
         }}
@@ -174,28 +227,36 @@ function ListItem({
   );
 }
 
-function MobileItem({ title, children, to }: RouteConfig) {
+function MobileItem({
+  title,
+  children,
+  to,
+  onNavigate,
+}: RouteConfig & { onNavigate: () => void }) {
   if (!children) {
     return (
       <Link
         to={to}
-        className="px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground"
+        onClick={onNavigate}
+        className="px-3 py-2.5 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors"
       >
         {title}
       </Link>
     );
   }
+
   return (
-    <div className="mb-2">
-      <div className="px-3 py-2 text-sm font-medium text-muted-foreground">
+    <div className="mb-1">
+      <div className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
         {title}
       </div>
-      <div className="ml-2 flex flex-col">
+      <div className="ml-1 flex flex-col gap-0.5">
         {children.map((child) => (
           <Link
             key={child.title}
             to={child.to}
-            className="px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground"
+            onClick={onNavigate}
+            className="px-3 py-2.5 rounded-md text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
           >
             {child.title}
           </Link>
