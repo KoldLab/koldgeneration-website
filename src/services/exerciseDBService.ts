@@ -12,8 +12,7 @@ const getAPIBaseURL = () => {
   }
   // Default API URL (used in both dev and production)
   // Note: The API base URL should NOT include /api, as we add it in API_VERSION
-  const defaultUrl =
-    'https://kold-exercisedb-api-git-develop-sami-steenhauts-projects.vercel.app';
+  const defaultUrl = 'https://kold-exercisedb-api.vercel.app';
   console.log('Using default API URL:', defaultUrl);
   return defaultUrl;
 };

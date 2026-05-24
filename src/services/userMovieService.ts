@@ -1,62 +1,45 @@
-import {
-  doc,
-  getDoc,
-  getDocs,
-  setDoc,
-  deleteDoc,
-  collection,
-  query,
-  where,
-  orderBy,
-  serverTimestamp,
-  Timestamp,
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 import type { UserMovie, UserMovieStatus } from '@/types/userMovie';
 
-const COLLECTION = 'userMovies';
-
-function docId(userId: string, imdbId: string) {
-  return `${userId}_${imdbId}`;
-}
-
-function timestampToDate(ts: any): Date {
-  if (ts?.toDate) return ts.toDate();
-  if (ts instanceof Date) return ts;
-  return new Date(ts);
-}
-
-function docToUserMovie(id: string, data: any): UserMovie {
+function rowToUserMovie(row: any): UserMovie {
   return {
-    id,
-    userId: data.userId,
-    imdbId: data.imdbId,
-    title: data.title,
-    posterUrl: data.posterUrl ?? null,
-    releaseYear: data.releaseYear ?? null,
-    runtime: data.runtime ?? null,
-    genres: data.genres ?? [],
-    overview: data.overview ?? '',
-    status: data.status,
-    addedAt: timestampToDate(data.addedAt),
-    watchedAt: data.watchedAt ? timestampToDate(data.watchedAt) : null,
+    id: row.id,
+    userId: row.user_id,
+    imdbId: row.imdb_id,
+    title: row.title,
+    posterUrl: row.poster_url ?? null,
+    releaseYear: row.release_year ?? null,
+    runtime: row.runtime ?? null,
+    genres: row.genres ?? [],
+    overview: row.overview ?? '',
+    status: row.status,
+    addedAt: new Date(row.added_at),
+    watchedAt: row.watched_at ? new Date(row.watched_at) : null,
   };
 }
 
 export async function getUserMovies(userId: string): Promise<UserMovie[]> {
-  const q = query(
-    collection(db, COLLECTION),
-    where('userId', '==', userId),
-    orderBy('addedAt', 'desc')
-  );
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => docToUserMovie(d.id, d.data()));
+  const { data, error } = await supabase
+    .from('user_movies')
+    .select('*')
+    .eq('user_id', userId)
+    .order('added_at', { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map(rowToUserMovie);
 }
 
-export async function getUserMovie(userId: string, imdbId: string): Promise<UserMovie | null> {
-  const snap = await getDoc(doc(db, COLLECTION, docId(userId, imdbId)));
-  if (!snap.exists()) return null;
-  return docToUserMovie(snap.id, snap.data());
+export async function getUserMovie(
+  userId: string,
+  imdbId: string
+): Promise<UserMovie | null> {
+  const { data, error } = await supabase
+    .from('user_movies')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('imdb_id', imdbId)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? rowToUserMovie(data) : null;
 }
 
 export async function addUserMovie(
@@ -64,13 +47,23 @@ export async function addUserMovie(
   movie: Omit<UserMovie, 'id' | 'userId' | 'addedAt' | 'watchedAt'>,
   status: UserMovieStatus
 ): Promise<void> {
-  await setDoc(doc(db, COLLECTION, docId(userId, movie.imdbId)), {
-    userId,
-    ...movie,
-    status,
-    addedAt: serverTimestamp(),
-    watchedAt: status === 'watched' ? serverTimestamp() : null,
-  });
+  const { error } = await supabase.from('user_movies').upsert(
+    {
+      user_id: userId,
+      imdb_id: movie.imdbId,
+      title: movie.title,
+      poster_url: movie.posterUrl,
+      release_year: movie.releaseYear,
+      runtime: movie.runtime,
+      genres: movie.genres,
+      overview: movie.overview,
+      status,
+      added_at: new Date().toISOString(),
+      watched_at: status === 'watched' ? new Date().toISOString() : null,
+    },
+    { onConflict: 'user_id,imdb_id' }
+  );
+  if (error) throw error;
 }
 
 export async function updateUserMovieStatus(
@@ -78,16 +71,25 @@ export async function updateUserMovieStatus(
   imdbId: string,
   status: UserMovieStatus
 ): Promise<void> {
-  await setDoc(
-    doc(db, COLLECTION, docId(userId, imdbId)),
-    {
+  const { error } = await supabase
+    .from('user_movies')
+    .update({
       status,
-      watchedAt: status === 'watched' ? Timestamp.now() : null,
-    },
-    { merge: true }
-  );
+      watched_at: status === 'watched' ? new Date().toISOString() : null,
+    })
+    .eq('user_id', userId)
+    .eq('imdb_id', imdbId);
+  if (error) throw error;
 }
 
-export async function removeUserMovie(userId: string, imdbId: string): Promise<void> {
-  await deleteDoc(doc(db, COLLECTION, docId(userId, imdbId)));
+export async function removeUserMovie(
+  userId: string,
+  imdbId: string
+): Promise<void> {
+  const { error } = await supabase
+    .from('user_movies')
+    .delete()
+    .eq('user_id', userId)
+    .eq('imdb_id', imdbId);
+  if (error) throw error;
 }

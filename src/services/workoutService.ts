@@ -1,154 +1,155 @@
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  addDoc,
-  setDoc,
-  updateDoc,
-  deleteDoc,
-  query,
-  where,
-  orderBy,
-  limit,
-  Timestamp,
-  serverTimestamp,
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 import type { Exercise, WorkoutRoutine, WorkoutLog } from '@/types/workout';
 
-// Collection names
-const EXERCISES_COLLECTION = 'exercises';
-const ROUTINES_COLLECTION = 'routines';
-const LOGS_COLLECTION = 'workoutLogs';
-const FAVORITES_COLLECTION = 'exerciseFavorites';
+// ============================================================================
+// Row <-> Domain mapping helpers
+// ============================================================================
 
-// Helper: Convert Firestore timestamp to Date
-function timestampToDate(timestamp: any): Date {
-  if (timestamp?.toDate) {
-    return timestamp.toDate();
-  }
-  if (timestamp instanceof Timestamp) {
-    return timestamp.toDate();
-  }
-  if (timestamp instanceof Date) {
-    return timestamp;
-  }
-  return new Date(timestamp);
+function rowToExercise(row: any): Exercise {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    name: row.name,
+    description: row.description ?? undefined,
+    exerciseDBId: row.exercise_db_id ?? undefined,
+    source: row.source,
+    imageUrl: row.image_url ?? undefined,
+    videoUrl: row.video_url ?? undefined,
+    targetMuscles: row.target_muscles ?? undefined,
+    secondaryMuscles: row.secondary_muscles ?? undefined,
+    equipment: row.equipment ?? undefined,
+    bodyParts: row.body_parts ?? undefined,
+    instructions: row.instructions ?? undefined,
+    exerciseTips: row.exercise_tips ?? undefined,
+    variations: row.variations ?? undefined,
+    relatedExerciseIds: row.related_exercise_ids ?? undefined,
+    keywords: row.keywords ?? undefined,
+    overview: row.overview ?? undefined,
+    createdAt: new Date(row.created_at),
+    updatedAt: new Date(row.updated_at),
+  };
 }
 
-// Helper: Convert Date to Firestore timestamp
-function dateToTimestamp(date: Date): Timestamp {
-  return Timestamp.fromDate(date);
+function exerciseToRow(
+  userId: string,
+  data: Partial<Omit<Exercise, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>
+) {
+  const row: Record<string, unknown> = {};
+  if (userId) row.user_id = userId;
+  if (data.name !== undefined) row.name = data.name;
+  if (data.description !== undefined) row.description = data.description;
+  if (data.exerciseDBId !== undefined) row.exercise_db_id = data.exerciseDBId;
+  if (data.source !== undefined) row.source = data.source;
+  if (data.imageUrl !== undefined) row.image_url = data.imageUrl;
+  if (data.videoUrl !== undefined) row.video_url = data.videoUrl;
+  if (data.targetMuscles !== undefined) row.target_muscles = data.targetMuscles;
+  if (data.secondaryMuscles !== undefined)
+    row.secondary_muscles = data.secondaryMuscles;
+  if (data.equipment !== undefined) row.equipment = data.equipment;
+  if (data.bodyParts !== undefined) row.body_parts = data.bodyParts;
+  if (data.instructions !== undefined) row.instructions = data.instructions;
+  if (data.exerciseTips !== undefined) row.exercise_tips = data.exerciseTips;
+  if (data.variations !== undefined) row.variations = data.variations;
+  if (data.relatedExerciseIds !== undefined)
+    row.related_exercise_ids = data.relatedExerciseIds;
+  if (data.keywords !== undefined) row.keywords = data.keywords;
+  if (data.overview !== undefined) row.overview = data.overview;
+  return row;
+}
+
+function rowToRoutine(row: any): WorkoutRoutine {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    name: row.name,
+    description: row.description ?? undefined,
+    exercises: (row.exercises ?? []).map((ex: any) => ({
+      ...ex,
+      sets: ex.sets ?? [],
+    })),
+    createdAt: new Date(row.created_at),
+    updatedAt: new Date(row.updated_at),
+  };
+}
+
+function rowToWorkoutLog(row: any): WorkoutLog {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    routineId: row.routine_id ?? undefined,
+    routineName: row.routine_name ?? undefined,
+    date: new Date(row.date),
+    exercises: (row.exercises ?? []).map((ex: any) => ({
+      ...ex,
+      sets: (ex.sets ?? []).map((set: any) => ({ ...set })),
+    })),
+    notes: row.notes ?? undefined,
+    duration: row.duration ?? undefined,
+    createdAt: new Date(row.created_at),
+    updatedAt: new Date(row.updated_at),
+  };
 }
 
 // ==================== EXERCISES ====================
 
-/**
- * Create a new exercise
- */
 export async function createExercise(
   userId: string,
   exerciseData: Omit<Exercise, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
 ): Promise<Exercise> {
-  // Remove undefined values before saving
-  const cleanedData = removeUndefined({
-    ...exerciseData,
-    userId,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  });
-
-  const exerciseRef = await addDoc(
-    collection(db, EXERCISES_COLLECTION),
-    cleanedData
-  );
-
-  const docSnap = await getDoc(exerciseRef);
-  if (!docSnap.exists()) {
-    throw new Error('Failed to create exercise');
-  }
-
-  const data = docSnap.data();
-  return {
-    id: docSnap.id,
-    ...data,
-    createdAt: timestampToDate(data.createdAt),
-    updatedAt: timestampToDate(data.updatedAt),
-  } as Exercise;
+  const { data, error } = await supabase
+    .from('exercises')
+    .insert(exerciseToRow(userId, exerciseData))
+    .select()
+    .single();
+  if (error) throw error;
+  return rowToExercise(data);
 }
 
-/**
- * Get all exercises for a user
- */
 export async function getExercisesByUserId(
   userId: string
 ): Promise<Exercise[]> {
-  const q = query(
-    collection(db, EXERCISES_COLLECTION),
-    where('userId', '==', userId),
-    orderBy('createdAt', 'desc')
-  );
-
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map((doc) => {
-    const data = doc.data();
-    return {
-      id: doc.id,
-      ...data,
-      createdAt: timestampToDate(data.createdAt),
-      updatedAt: timestampToDate(data.updatedAt),
-    } as Exercise;
-  });
+  const { data, error } = await supabase
+    .from('exercises')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map(rowToExercise);
 }
 
-/**
- * Get exercise by ID
- */
 export async function getExerciseById(
   exerciseId: string
 ): Promise<Exercise | null> {
-  const docRef = doc(db, EXERCISES_COLLECTION, exerciseId);
-  const docSnap = await getDoc(docRef);
-
-  if (!docSnap.exists()) {
-    return null;
-  }
-
-  const data = docSnap.data();
-  return {
-    id: docSnap.id,
-    ...data,
-    createdAt: timestampToDate(data.createdAt),
-    updatedAt: timestampToDate(data.updatedAt),
-  } as Exercise;
+  const { data, error } = await supabase
+    .from('exercises')
+    .select('*')
+    .eq('id', exerciseId)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? rowToExercise(data) : null;
 }
 
-/**
- * Update an exercise
- */
 export async function updateExercise(
   exerciseId: string,
   updates: Partial<Omit<Exercise, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>
 ): Promise<void> {
-  const exerciseRef = doc(db, EXERCISES_COLLECTION, exerciseId);
-  await updateDoc(exerciseRef, {
-    ...updates,
-    updatedAt: serverTimestamp(),
-  });
+  const row = exerciseToRow('', updates);
+  row.updated_at = new Date().toISOString();
+  const { error } = await supabase
+    .from('exercises')
+    .update(row)
+    .eq('id', exerciseId);
+  if (error) throw error;
 }
 
-/**
- * Delete an exercise
- */
 export async function deleteExercise(exerciseId: string): Promise<void> {
-  const exerciseRef = doc(db, EXERCISES_COLLECTION, exerciseId);
-  await deleteDoc(exerciseRef);
+  const { error } = await supabase
+    .from('exercises')
+    .delete()
+    .eq('id', exerciseId);
+  if (error) throw error;
 }
 
-/**
- * Import exercise from ExerciseDB
- */
 export async function importExerciseFromDB(
   userId: string,
   exerciseDBData: {
@@ -177,182 +178,98 @@ export async function importExerciseFromDB(
 
 // ==================== ROUTINES ====================
 
-/**
- * Create a new workout routine
- */
 export async function createRoutine(
   userId: string,
   routineData: Omit<WorkoutRoutine, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
 ): Promise<WorkoutRoutine> {
-  // Remove undefined values before saving
-  const cleanedData = removeUndefined({
-    ...routineData,
-    userId,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  });
-
-  const routineRef = await addDoc(
-    collection(db, ROUTINES_COLLECTION),
-    cleanedData
-  );
-
-  const docSnap = await getDoc(routineRef);
-  if (!docSnap.exists()) {
-    throw new Error('Failed to create routine');
-  }
-
-  const data = docSnap.data();
-  return {
-    id: docSnap.id,
-    ...data,
-    exercises: (data.exercises || []).map((ex: any) => ({
-      ...ex,
-      sets: ex.sets || [],
-    })),
-    createdAt: timestampToDate(data.createdAt),
-    updatedAt: timestampToDate(data.updatedAt),
-  } as WorkoutRoutine;
+  const { data, error } = await supabase
+    .from('workout_routines')
+    .insert({
+      user_id: userId,
+      name: routineData.name,
+      description: routineData.description,
+      exercises: routineData.exercises ?? [],
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return rowToRoutine(data);
 }
 
-/**
- * Get all routines for a user
- */
 export async function getRoutinesByUserId(
   userId: string
 ): Promise<WorkoutRoutine[]> {
-  const q = query(
-    collection(db, ROUTINES_COLLECTION),
-    where('userId', '==', userId),
-    orderBy('createdAt', 'desc')
-  );
-
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map((doc) => {
-    const data = doc.data();
-    return {
-      id: doc.id,
-      ...data,
-      exercises: (data.exercises || []).map((ex: any) => ({
-        ...ex,
-        sets: ex.sets || [],
-      })),
-      createdAt: timestampToDate(data.createdAt),
-      updatedAt: timestampToDate(data.updatedAt),
-    } as WorkoutRoutine;
-  });
+  const { data, error } = await supabase
+    .from('workout_routines')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map(rowToRoutine);
 }
 
-/**
- * Get routine by ID
- */
 export async function getRoutineById(
   routineId: string
 ): Promise<WorkoutRoutine | null> {
-  const docRef = doc(db, ROUTINES_COLLECTION, routineId);
-  const docSnap = await getDoc(docRef);
-
-  if (!docSnap.exists()) {
-    return null;
-  }
-
-  const data = docSnap.data();
-  return {
-    id: docSnap.id,
-    ...data,
-    exercises: (data.exercises || []).map((ex: any) => ({
-      ...ex,
-      sets: ex.sets || [],
-    })),
-    createdAt: timestampToDate(data.createdAt),
-    updatedAt: timestampToDate(data.updatedAt),
-  } as WorkoutRoutine;
+  const { data, error } = await supabase
+    .from('workout_routines')
+    .select('*')
+    .eq('id', routineId)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? rowToRoutine(data) : null;
 }
 
-/**
- * Update a routine
- */
 export async function updateRoutine(
   routineId: string,
   updates: Partial<
     Omit<WorkoutRoutine, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
   >
 ): Promise<void> {
-  // Remove undefined values before saving
-  const cleanedUpdates = removeUndefined({
-    ...updates,
-    updatedAt: serverTimestamp(),
-  });
-
-  const routineRef = doc(db, ROUTINES_COLLECTION, routineId);
-  await updateDoc(routineRef, cleanedUpdates);
+  const row: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+  };
+  if (updates.name !== undefined) row.name = updates.name;
+  if (updates.description !== undefined) row.description = updates.description;
+  if (updates.exercises !== undefined) row.exercises = updates.exercises;
+  const { error } = await supabase
+    .from('workout_routines')
+    .update(row)
+    .eq('id', routineId);
+  if (error) throw error;
 }
 
-/**
- * Delete a routine
- */
 export async function deleteRoutine(routineId: string): Promise<void> {
-  const routineRef = doc(db, ROUTINES_COLLECTION, routineId);
-  await deleteDoc(routineRef);
+  const { error } = await supabase
+    .from('workout_routines')
+    .delete()
+    .eq('id', routineId);
+  if (error) throw error;
 }
 
 // ==================== WORKOUT LOGS ====================
 
-/**
- * Helper: Remove undefined values from an object
- */
-function removeUndefined<T extends Record<string, any>>(obj: T): Partial<T> {
-  const cleaned: Partial<T> = {};
-  for (const key in obj) {
-    if (obj[key] !== undefined) {
-      cleaned[key] = obj[key];
-    }
-  }
-  return cleaned;
-}
-
-/**
- * Create a new workout log
- */
 export async function createWorkoutLog(
   userId: string,
   logData: Omit<WorkoutLog, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
 ): Promise<WorkoutLog> {
-  // Remove undefined values before saving
-  const cleanedData = removeUndefined({
-    ...logData,
-    userId,
-    date: dateToTimestamp(logData.date),
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  });
-
-  const logRef = await addDoc(collection(db, LOGS_COLLECTION), cleanedData);
-
-  const docSnap = await getDoc(logRef);
-  if (!docSnap.exists()) {
-    throw new Error('Failed to create workout log');
-  }
-
-  const data = docSnap.data();
-  return {
-    id: docSnap.id,
-    ...data,
-    date: timestampToDate(data.date),
-    exercises: (data.exercises || []).map((ex: any) => ({
-      ...ex,
-      sets: (ex.sets || []).map((set: any) => ({
-        ...set,
-      })),
-    })),
-    createdAt: timestampToDate(data.createdAt),
-    updatedAt: timestampToDate(data.updatedAt),
-  } as WorkoutLog;
+  const { data, error } = await supabase
+    .from('workout_logs')
+    .insert({
+      user_id: userId,
+      routine_id: logData.routineId ?? null,
+      routine_name: logData.routineName ?? null,
+      date: logData.date.toISOString(),
+      exercises: logData.exercises ?? [],
+      notes: logData.notes ?? null,
+      duration: logData.duration ?? null,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return rowToWorkoutLog(data);
 }
 
-/**
- * Get all workout logs for a user
- */
 export async function getWorkoutLogsByUserId(
   userId: string,
   options?: {
@@ -361,250 +278,154 @@ export async function getWorkoutLogsByUserId(
     endDate?: Date;
   }
 ): Promise<WorkoutLog[]> {
-  let q = query(collection(db, LOGS_COLLECTION), where('userId', '==', userId));
+  let query = supabase
+    .from('workout_logs')
+    .select('*')
+    .eq('user_id', userId)
+    .order('date', { ascending: false })
+    .order('created_at', { ascending: false });
 
-  // Add date range filters if provided
   if (options?.startDate) {
-    q = query(q, where('date', '>=', dateToTimestamp(options.startDate)));
+    query = query.gte('date', options.startDate.toISOString());
   }
   if (options?.endDate) {
-    q = query(q, where('date', '<=', dateToTimestamp(options.endDate)));
+    query = query.lte('date', options.endDate.toISOString());
   }
-
-  // Order by date (most recent first), then by createdAt for workouts on the same date
-  // Requires composite index: userId (Ascending), date (Descending), createdAt (Descending)
-  q = query(q, orderBy('date', 'desc'), orderBy('createdAt', 'desc'));
-
-  // Add limit if provided
   if (options?.limit) {
-    q = query(q, limit(options.limit));
+    query = query.limit(options.limit);
   }
 
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map((doc) => {
-    const data = doc.data();
-    return {
-      id: doc.id,
-      ...data,
-      date: timestampToDate(data.date),
-      exercises: (data.exercises || []).map((ex: any) => ({
-        ...ex,
-        sets: (ex.sets || []).map((set: any) => ({
-          ...set,
-        })),
-      })),
-      createdAt: timestampToDate(data.createdAt),
-      updatedAt: timestampToDate(data.updatedAt),
-    } as WorkoutLog;
-  });
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data ?? []).map(rowToWorkoutLog);
 }
 
-/**
- * Get workout log by ID
- */
 export async function getWorkoutLogById(
   logId: string
 ): Promise<WorkoutLog | null> {
-  const docRef = doc(db, LOGS_COLLECTION, logId);
-  const docSnap = await getDoc(docRef);
-
-  if (!docSnap.exists()) {
-    return null;
-  }
-
-  const data = docSnap.data();
-  return {
-    id: docSnap.id,
-    ...data,
-    date: timestampToDate(data.date),
-    exercises: (data.exercises || []).map((ex: any) => ({
-      ...ex,
-      sets: (ex.sets || []).map((set: any) => ({
-        ...set,
-      })),
-    })),
-    createdAt: timestampToDate(data.createdAt),
-    updatedAt: timestampToDate(data.updatedAt),
-  } as WorkoutLog;
+  const { data, error } = await supabase
+    .from('workout_logs')
+    .select('*')
+    .eq('id', logId)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? rowToWorkoutLog(data) : null;
 }
 
-/**
- * Update a workout log
- */
 export async function updateWorkoutLog(
   logId: string,
-  updates: Partial<
-    Omit<WorkoutLog, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
-  >
+  updates: Partial<Omit<WorkoutLog, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>
 ): Promise<void> {
-  const logRef = doc(db, LOGS_COLLECTION, logId);
-  const updateData: any = {
-    ...updates,
-    updatedAt: serverTimestamp(),
+  const row: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
   };
-
-  // Convert date to timestamp if provided
-  if (updates.date) {
-    updateData.date = dateToTimestamp(updates.date);
-  }
-
-  await updateDoc(logRef, updateData);
+  if (updates.routineId !== undefined) row.routine_id = updates.routineId;
+  if (updates.routineName !== undefined) row.routine_name = updates.routineName;
+  if (updates.date !== undefined) row.date = updates.date.toISOString();
+  if (updates.exercises !== undefined) row.exercises = updates.exercises;
+  if (updates.notes !== undefined) row.notes = updates.notes;
+  if (updates.duration !== undefined) row.duration = updates.duration;
+  const { error } = await supabase
+    .from('workout_logs')
+    .update(row)
+    .eq('id', logId);
+  if (error) throw error;
 }
 
-/**
- * Delete a workout log
- */
 export async function deleteWorkoutLog(logId: string): Promise<void> {
-  const logRef = doc(db, LOGS_COLLECTION, logId);
-  await deleteDoc(logRef);
+  const { error } = await supabase
+    .from('workout_logs')
+    .delete()
+    .eq('id', logId);
+  if (error) throw error;
 }
 
 // ==================== EXERCISE FAVORITES ====================
 
-/**
- * Get user's favorite exercises
- */
 export async function getFavoriteExercises(userId: string): Promise<{
   exerciseDBIds: string[];
   customExerciseIds: string[];
   exists: boolean;
 }> {
-  const docRef = doc(db, FAVORITES_COLLECTION, userId);
-  const docSnap = await getDoc(docRef);
-  const exists = docSnap.exists();
-
-  if (exists) {
-    const data = docSnap.data();
-    return {
-      exerciseDBIds: data.exerciseDBIds || [],
-      customExerciseIds: data.customExerciseIds || [],
-      exists: true,
-    };
+  const { data, error } = await supabase
+    .from('exercise_favorites')
+    .select('*')
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) {
+    return { exerciseDBIds: [], customExerciseIds: [], exists: false };
   }
-
-  // Return empty arrays if document doesn't exist
   return {
-    exerciseDBIds: [],
-    customExerciseIds: [],
-    exists: false,
+    exerciseDBIds: data.exercise_db_ids ?? [],
+    customExerciseIds: data.custom_exercise_ids ?? [],
+    exists: true,
   };
 }
 
-/**
- * Update user's favorite exercises
- * @param documentExists - Optional flag to skip existence check if we already know
- */
 export async function updateFavoriteExercises(
   userId: string,
   favorites: { exerciseDBIds: string[]; customExerciseIds: string[] },
-  documentExists?: boolean
+  _documentExists?: boolean
 ): Promise<void> {
-  const docRef = doc(db, FAVORITES_COLLECTION, userId);
-
-  // Only check existence if we don't already know
-  let exists = documentExists;
-  if (exists === undefined) {
-    const docSnap = await getDoc(docRef);
-    exists = docSnap.exists();
-  }
-
-  if (exists) {
-    // Update existing document
-    await updateDoc(docRef, {
-      exerciseDBIds: favorites.exerciseDBIds,
-      customExerciseIds: favorites.customExerciseIds,
-      updatedAt: serverTimestamp(),
-    });
-  } else {
-    // Create new document with userId as document ID
-    await setDoc(docRef, {
-      userId,
-      exerciseDBIds: favorites.exerciseDBIds,
-      customExerciseIds: favorites.customExerciseIds,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
-  }
+  const { error } = await supabase.from('exercise_favorites').upsert(
+    {
+      user_id: userId,
+      exercise_db_ids: favorites.exerciseDBIds,
+      custom_exercise_ids: favorites.customExerciseIds,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: 'user_id' }
+  );
+  if (error) throw error;
 }
 
-/**
- * Add favorite ExerciseDB exercise
- */
 export async function addFavoriteExerciseDB(
   userId: string,
   exerciseDBId: string
 ): Promise<void> {
   const current = await getFavoriteExercises(userId);
   if (!current.exerciseDBIds.includes(exerciseDBId)) {
-    // Pass the exists flag to skip redundant getDoc check
-    await updateFavoriteExercises(
-      userId,
-      {
-        exerciseDBIds: [...current.exerciseDBIds, exerciseDBId],
-        customExerciseIds: current.customExerciseIds,
-      },
-      current.exists
-    );
+    await updateFavoriteExercises(userId, {
+      exerciseDBIds: [...current.exerciseDBIds, exerciseDBId],
+      customExerciseIds: current.customExerciseIds,
+    });
   }
 }
 
-/**
- * Remove favorite ExerciseDB exercise
- */
 export async function removeFavoriteExerciseDB(
   userId: string,
   exerciseDBId: string
 ): Promise<void> {
   const current = await getFavoriteExercises(userId);
-  // Pass the exists flag to skip redundant getDoc check
-  await updateFavoriteExercises(
-    userId,
-    {
-      exerciseDBIds: current.exerciseDBIds.filter((id) => id !== exerciseDBId),
-      customExerciseIds: current.customExerciseIds,
-    },
-    current.exists
-  );
+  await updateFavoriteExercises(userId, {
+    exerciseDBIds: current.exerciseDBIds.filter((id) => id !== exerciseDBId),
+    customExerciseIds: current.customExerciseIds,
+  });
 }
 
-/**
- * Add favorite custom exercise
- */
 export async function addFavoriteCustomExercise(
   userId: string,
   exerciseId: string
 ): Promise<void> {
   const current = await getFavoriteExercises(userId);
   if (!current.customExerciseIds.includes(exerciseId)) {
-    // Pass the exists flag to skip redundant getDoc check
-    await updateFavoriteExercises(
-      userId,
-      {
-        exerciseDBIds: current.exerciseDBIds,
-        customExerciseIds: [...current.customExerciseIds, exerciseId],
-      },
-      current.exists
-    );
+    await updateFavoriteExercises(userId, {
+      exerciseDBIds: current.exerciseDBIds,
+      customExerciseIds: [...current.customExerciseIds, exerciseId],
+    });
   }
 }
 
-/**
- * Remove favorite custom exercise
- */
 export async function removeFavoriteCustomExercise(
   userId: string,
   exerciseId: string
 ): Promise<void> {
   const current = await getFavoriteExercises(userId);
-  // Pass the exists flag to skip redundant getDoc check
-  await updateFavoriteExercises(
-    userId,
-    {
-      exerciseDBIds: current.exerciseDBIds,
-      customExerciseIds: current.customExerciseIds.filter(
-        (id) => id !== exerciseId
-      ),
-    },
-    current.exists
-  );
+  await updateFavoriteExercises(userId, {
+    exerciseDBIds: current.exerciseDBIds,
+    customExerciseIds: current.customExerciseIds.filter(
+      (id) => id !== exerciseId
+    ),
+  });
 }

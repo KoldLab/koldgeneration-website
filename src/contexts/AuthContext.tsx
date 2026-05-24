@@ -1,18 +1,16 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import {
-  onAuthStateChanged,
-  signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
-  GoogleAuthProvider,
-  signOut as firebaseSignOut,
-} from 'firebase/auth';
-import { auth } from '@/lib/firebase';
-import type { User } from 'firebase/auth';
-import { isInAppBrowser } from '@/utils/browserDetection';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
+
+export type AppUser = {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+};
 
 interface AuthContextType {
-  user: User | null;
+  user: AppUser | null;
   loading: boolean;
   error: string | null;
   signInWithGoogle: () => Promise<void>;
@@ -21,84 +19,90 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+function normalizeUser(user: SupabaseUser | null | undefined): AppUser | null {
+  if (!user) return null;
+  const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
+  const displayName =
+    (meta.full_name as string | undefined) ??
+    (meta.name as string | undefined) ??
+    (meta.user_name as string | undefined) ??
+    user.email ??
+    null;
+  const photoURL =
+    (meta.avatar_url as string | undefined) ??
+    (meta.picture as string | undefined) ??
+    null;
+  return {
+    uid: user.id,
+    email: user.email ?? null,
+    displayName,
+    photoURL,
+  };
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      // Check for redirect result (when returning from OAuth redirect)
-      getRedirectResult(auth)
-        .then((result) => {
-          if (result) {
-            // User signed in via redirect
-            setUser(result.user);
-            setError(null);
-          }
-        })
-        .catch((err) => {
-          console.error('Redirect result error:', err);
-          // Don't set error for redirect - user might have cancelled
-        });
+    let mounted = true;
 
-      const unsubscribe = onAuthStateChanged(
-        auth,
-        (user) => {
-          setUser(user);
-          setLoading(false);
-          setError(null);
-        },
-        (err) => {
-          console.error('Auth state error:', err);
-          setError(err.message);
-          setLoading(false);
+    supabase.auth
+      .getSession()
+      .then(({ data, error: sessionError }) => {
+        if (!mounted) return;
+        if (sessionError) {
+          setError(sessionError.message);
         }
-      );
+        setUser(normalizeUser(data.session?.user));
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (!mounted) return;
+        console.error('Supabase getSession error:', err);
+        setError(err?.message ?? 'Failed to load session');
+        setLoading(false);
+      });
 
-      return unsubscribe;
-    } catch (err) {
-      console.error('Firebase auth initialization error:', err);
-      setError(
-        'Firebase not configured. Please check your environment variables.'
-      );
-      setLoading(false);
-    }
+    const { data: subscription } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (!mounted) return;
+        setUser(normalizeUser(session?.user));
+        setError(null);
+      }
+    );
+
+    return () => {
+      mounted = false;
+      subscription.subscription.unsubscribe();
+    };
   }, []);
 
   const signInWithGoogle = async () => {
     try {
-      const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({
-        prompt: 'select_account',
+      const { error: signInError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+          queryParams: { prompt: 'select_account' },
+        },
       });
-
-      // Use redirect for in-app browsers (WebView) that block popups
-      // Use popup for regular browsers (better UX)
-      if (isInAppBrowser()) {
-        // Redirect will navigate away, so we don't await it
-        await signInWithRedirect(auth, provider);
-        // Note: User will be redirected to Google, then back to our app
-        // The redirect result will be handled in useEffect via getRedirectResult
-      } else {
-        await signInWithPopup(auth, provider);
-      }
+      if (signInError) throw signInError;
     } catch (err: any) {
       console.error('Sign in error:', err);
-      // Don't set error for popup_closed_by_user - it's user cancellation
-      if (err.code !== 'auth/popup-closed-by-user') {
-        setError(err.message || 'Failed to sign in');
-      }
+      setError(err?.message ?? 'Failed to sign in');
       throw err;
     }
   };
 
   const signOut = async () => {
     try {
-      await firebaseSignOut(auth);
+      const { error: signOutError } = await supabase.auth.signOut();
+      if (signOutError) throw signOutError;
     } catch (err: any) {
       console.error('Sign out error:', err);
-      setError(err.message || 'Failed to sign out');
+      setError(err?.message ?? 'Failed to sign out');
       throw err;
     }
   };

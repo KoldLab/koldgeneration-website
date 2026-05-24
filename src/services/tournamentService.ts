@@ -1,17 +1,4 @@
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  addDoc,
-  updateDoc,
-  query,
-  where,
-  limit,
-  serverTimestamp,
-  Timestamp,
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 import type {
   Tournament,
   TournamentPlayer,
@@ -29,11 +16,8 @@ import {
   applySingleEliminationResult,
   type SingleEliminationResultPayload,
 } from './brackets/singleElimination';
-import type { User } from 'firebase/auth';
+import type { AppUser } from '@/contexts/AuthContext';
 
-const TOURNAMENTS_COLLECTION = 'tournaments';
-
-// Generate a unique tournament code (6 alphanumeric characters)
 function generateTournamentCode(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let code = '';
@@ -43,28 +27,20 @@ function generateTournamentCode(): string {
   return code;
 }
 
-// Check if a tournament code already exists
 async function codeExists(code: string): Promise<boolean> {
-  try {
-    const q = query(
-      collection(db, TOURNAMENTS_COLLECTION),
-      where('code', '==', code)
-    );
-    const querySnapshot = await getDocs(q);
-    return !querySnapshot.empty;
-  } catch (error: any) {
-    // Check if error is due to request being blocked (likely by ad blocker)
-    if (
-      error?.message?.includes('ERR_BLOCKED_BY_CLIENT') ||
-      error?.code === 'blocked-by-client'
-    ) {
-      throw new Error('BLOCKED_BY_EXTENSION');
-    }
+  const { data, error } = await supabase
+    .from('tournaments')
+    .select('id')
+    .eq('code', code)
+    .limit(1)
+    .maybeSingle();
+  if (error && error.code !== 'PGRST116') {
+    if (isBlockedError(error)) throw new Error('BLOCKED_BY_EXTENSION');
     throw error;
   }
+  return Boolean(data);
 }
 
-// Generate a unique tournament code
 async function generateUniqueCode(): Promise<string> {
   let code = generateTournamentCode();
   let attempts = 0;
@@ -78,15 +54,21 @@ async function generateUniqueCode(): Promise<string> {
   return code;
 }
 
-// Convert Firestore timestamp to Date
-function timestampToDate(timestamp: any): Date {
-  if (timestamp?.toDate) {
-    return timestamp.toDate();
+function isBlockedError(error: any): boolean {
+  const msg = error?.message ?? '';
+  return (
+    msg.includes('ERR_BLOCKED_BY_CLIENT') ||
+    msg.includes('Failed to fetch') ||
+    msg.includes('blocked')
+  );
+}
+
+function toDate(value: unknown): Date {
+  if (value instanceof Date) return value;
+  if (typeof value === 'string' || typeof value === 'number') {
+    return new Date(value);
   }
-  if (timestamp instanceof Timestamp) {
-    return timestamp.toDate();
-  }
-  return new Date(timestamp);
+  return new Date();
 }
 
 function convertMatchParticipant(
@@ -101,38 +83,29 @@ function convertMatchParticipant(
     (typeof participant.userId === 'string' && `user:${participant.userId}`) ||
     (typeof participant.guestId === 'string' && `guest:${participant.guestId}`);
 
-  if (!keyCandidate) {
-    return null;
-  }
-
-  const displayNameCandidate =
-    typeof participant.displayName === 'string'
-      ? participant.displayName
-      : typeof participant.name === 'string'
-        ? participant.name
-        : 'Unknown';
-
-  const seedCandidate =
-    typeof participant.seed === 'number' ? participant.seed : undefined;
-
-  const slotCandidate =
-    typeof participant.slot === 'number'
-      ? participant.slot
-      : typeof participant.slot === 'string' && participant.slot.trim() !== ''
-        ? Number(participant.slot)
-        : undefined;
+  if (!keyCandidate) return null;
 
   return {
     key: keyCandidate,
-    displayName: displayNameCandidate,
-    seed: seedCandidate,
-    slot: slotCandidate,
+    displayName:
+      typeof participant.displayName === 'string'
+        ? participant.displayName
+        : typeof participant.name === 'string'
+          ? participant.name
+          : 'Unknown',
+    seed:
+      typeof participant.seed === 'number' ? participant.seed : undefined,
+    slot:
+      typeof participant.slot === 'number'
+        ? participant.slot
+        : typeof participant.slot === 'string' && participant.slot.trim() !== ''
+          ? Number(participant.slot)
+          : undefined,
   };
 }
 
 function convertMatchScores(scores: any): TournamentMatchScore[] {
   if (!scores) return [];
-
   if (Array.isArray(scores)) {
     return scores
       .map((score) => ({
@@ -144,7 +117,6 @@ function convertMatchScores(scores: any): TournamentMatchScore[] {
       }))
       .filter((entry) => entry.participantKey);
   }
-
   if (typeof scores === 'object') {
     return Object.entries(scores)
       .map(([participantKey, value]) => ({
@@ -153,19 +125,15 @@ function convertMatchScores(scores: any): TournamentMatchScore[] {
       }))
       .filter((entry) => entry.participantKey);
   }
-
   return [];
 }
 
 function convertMatchHistory(history: any): TournamentMatchHistoryEntry[] {
   if (!Array.isArray(history)) return [];
-
   return history
     .map((entry) => ({
       id: entry.id || entry.historyId || cryptoRandomId(),
-      timestamp: timestampToDate(
-        entry.timestamp || entry.reportedAt || new Date()
-      ),
+      timestamp: toDate(entry.timestamp || entry.reportedAt || new Date()),
       reportedByUid: entry.reportedByUid || entry.reportedBy || undefined,
       reporterDisplayName:
         entry.reporterDisplayName || entry.reporterName || undefined,
@@ -191,16 +159,12 @@ function convertMatchHistory(history: any): TournamentMatchHistoryEntry[] {
 
 function convertMatch(rawMatch: unknown): TournamentMatch {
   const matchRecord = (rawMatch ?? {}) as Record<string, unknown>;
-
   const participantsArray = Array.isArray(matchRecord.participants)
     ? (matchRecord.participants as Record<string, unknown>[])
     : [];
-
   const participants = participantsArray
-    .map((participant) => convertMatchParticipant(participant))
-    .filter((participant): participant is TournamentMatchParticipant =>
-      Boolean(participant)
-    );
+    .map(convertMatchParticipant)
+    .filter((p): p is TournamentMatchParticipant => Boolean(p));
 
   const matchId =
     (matchRecord.id as string) ||
@@ -228,8 +192,8 @@ function convertMatch(rawMatch: unknown): TournamentMatch {
       (matchRecord.result as any)?.winnerKey ||
       (matchRecord.result as any)?.winnerParticipantKey ||
       undefined,
-    createdAt: timestampToDate(matchRecord.createdAt || new Date()),
-    updatedAt: timestampToDate(
+    createdAt: toDate(matchRecord.createdAt || new Date()),
+    updatedAt: toDate(
       matchRecord.updatedAt || matchRecord.createdAt || new Date()
     ),
     history: convertMatchHistory(matchRecord.history),
@@ -240,7 +204,6 @@ function convertMatchesRecord(
   rawMatches: any
 ): Record<string, TournamentMatch> {
   if (!rawMatches) return {};
-
   if (Array.isArray(rawMatches)) {
     return rawMatches.reduce<Record<string, TournamentMatch>>((acc, match) => {
       const converted = convertMatch(match);
@@ -248,7 +211,6 @@ function convertMatchesRecord(
       return acc;
     }, {});
   }
-
   if (typeof rawMatches === 'object') {
     return Object.entries(rawMatches).reduce<Record<string, TournamentMatch>>(
       (acc, [key, value]) => {
@@ -263,13 +225,11 @@ function convertMatchesRecord(
       {}
     );
   }
-
   return {};
 }
 
 function convertRounds(rawRounds: any): TournamentRound[] {
   if (!Array.isArray(rawRounds)) return [];
-
   return rawRounds.map((round, index) => ({
     id: round?.id || round?.roundId || `${index}`,
     name: round?.name || `Round ${round?.order ?? index + 1}`,
@@ -284,7 +244,6 @@ function convertRounds(rawRounds: any): TournamentRound[] {
 function convertTournamentProgress(rawProgress: any): TournamentProgress {
   const rounds = convertRounds(rawProgress?.rounds);
   const matches = convertMatchesRecord(rawProgress?.matches);
-
   return {
     format:
       rawProgress?.format ||
@@ -336,11 +295,11 @@ function serializeTournamentProgress(
         score: score.score,
       })),
       winnerKey: match.winnerKey ?? null,
-      createdAt: match.createdAt,
-      updatedAt: match.updatedAt,
+      createdAt: match.createdAt.toISOString(),
+      updatedAt: match.updatedAt.toISOString(),
       history: match.history.map((entry) => ({
         id: entry.id,
-        timestamp: entry.timestamp,
+        timestamp: entry.timestamp.toISOString(),
         reportedByUid: entry.reportedByUid ?? null,
         reporterDisplayName: entry.reporterDisplayName ?? null,
         result: {
@@ -371,150 +330,128 @@ function serializeTournamentProgress(
   };
 }
 
-// Convert Firestore document to Tournament
-function docToTournament(docData: any, id: string): Tournament {
-  const progress = docData.progress
-    ? convertTournamentProgress(docData.progress)
+function rowToTournament(row: any): Tournament {
+  const progress = row.progress
+    ? convertTournamentProgress(row.progress)
     : undefined;
   const settings = {
-    requireScores: docData.settings?.requireScores ?? true,
+    requireScores: row.settings?.requireScores ?? true,
   };
 
   return {
-    id,
-    code: docData.code,
-    name: docData.name,
-    description: docData.description || '',
-    type: docData.type,
-    maxPlayers: docData.maxPlayers,
-    status: docData.status,
-    ownerId: docData.ownerId,
-    ownerDisplayName: docData.ownerDisplayName,
-    ownerEmail: docData.ownerEmail,
-    players: (docData.players || []).map((p: any) => ({
+    id: row.id,
+    code: row.code,
+    name: row.name,
+    description: row.description ?? '',
+    type: row.type,
+    maxPlayers: row.max_players,
+    status: row.status,
+    ownerId: row.owner_id,
+    ownerDisplayName: row.owner_display_name,
+    ownerEmail: row.owner_email,
+    players: (row.players ?? []).map((p: any) => ({
       ...p,
-      registeredAt: timestampToDate(p.registeredAt),
+      registeredAt: toDate(p.registeredAt),
     })),
-    createdAt: timestampToDate(docData.createdAt),
-    updatedAt: timestampToDate(docData.updatedAt),
-    startedAt: docData.startedAt
-      ? timestampToDate(docData.startedAt)
-      : undefined,
-    completedAt: docData.completedAt
-      ? timestampToDate(docData.completedAt)
-      : undefined,
+    createdAt: toDate(row.created_at),
+    updatedAt: toDate(row.updated_at),
+    startedAt: row.started_at ? toDate(row.started_at) : undefined,
+    completedAt: row.completed_at ? toDate(row.completed_at) : undefined,
     progress,
     settings,
   };
 }
 
-// Create a new tournament
+function serializePlayers(players: TournamentPlayer[]) {
+  return players.map((p) => ({
+    ...p,
+    registeredAt:
+      p.registeredAt instanceof Date
+        ? p.registeredAt.toISOString()
+        : p.registeredAt,
+  }));
+}
+
+// ============================================================================
+// API
+// ============================================================================
+
 export async function createTournament(
   data: CreateTournamentData,
-  user: User
+  user: AppUser
 ): Promise<Tournament> {
   try {
     const code = await generateUniqueCode();
-
-    const tournamentData = {
+    const insertData = {
       code,
       name: data.name,
       description: data.description || '',
       type: data.type,
-      maxPlayers: data.maxPlayers,
+      max_players: data.maxPlayers,
       status: 'pending' as TournamentStatus,
-      ownerId: user.uid,
-      ownerDisplayName: user.displayName || 'Unknown',
-      ownerEmail: user.email || '',
+      owner_id: user.uid,
+      owner_display_name: user.displayName || 'Unknown',
+      owner_email: user.email || '',
       players: [],
       progress: null,
-      settings: {
-        requireScores: data.requireScores ?? true,
-      },
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
+      settings: { requireScores: data.requireScores ?? true },
     };
 
-    const docRef = await addDoc(
-      collection(db, TOURNAMENTS_COLLECTION),
-      tournamentData
-    );
-    const docSnap = await getDoc(docRef);
+    const { data: row, error } = await supabase
+      .from('tournaments')
+      .insert(insertData)
+      .select()
+      .single();
 
-    if (!docSnap.exists()) {
-      throw new Error('Failed to create tournament');
+    if (error) {
+      if (isBlockedError(error)) throw new Error('BLOCKED_BY_EXTENSION');
+      throw error;
     }
 
-    return docToTournament(docSnap.data(), docSnap.id);
+    return rowToTournament(row);
   } catch (error: any) {
-    // Check if error is due to request being blocked (likely by ad blocker)
-    const errorMessage = error?.message || '';
-    const errorCode = error?.code || '';
-    if (
-      errorMessage.includes('ERR_BLOCKED_BY_CLIENT') ||
-      errorMessage.includes('blocked') ||
-      errorCode === 'unavailable' ||
-      errorCode === 'deadline-exceeded'
-    ) {
-      throw new Error('BLOCKED_BY_EXTENSION');
-    }
+    if (isBlockedError(error)) throw new Error('BLOCKED_BY_EXTENSION');
     throw error;
   }
 }
 
-// Get tournament by code
 export async function getTournamentByCode(
   code: string
 ): Promise<Tournament | null> {
-  const q = query(
-    collection(db, TOURNAMENTS_COLLECTION),
-    where('code', '==', code),
-    limit(1)
-  );
-  const querySnapshot = await getDocs(q);
-
-  if (querySnapshot.empty) {
-    return null;
-  }
-
-  const doc = querySnapshot.docs[0];
-  return docToTournament(doc.data(), doc.id);
+  const { data, error } = await supabase
+    .from('tournaments')
+    .select('*')
+    .eq('code', code)
+    .limit(1)
+    .maybeSingle();
+  if (error && error.code !== 'PGRST116') throw error;
+  return data ? rowToTournament(data) : null;
 }
 
-// Get tournament by ID
 export async function getTournamentById(
   id: string
 ): Promise<Tournament | null> {
-  const docRef = doc(db, TOURNAMENTS_COLLECTION, id);
-  const docSnap = await getDoc(docRef);
-
-  if (!docSnap.exists()) {
-    return null;
-  }
-
-  return docToTournament(docSnap.data(), docSnap.id);
+  const { data, error } = await supabase
+    .from('tournaments')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? rowToTournament(data) : null;
 }
 
-// Register an authenticated player to a tournament
 export async function registerPlayer(
   tournamentId: string,
-  user: User
+  user: AppUser
 ): Promise<void> {
   const tournament = await getTournamentById(tournamentId);
-
-  if (!tournament) {
-    throw new Error('Tournament not found');
-  }
-
+  if (!tournament) throw new Error('Tournament not found');
   if (tournament.status !== 'open' && tournament.status !== 'pending') {
     throw new Error('Tournament is not accepting registrations');
   }
-
   if (tournament.players.length >= tournament.maxPlayers) {
     throw new Error('Tournament is full');
   }
-
-  // Check if user is already registered (allow owner to join)
   if (tournament.players.some((p) => p.userId === user.uid)) {
     throw new Error('You are already registered for this tournament');
   }
@@ -528,39 +465,32 @@ export async function registerPlayer(
     isGuest: false,
   };
 
-  const tournamentRef = doc(db, TOURNAMENTS_COLLECTION, tournamentId);
-  await updateDoc(tournamentRef, {
-    players: [...tournament.players, newPlayer],
-    updatedAt: serverTimestamp(),
-  });
+  const { error } = await supabase
+    .from('tournaments')
+    .update({
+      players: serializePlayers([...tournament.players, newPlayer]),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', tournamentId);
+  if (error) throw error;
 }
 
-// Register a guest player (with pseudonym) to a tournament
 export async function registerGuestPlayer(
   tournamentId: string,
   pseudonym: string,
   guestId: string
 ): Promise<void> {
   const tournament = await getTournamentById(tournamentId);
-
-  if (!tournament) {
-    throw new Error('Tournament not found');
-  }
-
+  if (!tournament) throw new Error('Tournament not found');
   if (tournament.status !== 'open' && tournament.status !== 'pending') {
     throw new Error('Tournament is not accepting registrations');
   }
-
   if (tournament.players.length >= tournament.maxPlayers) {
     throw new Error('Tournament is full');
   }
-
-  // Check if guest is already registered
   if (tournament.players.some((p) => p.guestId === guestId)) {
     throw new Error('You are already registered for this tournament');
   }
-
-  // Check if pseudonym is already taken (for this tournament)
   if (
     tournament.players.some(
       (p) => p.pseudonym?.toLowerCase() === pseudonym.toLowerCase()
@@ -577,24 +507,22 @@ export async function registerGuestPlayer(
     isGuest: true,
   };
 
-  const tournamentRef = doc(db, TOURNAMENTS_COLLECTION, tournamentId);
-  await updateDoc(tournamentRef, {
-    players: [...tournament.players, newPlayer],
-    updatedAt: serverTimestamp(),
-  });
+  const { error } = await supabase
+    .from('tournaments')
+    .update({
+      players: serializePlayers([...tournament.players, newPlayer]),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', tournamentId);
+  if (error) throw error;
 }
 
-// Unregister an authenticated player from a tournament
 export async function unregisterPlayer(
   tournamentId: string,
   userId: string
 ): Promise<void> {
   const tournament = await getTournamentById(tournamentId);
-
-  if (!tournament) {
-    throw new Error('Tournament not found');
-  }
-
+  if (!tournament) throw new Error('Tournament not found');
   if (
     tournament.status === 'in-progress' ||
     tournament.status === 'completed' ||
@@ -604,24 +532,22 @@ export async function unregisterPlayer(
   }
 
   const updatedPlayers = tournament.players.filter((p) => p.userId !== userId);
-  const tournamentRef = doc(db, TOURNAMENTS_COLLECTION, tournamentId);
-  await updateDoc(tournamentRef, {
-    players: updatedPlayers,
-    updatedAt: serverTimestamp(),
-  });
+  const { error } = await supabase
+    .from('tournaments')
+    .update({
+      players: serializePlayers(updatedPlayers),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', tournamentId);
+  if (error) throw error;
 }
 
-// Unregister a guest player from a tournament
 export async function unregisterGuestPlayer(
   tournamentId: string,
   guestId: string
 ): Promise<void> {
   const tournament = await getTournamentById(tournamentId);
-
-  if (!tournament) {
-    throw new Error('Tournament not found');
-  }
-
+  if (!tournament) throw new Error('Tournament not found');
   if (
     tournament.status === 'in-progress' ||
     tournament.status === 'completed' ||
@@ -633,53 +559,47 @@ export async function unregisterGuestPlayer(
   const updatedPlayers = tournament.players.filter(
     (p) => p.guestId !== guestId
   );
-  const tournamentRef = doc(db, TOURNAMENTS_COLLECTION, tournamentId);
-  await updateDoc(tournamentRef, {
-    players: updatedPlayers,
-    updatedAt: serverTimestamp(),
-  });
+  const { error } = await supabase
+    .from('tournaments')
+    .update({
+      players: serializePlayers(updatedPlayers),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', tournamentId);
+  if (error) throw error;
 }
 
-// Get tournaments where a user has participated (as authenticated player)
 export async function getTournamentsByUserId(
   userId: string
 ): Promise<Tournament[]> {
-  // Note: Firestore doesn't support querying nested array fields directly
-  // We need to get all tournaments and filter in memory
-  // This is acceptable for small datasets, but may need optimization for large scales
-  const querySnapshot = await getDocs(collection(db, TOURNAMENTS_COLLECTION));
-  const tournaments: Tournament[] = [];
+  // Get all tournaments and filter in memory — Postgres JSONB queries on player
+  // userId would need a custom index/function and current dataset is small.
+  const { data, error } = await supabase
+    .from('tournaments')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
 
-  querySnapshot.forEach((docSnap) => {
-    const tournament = docToTournament(docSnap.data(), docSnap.id);
-    const isOwner = tournament.ownerId === userId;
-    const isPlayer = tournament.players.some((p) => p.userId === userId);
-
-    if (isOwner || isPlayer) {
-      tournaments.push(tournament);
-    }
-  });
-
-  // Sort by most recent first
-  tournaments.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-
-  return tournaments;
+  return (data ?? [])
+    .map(rowToTournament)
+    .filter(
+      (tournament) =>
+        tournament.ownerId === userId ||
+        tournament.players.some((p) => p.userId === userId)
+    );
 }
 
-// Update tournament status
 export async function updateTournamentStatus(
   tournamentId: string,
   status: TournamentStatus
 ): Promise<void> {
-  const tournamentRef = doc(db, TOURNAMENTS_COLLECTION, tournamentId);
-  const updateData: any = {
+  const updateData: Record<string, unknown> = {
     status,
-    updatedAt: serverTimestamp(),
+    updated_at: new Date().toISOString(),
   };
 
   if (status === 'in-progress') {
-    updateData.startedAt = serverTimestamp();
-
+    updateData.started_at = new Date().toISOString();
     const tournament = await getTournamentById(tournamentId);
     if (
       tournament &&
@@ -690,10 +610,14 @@ export async function updateTournamentStatus(
       updateData.progress = serializeTournamentProgress(progress);
     }
   } else if (status === 'completed') {
-    updateData.completedAt = serverTimestamp();
+    updateData.completed_at = new Date().toISOString();
   }
 
-  await updateDoc(tournamentRef, updateData);
+  const { error } = await supabase
+    .from('tournaments')
+    .update(updateData)
+    .eq('id', tournamentId);
+  if (error) throw error;
 }
 
 export async function reportSingleEliminationMatch(
@@ -701,14 +625,10 @@ export async function reportSingleEliminationMatch(
   payload: SingleEliminationResultPayload
 ): Promise<void> {
   const tournament = await getTournamentById(tournamentId);
-  if (!tournament) {
-    throw new Error('Tournament not found');
-  }
-
+  if (!tournament) throw new Error('Tournament not found');
   if (tournament.type !== 'single-elimination') {
     throw new Error('Tournament type does not support this operation');
   }
-
   if (!tournament.progress) {
     throw new Error('Tournament bracket has not been initialized');
   }
@@ -720,16 +640,19 @@ export async function reportSingleEliminationMatch(
   const finalRound = updatedProgress.rounds[updatedProgress.rounds.length - 1];
   const isTournamentComplete = finalRound?.status === 'completed';
 
-  const tournamentRef = doc(db, TOURNAMENTS_COLLECTION, tournamentId);
-  const updateData: any = {
+  const updateData: Record<string, unknown> = {
     progress: serializeTournamentProgress(updatedProgress),
-    updatedAt: serverTimestamp(),
+    updated_at: new Date().toISOString(),
   };
 
   if (isTournamentComplete) {
     updateData.status = 'completed';
-    updateData.completedAt = serverTimestamp();
+    updateData.completed_at = new Date().toISOString();
   }
 
-  await updateDoc(tournamentRef, updateData);
+  const { error } = await supabase
+    .from('tournaments')
+    .update(updateData)
+    .eq('id', tournamentId);
+  if (error) throw error;
 }

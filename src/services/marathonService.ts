@@ -1,132 +1,145 @@
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  query,
-  where,
-  orderBy,
-  serverTimestamp,
-  Timestamp,
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import type { Marathon, UserMarathon, MarathonMovie, MarathonMovieEntry } from '@/types/marathon';
+import { supabase } from '@/lib/supabase';
+import type {
+  Marathon,
+  UserMarathon,
+  MarathonMovie,
+  MarathonMovieEntry,
+} from '@/types/marathon';
 
-const MARATHONS_COLLECTION = 'marathons';
-const USER_MARATHONS_COLLECTION = 'userMarathons';
-
-function timestampToDate(ts: any): Date {
-  if (ts?.toDate) return ts.toDate();
-  if (ts instanceof Date) return ts;
-  return new Date(ts);
-}
-
-function docToMarathon(id: string, data: any): Marathon {
+function rowToMarathon(row: any): Marathon {
   return {
-    id,
-    title: data.title,
-    description: data.description ?? '',
-    coverPosterUrl: data.coverPosterUrl ?? null,
-    movies: data.movies ?? [],
-    createdBy: data.createdBy,
-    visibility: data.visibility ?? 'public',
-    tags: data.tags ?? [],
-    createdAt: timestampToDate(data.createdAt),
-    updatedAt: timestampToDate(data.updatedAt),
+    id: row.id,
+    title: row.title,
+    description: row.description ?? '',
+    coverPosterUrl: row.cover_poster_url ?? null,
+    movies: row.movies ?? [],
+    createdBy: row.created_by,
+    visibility: row.visibility ?? 'public',
+    tags: row.tags ?? [],
+    createdAt: new Date(row.created_at),
+    updatedAt: new Date(row.updated_at),
   };
 }
 
-function docToUserMarathon(id: string, data: any): UserMarathon {
+function rowToUserMarathon(row: any): UserMarathon {
   return {
-    id,
-    marathonId: data.marathonId,
-    marathonTitle: data.marathonTitle,
-    userId: data.userId,
-    movies: (data.movies ?? []).map((m: any) => ({
+    id: row.id,
+    marathonId: row.marathon_id,
+    marathonTitle: row.marathon_title,
+    userId: row.user_id,
+    movies: (row.movies ?? []).map((m: any) => ({
       ...m,
-      watchedAt: m.watchedAt ? timestampToDate(m.watchedAt) : null,
+      watchedAt: m.watchedAt ? new Date(m.watchedAt) : null,
     })),
-    startedAt: timestampToDate(data.startedAt),
-    completedAt: data.completedAt ? timestampToDate(data.completedAt) : null,
-    updatedAt: timestampToDate(data.updatedAt),
+    startedAt: new Date(row.started_at),
+    completedAt: row.completed_at ? new Date(row.completed_at) : null,
+    updatedAt: new Date(row.updated_at),
   };
 }
 
 // ==================== MARATHONS (templates) ====================
 
 export async function getPublicMarathons(): Promise<Marathon[]> {
-  const q = query(
-    collection(db, MARATHONS_COLLECTION),
-    where('visibility', '==', 'public'),
-    orderBy('createdAt', 'desc')
-  );
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => docToMarathon(d.id, d.data()));
+  const { data, error } = await supabase
+    .from('marathons')
+    .select('*')
+    .eq('visibility', 'public')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map(rowToMarathon);
 }
 
-export async function getUserCreatedMarathons(userId: string): Promise<Marathon[]> {
-  const q = query(
-    collection(db, MARATHONS_COLLECTION),
-    where('createdBy', '==', userId),
-    orderBy('createdAt', 'desc')
-  );
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => docToMarathon(d.id, d.data()));
+export async function getUserCreatedMarathons(
+  userId: string
+): Promise<Marathon[]> {
+  const { data, error } = await supabase
+    .from('marathons')
+    .select('*')
+    .eq('created_by', userId)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map(rowToMarathon);
 }
 
 export async function getMarathon(id: string): Promise<Marathon | null> {
-  const snap = await getDoc(doc(db, MARATHONS_COLLECTION, id));
-  if (!snap.exists()) return null;
-  return docToMarathon(snap.id, snap.data());
+  const { data, error } = await supabase
+    .from('marathons')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? rowToMarathon(data) : null;
 }
 
 export async function createMarathon(
   userId: string,
   data: Omit<Marathon, 'id' | 'createdBy' | 'createdAt' | 'updatedAt'>
 ): Promise<Marathon> {
-  const ref = await addDoc(collection(db, MARATHONS_COLLECTION), {
-    ...data,
-    createdBy: userId,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  });
-  const snap = await getDoc(ref);
-  return docToMarathon(snap.id, snap.data());
+  const { data: row, error } = await supabase
+    .from('marathons')
+    .insert({
+      title: data.title,
+      description: data.description ?? '',
+      cover_poster_url: data.coverPosterUrl ?? null,
+      movies: data.movies ?? [],
+      created_by: userId,
+      visibility: data.visibility ?? 'public',
+      tags: data.tags ?? [],
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return rowToMarathon(row);
 }
 
 export async function updateMarathon(
   id: string,
   data: Partial<Omit<Marathon, 'id' | 'createdBy' | 'createdAt'>>
 ): Promise<void> {
-  await updateDoc(doc(db, MARATHONS_COLLECTION, id), {
-    ...data,
-    updatedAt: serverTimestamp(),
-  });
+  const row: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+  };
+  if (data.title !== undefined) row.title = data.title;
+  if (data.description !== undefined) row.description = data.description;
+  if (data.coverPosterUrl !== undefined)
+    row.cover_poster_url = data.coverPosterUrl;
+  if (data.movies !== undefined) row.movies = data.movies;
+  if (data.visibility !== undefined) row.visibility = data.visibility;
+  if (data.tags !== undefined) row.tags = data.tags;
+
+  const { error } = await supabase.from('marathons').update(row).eq('id', id);
+  if (error) throw error;
 }
 
 export async function deleteMarathon(id: string): Promise<void> {
-  await deleteDoc(doc(db, MARATHONS_COLLECTION, id));
+  const { error } = await supabase.from('marathons').delete().eq('id', id);
+  if (error) throw error;
 }
 
-// ==================== USER MARATHONS (progress tracking) ====================
+// ==================== USER MARATHONS ====================
 
-export async function getUserMarathons(userId: string): Promise<UserMarathon[]> {
-  const q = query(
-    collection(db, USER_MARATHONS_COLLECTION),
-    where('userId', '==', userId),
-    orderBy('updatedAt', 'desc')
-  );
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => docToUserMarathon(d.id, d.data()));
+export async function getUserMarathons(
+  userId: string
+): Promise<UserMarathon[]> {
+  const { data, error } = await supabase
+    .from('user_marathons')
+    .select('*')
+    .eq('user_id', userId)
+    .order('updated_at', { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map(rowToUserMarathon);
 }
 
-export async function getUserMarathon(id: string): Promise<UserMarathon | null> {
-  const snap = await getDoc(doc(db, USER_MARATHONS_COLLECTION, id));
-  if (!snap.exists()) return null;
-  return docToUserMarathon(snap.id, snap.data());
+export async function getUserMarathon(
+  id: string
+): Promise<UserMarathon | null> {
+  const { data, error } = await supabase
+    .from('user_marathons')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? rowToUserMarathon(data) : null;
 }
 
 export async function startMarathon(
@@ -139,17 +152,19 @@ export async function startMarathon(
     watchedAt: null,
     notes: '',
   }));
-  const ref = await addDoc(collection(db, USER_MARATHONS_COLLECTION), {
-    marathonId: marathon.id,
-    marathonTitle: marathon.title,
-    userId,
-    movies,
-    startedAt: serverTimestamp(),
-    completedAt: null,
-    updatedAt: serverTimestamp(),
-  });
-  const snap = await getDoc(ref);
-  return docToUserMarathon(snap.id, snap.data());
+  const { data, error } = await supabase
+    .from('user_marathons')
+    .insert({
+      marathon_id: marathon.id,
+      marathon_title: marathon.title,
+      user_id: userId,
+      movies,
+      completed_at: null,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return rowToUserMarathon(data);
 }
 
 export async function startCustomMarathon(
@@ -163,17 +178,19 @@ export async function startCustomMarathon(
     watchedAt: null,
     notes: '',
   }));
-  const ref = await addDoc(collection(db, USER_MARATHONS_COLLECTION), {
-    marathonId: null,
-    marathonTitle: title,
-    userId,
-    movies: entries,
-    startedAt: serverTimestamp(),
-    completedAt: null,
-    updatedAt: serverTimestamp(),
-  });
-  const snap = await getDoc(ref);
-  return docToUserMarathon(snap.id, snap.data());
+  const { data, error } = await supabase
+    .from('user_marathons')
+    .insert({
+      marathon_id: null,
+      marathon_title: title,
+      user_id: userId,
+      movies: entries,
+      completed_at: null,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return rowToUserMarathon(data);
 }
 
 export async function updateMovieProgress(
@@ -182,17 +199,25 @@ export async function updateMovieProgress(
 ): Promise<void> {
   const serialized = movies.map((m) => ({
     ...m,
-    watchedAt: m.watchedAt ? Timestamp.fromDate(m.watchedAt) : null,
+    watchedAt: m.watchedAt ? m.watchedAt.toISOString() : null,
   }));
-
   const allWatched = movies.every((m) => m.watched);
-  await updateDoc(doc(db, USER_MARATHONS_COLLECTION, userMarathonId), {
-    movies: serialized,
-    completedAt: allWatched ? serverTimestamp() : null,
-    updatedAt: serverTimestamp(),
-  });
+
+  const { error } = await supabase
+    .from('user_marathons')
+    .update({
+      movies: serialized,
+      completed_at: allWatched ? new Date().toISOString() : null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', userMarathonId);
+  if (error) throw error;
 }
 
 export async function deleteUserMarathon(id: string): Promise<void> {
-  await deleteDoc(doc(db, USER_MARATHONS_COLLECTION, id));
+  const { error } = await supabase
+    .from('user_marathons')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
 }

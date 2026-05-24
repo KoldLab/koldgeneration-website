@@ -7,6 +7,7 @@ import {
   Dumbbell,
   Home,
   Languages,
+  Lock,
   LogIn,
   LogOut,
   Menu,
@@ -47,6 +48,7 @@ import UserMenu from '@/components/auth/UserMenu';
 
 type NavRoute = RouteConfig & {
   icon: typeof Home;
+  locked?: boolean;
   children?: NavRoute[];
 };
 
@@ -74,32 +76,11 @@ export function NavBar() {
   }, [location.pathname]);
 
   const routesConfig = useMemo(
-    () =>
-      getRoutesConfig(t)
-        .map((route) => {
-          if (route.to === '/workouts' && !user) {
-            return null;
-          }
-
-          if (route.to === '/tournaments' && route.children) {
-            const filteredChildren = route.children.filter((child) => {
-              if (
-                !user &&
-                (child.to === '/tournaments/create' || child.to === '/tournaments/my')
-              ) {
-                return false;
-              }
-              return true;
-            });
-            return { ...route, children: filteredChildren };
-          }
-
-          return route;
-        })
-        .filter((route): route is RouteConfig => route !== null)
-        .map(withRouteIcons),
+    () => getRoutesConfig(t).map((route) => withRouteIcons(route, !user)),
     [t, user]
   );
+
+  const lockTooltip = t('nav.signInRequired');
 
   const handleSignOut = async () => {
     try {
@@ -119,7 +100,7 @@ export function NavBar() {
 
   return (
     <div className="w-full flex items-center gap-3">
-      <div className="flex flex-1 items-center justify-between sm:hidden">
+      <div className="flex flex-1 items-center justify-between lg:hidden">
         <Link to="/" className="flex items-center gap-3">
           <img src="/logo.png" alt="Logo" className="h-10 w-auto shrink-0 invert dark:invert-0" />
         </Link>
@@ -159,7 +140,7 @@ export function NavBar() {
         </Sheet>
       </div>
 
-      <div className="hidden sm:flex flex-1 justify-start items-center">
+      <div className="hidden lg:flex flex-1 justify-start items-center">
         <NavigationMenu viewport={isMobile} delayDuration={150}>
           <NavigationMenuList className="items-center gap-2">
             <NavigationMenuItem>
@@ -168,13 +149,18 @@ export function NavBar() {
               </Link>
             </NavigationMenuItem>
             {routesConfig.map((route) => (
-              <ListItem key={route.title} {...route} />
+              <ListItem
+                key={route.title}
+                {...route}
+                lockTooltip={lockTooltip}
+                onLockedClick={handleSignIn}
+              />
             ))}
           </NavigationMenuList>
         </NavigationMenu>
       </div>
 
-      <div className="hidden sm:flex flex-1 items-center justify-end gap-3">
+      <div className="hidden lg:flex flex-1 items-center justify-end gap-3">
         {!user && (
           <>
             <LanguagePicker
@@ -203,18 +189,51 @@ function ListItem({
   children,
   to,
   isSub,
-}: NavRoute & { isSub?: boolean }) {
+  locked,
+  lockTooltip,
+  onLockedClick,
+}: NavRoute & {
+  isSub?: boolean;
+  lockTooltip: string;
+  onLockedClick: () => void;
+}) {
+  const label = (
+    <span className="inline-flex items-center gap-1.5">
+      <span>{title}</span>
+      {locked && (
+        <Lock
+          className="h-3 w-3 text-muted-foreground"
+          aria-label={lockTooltip}
+        />
+      )}
+    </span>
+  );
+
+  if (locked) {
+    const button = (
+      <button
+        type="button"
+        onClick={onLockedClick}
+        title={lockTooltip}
+        className={navigationMenuTriggerStyle()}
+      >
+        {label}
+      </button>
+    );
+    return isSub ? <li>{button}</li> : <NavigationMenuItem>{button}</NavigationMenuItem>;
+  }
+
   if (!children) {
     return isSub ? (
       <li>
         <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-          <Link to={to}>{title}</Link>
+          <Link to={to}>{label}</Link>
         </NavigationMenuLink>
       </li>
     ) : (
       <NavigationMenuItem>
         <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-          <Link to={to}>{title}</Link>
+          <Link to={to}>{label}</Link>
         </NavigationMenuLink>
       </NavigationMenuItem>
     );
@@ -231,12 +250,18 @@ function ListItem({
           }
         }}
       >
-        {title}
+        {label}
       </NavigationMenuTrigger>
       <NavigationMenuContent className="left-0 w-max min-w-[calc(100%-0px)] [@media(min-width:768px)]:min-w-[var(--trigger-width,auto)]">
         <ul className="grid gap-4">
           {children.map((child: NavRoute) => (
-            <ListItem key={child.title} {...child} isSub />
+            <ListItem
+              key={child.title}
+              {...child}
+              isSub
+              lockTooltip={lockTooltip}
+              onLockedClick={onLockedClick}
+            />
           ))}
         </ul>
       </NavigationMenuContent>
@@ -304,6 +329,11 @@ function MobileDrawerNav({
               route={route}
               pathname={pathname}
               shouldAutoExpand={isOpen}
+              lockTooltip={t('nav.signInRequired')}
+              onLockedClick={() => {
+                onClose();
+                onSignIn();
+              }}
             />
           ))}
         </nav>
@@ -378,10 +408,14 @@ function MobileNavItem({
   route,
   pathname,
   shouldAutoExpand,
+  lockTooltip,
+  onLockedClick,
 }: {
   route: NavRoute;
   pathname: string;
   shouldAutoExpand: boolean;
+  lockTooltip: string;
+  onLockedClick: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const isActive = routeMatches(pathname, route.to);
@@ -393,6 +427,24 @@ function MobileNavItem({
       setIsOpen(true);
     }
   }, [isActive, isBranchActive, shouldAutoExpand]);
+
+  if (route.locked) {
+    return (
+      <button
+        type="button"
+        onClick={onLockedClick}
+        title={lockTooltip}
+        className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-medium text-sidebar-foreground transition-colors hover:bg-sidebar-accent"
+      >
+        <Icon className="h-4 w-4 shrink-0" />
+        <span className="flex-1">{route.title}</span>
+        <Lock
+          className="h-3.5 w-3.5 text-muted-foreground"
+          aria-label={lockTooltip}
+        />
+      </button>
+    );
+  }
 
   if (!route.children?.length) {
     return (
@@ -406,7 +458,7 @@ function MobileNavItem({
           }`}
         >
           <Icon className="h-4 w-4 shrink-0" />
-          <span>{route.title}</span>
+          <span className="flex-1">{route.title}</span>
         </Link>
       </SheetClose>
     );
@@ -433,6 +485,25 @@ function MobileNavItem({
           {route.children.map((child) => {
             const childActive = routeMatches(pathname, child.to);
 
+            if (child.locked) {
+              return (
+                <button
+                  key={child.title}
+                  type="button"
+                  onClick={onLockedClick}
+                  title={lockTooltip}
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-current/70" />
+                  <span className="flex-1">{child.title}</span>
+                  <Lock
+                    className="h-3.5 w-3.5 text-muted-foreground"
+                    aria-label={lockTooltip}
+                  />
+                </button>
+              );
+            }
+
             return (
               <SheetClose asChild key={child.title}>
                 <Link
@@ -444,7 +515,7 @@ function MobileNavItem({
                   }`}
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-current/70" />
-                  <span>{child.title}</span>
+                  <span className="flex-1">{child.title}</span>
                 </Link>
               </SheetClose>
             );
@@ -498,11 +569,12 @@ function DesktopThemeToggle({
   );
 }
 
-function withRouteIcons(route: RouteConfig): NavRoute {
+function withRouteIcons(route: RouteConfig, signedOut: boolean): NavRoute {
   return {
     ...route,
     icon: routeIcons[route.to] ?? Home,
-    children: route.children?.map(withRouteIcons),
+    locked: Boolean(route.protected && signedOut),
+    children: route.children?.map((child) => withRouteIcons(child, signedOut)),
   };
 }
 

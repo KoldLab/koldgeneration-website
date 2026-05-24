@@ -1,23 +1,4 @@
-// Required Firestore security rules — see firestore.rules in project root.
-
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  query,
-  where,
-  orderBy,
-  onSnapshot,
-  arrayUnion,
-  arrayRemove,
-  Timestamp,
-  serverTimestamp,
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 import type {
   Note,
   NoteType,
@@ -26,38 +7,26 @@ import type {
   CollaboratorProfile,
 } from '@/types/notes';
 
-const NOTES_COLLECTION = 'notes';
-
-function timestampToDate(ts: unknown): Date {
-  if (ts && typeof ts === 'object' && 'toDate' in ts) {
-    return (ts as Timestamp).toDate();
-  }
-  if (ts instanceof Date) return ts;
-  return new Date(ts as string | number);
-}
-
-function docToNote(id: string, data: Record<string, unknown>): Note {
+function rowToNote(row: any): Note {
   return {
-    id,
-    userId: data.userId as string,
-    collaborators: (data.collaborators as string[]) ?? [],
+    id: row.id,
+    userId: row.user_id,
+    collaborators: row.collaborators ?? [],
     collaboratorProfiles:
-      (data.collaboratorProfiles as Record<string, CollaboratorProfile>) ?? {},
-    inviteToken: (data.inviteToken as string | null) ?? null,
-    title: (data.title as string) ?? '',
-    type: (data.type as NoteType) ?? 'note',
-    content: (data.content as string) ?? '',
-    items: (data.items as ChecklistItem[]) ?? [],
-    color: (data.color as NoteColor) ?? 'default',
-    isPinned: (data.isPinned as boolean) ?? false,
-    isPublic: (data.isPublic as boolean) ?? false,
-    shareToken: (data.shareToken as string | null) ?? null,
-    createdAt: timestampToDate(data.createdAt),
-    updatedAt: timestampToDate(data.updatedAt),
+      (row.collaborator_profiles as Record<string, CollaboratorProfile>) ?? {},
+    inviteToken: row.invite_token ?? null,
+    title: row.title ?? '',
+    type: (row.type as NoteType) ?? 'note',
+    content: row.content ?? '',
+    items: (row.items as ChecklistItem[]) ?? [],
+    color: (row.color as NoteColor) ?? 'default',
+    isPinned: row.is_pinned ?? false,
+    isPublic: row.is_public ?? false,
+    shareToken: row.share_token ?? null,
+    createdAt: new Date(row.created_at),
+    updatedAt: new Date(row.updated_at),
   };
 }
-
-// ─── One-time reads ────────────────────────────────────────────────────────
 
 export async function createNote(
   userId: string,
@@ -69,84 +38,81 @@ export async function createNote(
     color?: NoteColor;
   }
 ): Promise<Note> {
-  const data = {
-    userId,
-    collaborators: [],
-    collaboratorProfiles: {},
-    inviteToken: null,
-    title: input.title,
-    type: input.type,
-    content: input.content ?? '',
-    items: input.items ?? [],
-    color: input.color ?? 'default',
-    isPinned: false,
-    isPublic: false,
-    shareToken: null,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  };
-
-  const ref = await addDoc(collection(db, NOTES_COLLECTION), data);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) throw new Error('Failed to create note');
-  return docToNote(snap.id, snap.data() as Record<string, unknown>);
+  const { data, error } = await supabase
+    .from('notes')
+    .insert({
+      user_id: userId,
+      collaborators: [],
+      collaborator_profiles: {},
+      invite_token: null,
+      title: input.title,
+      type: input.type,
+      content: input.content ?? '',
+      items: input.items ?? [],
+      color: input.color ?? 'default',
+      is_pinned: false,
+      is_public: false,
+      share_token: null,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return rowToNote(data);
 }
 
 export async function getNotesByUserId(userId: string): Promise<Note[]> {
-  const q = query(
-    collection(db, NOTES_COLLECTION),
-    where('userId', '==', userId),
-    orderBy('updatedAt', 'desc')
-  );
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map((d) =>
-    docToNote(d.id, d.data() as Record<string, unknown>)
-  );
+  const { data, error } = await supabase
+    .from('notes')
+    .select('*')
+    .eq('user_id', userId)
+    .order('updated_at', { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map(rowToNote);
 }
 
 export async function getCollaboratorNotes(userId: string): Promise<Note[]> {
-  const q = query(
-    collection(db, NOTES_COLLECTION),
-    where('collaborators', 'array-contains', userId),
-    orderBy('updatedAt', 'desc')
-  );
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map((d) =>
-    docToNote(d.id, d.data() as Record<string, unknown>)
-  );
+  const { data, error } = await supabase
+    .from('notes')
+    .select('*')
+    .contains('collaborators', [userId])
+    .order('updated_at', { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map(rowToNote);
 }
 
 export async function getNoteById(noteId: string): Promise<Note | null> {
-  const snap = await getDoc(doc(db, NOTES_COLLECTION, noteId));
-  if (!snap.exists()) return null;
-  return docToNote(snap.id, snap.data() as Record<string, unknown>);
+  const { data, error } = await supabase
+    .from('notes')
+    .select('*')
+    .eq('id', noteId)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? rowToNote(data) : null;
 }
 
 export async function getNoteByShareToken(
   shareToken: string
 ): Promise<Note | null> {
-  const q = query(
-    collection(db, NOTES_COLLECTION),
-    where('shareToken', '==', shareToken),
-    where('isPublic', '==', true)
-  );
-  const snapshot = await getDocs(q);
-  if (snapshot.empty) return null;
-  const d = snapshot.docs[0];
-  return docToNote(d.id, d.data() as Record<string, unknown>);
+  const { data, error } = await supabase
+    .from('notes')
+    .select('*')
+    .eq('share_token', shareToken)
+    .eq('is_public', true)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? rowToNote(data) : null;
 }
 
 export async function getNoteByInviteToken(
   inviteToken: string
 ): Promise<Note | null> {
-  const q = query(
-    collection(db, NOTES_COLLECTION),
-    where('inviteToken', '==', inviteToken)
-  );
-  const snapshot = await getDocs(q);
-  if (snapshot.empty) return null;
-  const d = snapshot.docs[0];
-  return docToNote(d.id, d.data() as Record<string, unknown>);
+  const { data, error } = await supabase
+    .from('notes')
+    .select('*')
+    .eq('invite_token', inviteToken)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? rowToNote(data) : null;
 }
 
 // ─── Real-time subscription ────────────────────────────────────────────────
@@ -155,18 +121,34 @@ export function subscribeToNote(
   noteId: string,
   callback: (note: Note | null) => void
 ): () => void {
-  const ref = doc(db, NOTES_COLLECTION, noteId);
-  return onSnapshot(
-    ref,
-    (snap) => {
-      if (!snap.exists()) {
-        callback(null);
-      } else {
-        callback(docToNote(snap.id, snap.data() as Record<string, unknown>));
+  // Fetch initial state then subscribe to changes.
+  void getNoteById(noteId)
+    .then(callback)
+    .catch(() => callback(null));
+
+  const channel = supabase
+    .channel(`note:${noteId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'notes',
+        filter: `id=eq.${noteId}`,
+      },
+      (payload) => {
+        if (payload.eventType === 'DELETE') {
+          callback(null);
+        } else if (payload.new) {
+          callback(rowToNote(payload.new));
+        }
       }
-    },
-    () => callback(null)
-  );
+    )
+    .subscribe();
+
+  return () => {
+    void supabase.removeChannel(channel);
+  };
 }
 
 // ─── Mutations ─────────────────────────────────────────────────────────────
@@ -175,14 +157,30 @@ export async function updateNote(
   noteId: string,
   updates: Partial<Omit<Note, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>
 ): Promise<void> {
-  await updateDoc(doc(db, NOTES_COLLECTION, noteId), {
-    ...updates,
-    updatedAt: serverTimestamp(),
-  });
+  const row: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+  };
+  if (updates.collaborators !== undefined)
+    row.collaborators = updates.collaborators;
+  if (updates.collaboratorProfiles !== undefined)
+    row.collaborator_profiles = updates.collaboratorProfiles;
+  if (updates.inviteToken !== undefined) row.invite_token = updates.inviteToken;
+  if (updates.title !== undefined) row.title = updates.title;
+  if (updates.type !== undefined) row.type = updates.type;
+  if (updates.content !== undefined) row.content = updates.content;
+  if (updates.items !== undefined) row.items = updates.items;
+  if (updates.color !== undefined) row.color = updates.color;
+  if (updates.isPinned !== undefined) row.is_pinned = updates.isPinned;
+  if (updates.isPublic !== undefined) row.is_public = updates.isPublic;
+  if (updates.shareToken !== undefined) row.share_token = updates.shareToken;
+
+  const { error } = await supabase.from('notes').update(row).eq('id', noteId);
+  if (error) throw error;
 }
 
 export async function deleteNote(noteId: string): Promise<void> {
-  await deleteDoc(doc(db, NOTES_COLLECTION, noteId));
+  const { error } = await supabase.from('notes').delete().eq('id', noteId);
+  if (error) throw error;
 }
 
 // ─── Sharing (read-only public link) ──────────────────────────────────────
@@ -216,22 +214,49 @@ export async function joinNoteAsCollaborator(
   noteId: string,
   user: { uid: string; displayName: string | null; photoURL: string | null }
 ): Promise<void> {
-  await updateDoc(doc(db, NOTES_COLLECTION, noteId), {
-    collaborators: arrayUnion(user.uid),
-    [`collaboratorProfiles.${user.uid}`]: {
+  const note = await getNoteById(noteId);
+  if (!note) throw new Error('Note not found');
+
+  if (note.collaborators.includes(user.uid)) return;
+
+  const updatedCollaborators = [...note.collaborators, user.uid];
+  const updatedProfiles = {
+    ...note.collaboratorProfiles,
+    [user.uid]: {
       displayName: user.displayName,
       photoURL: user.photoURL,
     },
-    updatedAt: serverTimestamp(),
-  });
+  };
+
+  const { error } = await supabase
+    .from('notes')
+    .update({
+      collaborators: updatedCollaborators,
+      collaborator_profiles: updatedProfiles,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', noteId);
+  if (error) throw error;
 }
 
 export async function removeCollaborator(
   noteId: string,
   uid: string
 ): Promise<void> {
-  await updateDoc(doc(db, NOTES_COLLECTION, noteId), {
-    collaborators: arrayRemove(uid),
-    updatedAt: serverTimestamp(),
-  });
+  const note = await getNoteById(noteId);
+  if (!note) throw new Error('Note not found');
+
+  const updatedCollaborators = note.collaborators.filter((c) => c !== uid);
+  const updatedProfiles = { ...note.collaboratorProfiles };
+  delete updatedProfiles[uid];
+
+  const { error } = await supabase
+    .from('notes')
+    .update({
+      collaborators: updatedCollaborators,
+      collaborator_profiles: updatedProfiles,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', noteId);
+  if (error) throw error;
 }

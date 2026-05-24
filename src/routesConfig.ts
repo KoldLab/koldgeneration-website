@@ -5,6 +5,7 @@ export type RouteConfig = {
   title: string;
   to: string;
   description: string;
+  protected?: boolean;
   children?: RouteConfig[];
 };
 
@@ -52,6 +53,7 @@ export const getRoutesConfig = (t: TFunction): RouteConfig[] => [
     title: t('routes.workouts.title'),
     to: '/workouts',
     description: t('routes.workouts.description'),
+    protected: true,
     children: [
       {
         title: t('routes.workouts.dashboard.title'),
@@ -91,11 +93,13 @@ export const getRoutesConfig = (t: TFunction): RouteConfig[] => [
         title: t('routes.tournaments.create.title'),
         to: '/tournaments/create',
         description: t('routes.tournaments.create.description'),
+        protected: true,
       },
       {
         title: t('routes.tournaments.my.title'),
         to: '/tournaments/my',
         description: t('routes.tournaments.my.description'),
+        protected: true,
       },
       {
         title: t('routes.tournaments.enter.title'),
@@ -108,6 +112,7 @@ export const getRoutesConfig = (t: TFunction): RouteConfig[] => [
     title: t('routes.notes.title'),
     to: '/notes',
     description: t('routes.notes.description'),
+    protected: true,
   },
 ];
 
@@ -163,11 +168,13 @@ export const routesConfig: RouteConfig[] = [
         title: 'Create Tournament',
         to: '/tournaments/create',
         description: 'Create a new tournament',
+        protected: true,
       },
       {
         title: 'My Tournaments',
         to: '/tournaments/my',
         description: 'View all tournaments you have participated in',
+        protected: true,
       },
       {
         title: 'Enter Tournament Code',
