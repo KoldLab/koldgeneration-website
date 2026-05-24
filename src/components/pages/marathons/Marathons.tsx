@@ -148,6 +148,9 @@ export default function Marathons() {
 
   const initialSection = (searchParams.get('s') as Section) ?? 'browse';
   const [section, setSection] = useState<Section>(initialSection);
+  // Auto-jump to "My Marathons" on first load if the user has active runs and
+  // no explicit section was requested via URL.
+  const [autoSwitched, setAutoSwitched] = useState(false);
   const [publicMarathons, setPublicMarathons] = useState<Marathon[]>([]);
   const [myCreated, setMyCreated] = useState<Marathon[]>([]);
   const [myActive, setMyActive] = useState<UserMarathon[]>([]);
@@ -169,6 +172,15 @@ export default function Marathons() {
         if (user) {
           const created = await getUserCreatedMarathons(user.uid);
           setMyCreated(created);
+        }
+        if (
+          !autoSwitched &&
+          !searchParams.get('s') &&
+          active.length > 0 &&
+          section === 'browse'
+        ) {
+          setSection('my-marathons');
+          setAutoSwitched(true);
         }
       } catch (err: any) {
         console.error(err);
@@ -193,8 +205,16 @@ export default function Marathons() {
 
   const handleStart = async (marathon: Marathon) => {
     if (!user) { toast.error(t('marathon.loginRequired')); return; }
+    // If the user already has an in-progress run for this template, resume it
+    // instead of creating a duplicate user_marathon.
+    const existing = myActive.find((um) => um.marathonId === marathon.id);
+    if (existing) {
+      navigate(`/marathons/track/${existing.id}`);
+      return;
+    }
     try {
       const um = await startMarathon(user.uid, marathon);
+      setMyActive((p) => [um, ...p]);
       navigate(`/marathons/track/${um.id}`);
     } catch { toast.error(t('common.error')); }
   };
