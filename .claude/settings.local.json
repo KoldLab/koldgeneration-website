@@ -21,7 +21,9 @@
       "Bash(npm install *)",
       "mcp__7b1150b3-0575-4a8f-a425-e46102abbd23__list_teams",
       "mcp__7b1150b3-0575-4a8f-a425-e46102abbd23__list_projects",
-      "mcp__7b1150b3-0575-4a8f-a425-e46102abbd23__get_project"
+      "mcp__7b1150b3-0575-4a8f-a425-e46102abbd23__get_project",
+      "mcp__7b1150b3-0575-4a8f-a425-e46102abbd23__get_deployment_build_logs",
+      "Bash(node node_modules/typescript/bin/tsc -b --force)"
     ]
   }
 }

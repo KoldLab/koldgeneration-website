@@ -46,7 +46,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import LoginButton from '@/components/auth/LoginButton';
 import UserMenu from '@/components/auth/UserMenu';
 
-type NavRoute = RouteConfig & {
+type NavRoute = Omit<RouteConfig, 'children'> & {
   icon: typeof Home;
   locked?: boolean;
   children?: NavRoute[];
