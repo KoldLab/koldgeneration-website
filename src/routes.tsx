@@ -6,6 +6,9 @@ import MinecraftListGenerator from './components/pages/tools/minecraft list gene
 import ShulkerBoxGenerator from './components/pages/tools/minecraft-shulker-generator/ShulkerBoxGenerator';
 import Timer from './components/pages/tools/timer/Timer';
 import MazeGenerator from './components/pages/tools/maze-generator/MazeGenerator';
+import VolleyballSessions from './components/pages/tools/volleyball-team-maker/VolleyballSessions';
+import VolleyballSession from './components/pages/tools/volleyball-team-maker/VolleyballSession';
+import JoinVolleyballSession from './components/pages/tools/volleyball-team-maker/JoinVolleyballSession';
 import CreateTournament from './components/pages/tournaments/CreateTournament';
 import TournamentView from './components/pages/tournaments/TournamentView';
 import MyTournaments from './components/pages/tournaments/MyTournaments';
@@ -45,6 +48,24 @@ export const router = createBrowserRouter([
           {
             path: '/tools/maze-generator',
             element: <MazeGenerator />,
+          },
+          {
+            path: '/tools/volleyball-team-maker',
+            element: (
+              <ProtectedRoute>
+                <VolleyballSessions />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            // Public: anyone with the URL can view the session. Editing is
+            // gated server-side by RLS (owner or shared-via-code).
+            path: '/tools/volleyball-team-maker/sessions/:id',
+            element: <VolleyballSession />,
+          },
+          {
+            path: '/tools/volleyball-team-maker/join/:code',
+            element: <JoinVolleyballSession />,
           },
         ],
       },

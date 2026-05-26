@@ -23,7 +23,13 @@
       "mcp__7b1150b3-0575-4a8f-a425-e46102abbd23__list_projects",
       "mcp__7b1150b3-0575-4a8f-a425-e46102abbd23__get_project",
       "mcp__7b1150b3-0575-4a8f-a425-e46102abbd23__get_deployment_build_logs",
-      "Bash(node node_modules/typescript/bin/tsc -b --force)"
+      "Bash(node node_modules/typescript/bin/tsc -b --force)",
+      "Bash(npx eslint *)",
+      "Bash(supabase --version)",
+      "Bash(supabase projects *)",
+      "Bash(supabase migration *)",
+      "Bash(supabase db *)",
+      "Bash(grep -n \"winner =\\\\|const a, b =\\\\|const { a, b }\\\\|setWinnerSide =\\\\|session.matches.map\" src/components/pages/tools/volleyball-team-maker/VolleyballSession.tsx)"
     ]
   }
 }

@@ -30,6 +30,12 @@ export const getRoutesConfig = (t: TFunction): RouteConfig[] => [
         to: '/tools/maze-generator',
         description: t('routes.tools.mazeGenerator.description'),
       },
+      {
+        title: t('routes.tools.volleyballTeamMaker.title'),
+        to: '/tools/volleyball-team-maker',
+        description: t('routes.tools.volleyballTeamMaker.description'),
+        protected: true,
+      },
     ],
   },
   {

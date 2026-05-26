@@ -13,6 +13,10 @@
     "mazeGenerator": {
       "title": "Générateur de labyrinthe",
       "description": "Créez des labyrinthes parfaits aléatoires — à imprimer ou à intégrer dans vos projets"
+    },
+    "volleyballTeamMaker": {
+      "title": "Générateur d'équipes de volley",
+      "description": "Créez des équipes de volley équilibrées ou aléatoires à partir de votre liste de joueurs"
     }
   },
   "minecraftTools": {

@@ -13,6 +13,10 @@
     "mazeGenerator": {
       "title": "Maze generator",
       "description": "Create random perfect mazes—print or use in your projects"
+    },
+    "volleyballTeamMaker": {
+      "title": "Volleyball team maker",
+      "description": "Build balanced or random volleyball teams from your player list"
     }
   },
   "minecraftTools": {
