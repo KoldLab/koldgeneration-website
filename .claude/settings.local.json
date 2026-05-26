@@ -29,7 +29,8 @@
       "Bash(supabase projects *)",
       "Bash(supabase migration *)",
       "Bash(supabase db *)",
-      "Bash(grep -n \"winner =\\\\|const a, b =\\\\|const { a, b }\\\\|setWinnerSide =\\\\|session.matches.map\" src/components/pages/tools/volleyball-team-maker/VolleyballSession.tsx)"
+      "Bash(grep -n \"winner =\\\\|const a, b =\\\\|const { a, b }\\\\|setWinnerSide =\\\\|session.matches.map\" src/components/pages/tools/volleyball-team-maker/VolleyballSession.tsx)",
+      "Bash(git fetch *)"
     ]
   }
 }
