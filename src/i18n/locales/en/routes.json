@@ -45,15 +45,7 @@
   },
   "workouts": {
     "title": "Workouts",
-    "description": "Track your fitness journey with workout logging and routines",
-    "dashboard": {
-      "title": "Dashboard",
-      "description": "View and manage your workouts"
-    },
-    "exercises": {
-      "title": "Exercise Library",
-      "description": "Browse and import exercises from the database"
-    }
+    "description": "Track your fitness journey at workout.koldgeneration.com"
   },
   "tournaments": {
     "title": "Tournaments",

@@ -45,15 +45,7 @@
   },
   "workouts": {
     "title": "Entraînements",
-    "description": "Suivez votre parcours fitness avec l'enregistrement d'entraînements et de routines",
-    "dashboard": {
-      "title": "Tableau de Bord",
-      "description": "Voir et gérer vos entraînements"
-    },
-    "exercises": {
-      "title": "Bibliothèque d'Exercices",
-      "description": "Parcourir et importer des exercices depuis la base de données"
-    }
+    "description": "Suivez votre parcours fitness sur workout.koldgeneration.com"
   },
   "tournaments": {
     "title": "Tournois",

@@ -14,6 +14,7 @@ import {
   Grid3x3,
 } from 'lucide-react';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
+import { WORKOUTS_URL } from '@/routesConfig';
 
 type ToolCard = {
   title: string;
@@ -22,6 +23,7 @@ type ToolCard = {
   to: string;
   gradient: string;
   requireAuth?: boolean;
+  external?: boolean;
 };
 
 export default function Home() {
@@ -47,9 +49,9 @@ export default function Home() {
       title: t('home.cards.workouts.title'),
       description: t('home.cards.workouts.description'),
       icon: <Dumbbell className="h-12 w-12 text-white drop-shadow-lg" />,
-      to: '/workouts',
+      to: WORKOUTS_URL,
       gradient: 'from-red-500 via-rose-500 to-pink-500',
-      requireAuth: true,
+      external: true,
     },
     {
       title: t('home.cards.tools.minecraftListGenerator.title'),
@@ -160,12 +162,19 @@ export default function Home() {
             );
           }
 
+          const linkClassName =
+            'block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-3xl';
+
+          if (card.external) {
+            return (
+              <a key={card.title} href={card.to} className={linkClassName}>
+                {cardMarkup}
+              </a>
+            );
+          }
+
           return (
-            <Link
-              key={card.title}
-              to={card.to}
-              className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-3xl"
-            >
+            <Link key={card.title} to={card.to} className={linkClassName}>
               {cardMarkup}
             </Link>
           );

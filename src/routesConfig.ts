@@ -6,8 +6,13 @@ export type RouteConfig = {
   to: string;
   description: string;
   protected?: boolean;
+  /** When true, `to` is an absolute URL opened as a normal link instead of a client-side route. */
+  external?: boolean;
   children?: RouteConfig[];
 };
+
+/** The workout feature now lives on its own subdomain. */
+export const WORKOUTS_URL = 'https://workout.koldgeneration.com';
 
 export const getRoutesConfig = (t: TFunction): RouteConfig[] => [
   {
@@ -57,21 +62,9 @@ export const getRoutesConfig = (t: TFunction): RouteConfig[] => [
   },
   {
     title: t('routes.workouts.title'),
-    to: '/workouts',
+    to: WORKOUTS_URL,
     description: t('routes.workouts.description'),
-    protected: true,
-    children: [
-      {
-        title: t('routes.workouts.dashboard.title'),
-        to: '/workouts',
-        description: t('routes.workouts.dashboard.description'),
-      },
-      {
-        title: t('routes.workouts.exercises.title'),
-        to: '/workouts/exercises',
-        description: t('routes.workouts.exercises.description'),
-      },
-    ],
+    external: true,
   },
   {
     title: t('routes.marathons.title'),

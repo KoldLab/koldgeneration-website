@@ -40,7 +40,7 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { getRoutesConfig, type RouteConfig } from '@/routesConfig';
+import { getRoutesConfig, WORKOUTS_URL, type RouteConfig } from '@/routesConfig';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import LoginButton from '@/components/auth/LoginButton';
@@ -56,7 +56,7 @@ const routeIcons: Record<string, typeof Home> = {
   '/': Home,
   '/tools': Wrench,
   '/minecraft-tools': Pickaxe,
-  '/workouts': Dumbbell,
+  [WORKOUTS_URL]: Dumbbell,
   '/movies': Clapperboard,
   '/tournaments': Trophy,
   '/notes': NotebookPen,
@@ -188,6 +188,7 @@ function ListItem({
   title,
   children,
   to,
+  external,
   isSub,
   locked,
   lockTooltip,
@@ -224,16 +225,22 @@ function ListItem({
   }
 
   if (!children) {
+    const linkInner = external ? (
+      <a href={to}>{label}</a>
+    ) : (
+      <Link to={to}>{label}</Link>
+    );
+
     return isSub ? (
       <li>
         <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-          <Link to={to}>{label}</Link>
+          {linkInner}
         </NavigationMenuLink>
       </li>
     ) : (
       <NavigationMenuItem>
         <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-          <Link to={to}>{label}</Link>
+          {linkInner}
         </NavigationMenuLink>
       </NavigationMenuItem>
     );
@@ -447,19 +454,29 @@ function MobileNavItem({
   }
 
   if (!route.children?.length) {
+    const itemClassName = `flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-colors ${
+      isActive
+        ? 'bg-sidebar-primary text-sidebar-primary-foreground shadow-sm'
+        : 'text-sidebar-foreground hover:bg-sidebar-accent'
+    }`;
+    const itemInner = (
+      <>
+        <Icon className="h-4 w-4 shrink-0" />
+        <span className="flex-1">{route.title}</span>
+      </>
+    );
+
     return (
       <SheetClose asChild>
-        <Link
-          to={route.to}
-          className={`flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-colors ${
-            isActive
-              ? 'bg-sidebar-primary text-sidebar-primary-foreground shadow-sm'
-              : 'text-sidebar-foreground hover:bg-sidebar-accent'
-          }`}
-        >
-          <Icon className="h-4 w-4 shrink-0" />
-          <span className="flex-1">{route.title}</span>
-        </Link>
+        {route.external ? (
+          <a href={route.to} className={itemClassName}>
+            {itemInner}
+          </a>
+        ) : (
+          <Link to={route.to} className={itemClassName}>
+            {itemInner}
+          </Link>
+        )}
       </SheetClose>
     );
   }

@@ -13,8 +13,6 @@ import CreateTournament from './components/pages/tournaments/CreateTournament';
 import TournamentView from './components/pages/tournaments/TournamentView';
 import MyTournaments from './components/pages/tournaments/MyTournaments';
 import EnterTournament from './components/pages/tournaments/EnterTournament';
-import ExerciseLibrary from './components/pages/workouts/ExerciseLibrary';
-import Workouts from './components/pages/workouts/Workouts';
 import Marathons from './components/pages/marathons/Marathons';
 import MarathonView from './components/pages/marathons/MarathonView';
 import CreateEditMarathon from './components/pages/marathons/CreateEditMarathon';
@@ -82,22 +80,6 @@ export const router = createBrowserRouter([
             element: <ShulkerBoxGenerator />,
           },
         ],
-      },
-      {
-        path: '/workouts',
-        element: (
-          <ProtectedRoute>
-            <Workouts />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/workouts/exercises',
-        element: (
-          <ProtectedRoute>
-            <ExerciseLibrary />
-          </ProtectedRoute>
-        ),
       },
       {
         path: '/tournaments/create',
