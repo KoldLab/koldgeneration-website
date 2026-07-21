@@ -20,6 +20,10 @@
   "close": "Close",
   "undo": "Undo",
   "optional": "(optional)",
-  "saving": "Saving..."
+  "saving": "Saving...",
+  "update": {
+    "available": "A new version is available.",
+    "action": "Refresh"
+  }
 }
 

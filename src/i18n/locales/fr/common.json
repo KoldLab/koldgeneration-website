@@ -20,6 +20,10 @@
   "close": "Fermer",
   "undo": "Annuler",
   "optional": "(optionnel)",
-  "saving": "Enregistrement..."
+  "saving": "Enregistrement...",
+  "update": {
+    "available": "Une nouvelle version est disponible.",
+    "action": "Actualiser"
+  }
 }
 

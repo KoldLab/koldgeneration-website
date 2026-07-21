@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router';
 import { NavBar } from './NavBar';
 import { Footer } from './Footer';
+import { AppUpdatePrompt } from './AppUpdatePrompt';
 import { Toaster } from '@/components/ui/sonner';
 
 export default function Layout() {
@@ -16,6 +17,7 @@ export default function Layout() {
 
       <Footer />
       <Toaster />
+      <AppUpdatePrompt />
     </div>
   );
 }
